@@ -1,0 +1,1 @@
+bind mouse1 "+attack; ent_fire !picker SetHealth(0)"
