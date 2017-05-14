@@ -1,2 +1,2 @@
-# Garry's Mod fun
+# Source engine fun
 Some fun little scripts to play with.
