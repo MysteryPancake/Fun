@@ -41,13 +41,13 @@ local function DoEssay( txt )
 		draw.RoundedBox( 8, 0, 0, w, h, Color( 0, 0, 0, 255 ) )
 	end
 	
-	local bg = vgui.Create( "DPanel", main )
-	bg:Dock( FILL )
-	function bg:Paint( w, h )
+	local back = vgui.Create( "DPanel", main )
+	back:Dock( FILL )
+	function back:Paint( w, h )
 		draw.RoundedBox( 8, 0, 0, w, h, Color( 255, 255, 255, 255 ) )
 	end
 	
-	local scroll = vgui.Create( "DScrollPanel", bg )
+	local scroll = vgui.Create( "DScrollPanel", back )
 	scroll:Dock( FILL )
 	scroll:DockMargin( 20, 20, 20, 20 )
 	
