@@ -1,2 +1,2 @@
-# Source Engine fun
-Some fun little scripts I like to play with.
+# Source Engine Fun
+Some fun little scripts that I like to play with.
