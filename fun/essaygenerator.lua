@@ -50,7 +50,6 @@ local function DoEssay( text )
 	local scroll = vgui.Create( "DScrollPanel", back )
 	scroll:Dock( FILL )
 	scroll:DockMargin( 20, 20, 20, 20 )
-	
 	if math.random( 2 ) == 1 then
 		AddText( scroll, false, "Despite what many might think, " .. text .. " is well known across hundreds of nations all over the world. " .. CapitalizeFirst( text ) .. " has been around for several centuries and has a very important meaning in the lives of many. It would be safe to assume that " .. text .. " is going to be around for a long time and have an enormous impact on the lives of many people." )
 	else
