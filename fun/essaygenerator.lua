@@ -19,7 +19,6 @@ local function CapitalizeFirst( str )
 end
 
 local function AddText( parent, large, text )
-	
 	local label = vgui.Create( "DLabel", parent )
 	label:SetFont( large and "EssayLarge" or "EssayDefault" )
 	label:SetDark( true )
@@ -28,7 +27,6 @@ local function AddText( parent, large, text )
 	label:SetWrap( true )
 	label:SetAutoStretchVertical( true )
 	label:DockMargin( 0, 5, 5, 5 )
-	
 end
 
 local function DoEssay( text )
