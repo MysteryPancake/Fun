@@ -1,2 +1,0 @@
-sv_cheats 1
-bind mouse1 "+attack; ent_fire !picker SetHealth(0)"
