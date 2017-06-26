@@ -1,3 +1,5 @@
+-- This is a replica of the now deceased site LongEssays.com. It shall be missed.
+
 surface.CreateFont( "EssayDefault", {
 	font = "Times New Roman",
 	size = 18,
