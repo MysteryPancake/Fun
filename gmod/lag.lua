@@ -1,5 +1,5 @@
 local lag = 2
-local lagPos = Angle( 0, 0, 0 )
+local lagPos = Vector( 0, 0, 0 )
 local lagAng = Angle( 0, 0, 0 )
 
 hook.Add( "CalcView", "Lag", function( ply, pos, ang )
