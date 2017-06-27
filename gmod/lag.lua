@@ -4,8 +4,8 @@ local lagAng = Angle( 0, 0, 0 )
 
 hook.Add( "CalcView", "Lag", function( ply, pos, ang )
 	if math.random( lag ) == 1 then
-		lagPos = origin
-		lagAng = angles
+		lagPos = pos
+		lagAng = ang
 	end
 	return { origin = lagPos, angles = lagAng }
 end )
