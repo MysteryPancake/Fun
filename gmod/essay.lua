@@ -40,7 +40,7 @@ local function makeEssay( str )
 	main:Center()
 	main:MakePopup()
 	
-	local back = vgui.Create( "DPanel", main )
+	local back = vgui.Create( "Panel", main )
 	back:Dock( FILL )
 	function back:Paint( w, h )
 		surface.SetDrawColor( 255, 255, 255, 255 )
