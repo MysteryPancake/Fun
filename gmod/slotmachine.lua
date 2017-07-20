@@ -12,13 +12,20 @@ ENT.Instructions = "Press USE to make it spin"
 ENT.Spawnable = true
 ENT.AdminOnly = true
 
+ENT.Icons = {
+	[ 0 ] = Material( "icon16/cross.png" ),
+	[ 1 ] = Material( "icon16/coins.png" ),
+	[ 2 ] = Material( "icon16/star.png" ),
+	[ 3 ] = Material( "icon16/heart.png" )
+}
+
 function ENT:SetupDataTables()
 	self:NetworkVar( "Vector", 0, "Slots" )
 	self:NetworkVar( "Bool", 1, "Spinning" )
 end
-	
+
 function ENT:RandomizeSlots()
-	self:SetSlots( Vector( math.random( 3 ), math.random( 3 ), math.random( 3 ) ) )
+	self:SetSlots( Vector( math.random( #self.Icons ), math.random( #self.Icons ), math.random( #self.Icons ) ) )
 end
 	
 if SERVER then
@@ -62,10 +69,12 @@ if SERVER then
 	end
 	
 	function ENT:GivePrize()
+		
 		local can = ents.Create( "prop_physics" )
 		can:SetModel( "models/props_junk/PopCan01a.mdl" )
 		can:SetPos( self:LocalToWorld( Vector( 18, -5, -27 ) ) )
 		can:Spawn()
+		
 	end
 	
 	function ENT:Use( activator, caller )
@@ -92,13 +101,6 @@ if SERVER then
 end
 
 if CLIENT then
-
-	local icons = {
-		[ 0 ] = Material( "icon16/cross.png" ),
-		[ 1 ] = Material( "icon16/coins.png" ),
-		[ 2 ] = Material( "icon16/star.png" ),
-		[ 3 ] = Material( "icon16/heart.png" )
-	}
 	
 	local function DrawSlot( x, y, w, h, mat )
 	
@@ -126,7 +128,7 @@ if CLIENT then
 		cam.Start3D2D( self:GetPos() + ang:Up() * 17.4 + ang:Forward() * 16, ang, 0.2 )
 			local slots = self:GetSlots()
 			for i = 1, 3 do
-				DrawSlot( 0, i * 55, 50, 50, icons[ slots[ i ] ] )
+				DrawSlot( 0, i * 55, 50, 50, self.Icons[ slots[ i ] ] )
 			end
 		cam.End3D2D()
 		
