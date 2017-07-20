@@ -4,7 +4,7 @@ TOOL.Name = "#Demolisher"
 if ( CLIENT ) then
 	language.Add( "tool.demolisher.name", "Demolisher" )
 	language.Add( "tool.demolisher.desc", "Breaks everything" )
-	language.Add( "tool.demolisher.0", "Left click on something to break it" )
+	language.Add( "tool.demolisher.0", "Left click to demolish" )
 end
 
 function TOOL:LeftClick( trace )
