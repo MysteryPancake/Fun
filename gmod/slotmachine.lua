@@ -13,16 +13,12 @@ ENT.Spawnable = true
 ENT.AdminOnly = true
 
 function ENT:SetupDataTables()
-
 	self:NetworkVar( "Vector", 0, "Slots" )
 	self:NetworkVar( "Bool", 1, "Spinning" )
-	
 end
 	
 function ENT:RandomizeSlots()
-
 	self:SetSlots( Vector( math.random( 3 ), math.random( 3 ), math.random( 3 ) ) )
-	
 end
 	
 if SERVER then
@@ -55,23 +51,18 @@ if SERVER then
 	end
 	
 	function ENT:HasWon()
-	
 		local slots = self:GetSlots()
-		if slots.x == slots.y and slots.x == slots.z and slots.y == slots.z then
+		if slots.x == slots.y and slots.x == slots.z then
 			return true
 		end
-		
 		return false
-		
 	end
 	
 	function ENT:GivePrize()
-	
 		local can = ents.Create( "prop_physics" )
 		can:SetModel( "models/props_junk/PopCan01a.mdl" )
 		can:SetPos( self:LocalToWorld( Vector( 18, -5, -27 ) ) )
 		can:Spawn()
-		
 	end
 	
 	function ENT:Use( activator, caller )
@@ -130,12 +121,10 @@ if CLIENT then
 		ang:RotateAroundAxis( ang:Right(), -90 )
 		
 		cam.Start3D2D( self:GetPos() + ang:Up() * 17.4 + ang:Forward() * 16, ang, 0.2 )
-		
 			local slots = self:GetSlots()
 			for i = 1, 3 do
 				DrawSlot( 0, i * 55, 50, 50, icons[ slots[ i ] ] )
 			end
-			
 		cam.End3D2D()
 		
 	end
