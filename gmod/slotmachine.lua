@@ -14,9 +14,46 @@ ENT.AdminOnly = true
 
 ENT.Icons = {
 	[ 0 ] = Material( "icon16/cross.png" ),
-	[ 1 ] = Material( "icon16/coins.png" ),
-	[ 2 ] = Material( "icon16/star.png" ),
-	[ 3 ] = Material( "icon16/heart.png" )
+	[ 1 ] = Material( "icon16/accept.png" ),
+	[ 2 ] = Material( "icon16/award_star_bronze_1.png" ),
+	[ 3 ] = Material( "icon16/award_star_gold_3.png" ),
+	[ 4 ] = Material( "icon16/award_star_silver_2.png" ),
+	[ 5 ] = Material( "icon16/bell.png" ),
+	[ 6 ] = Material( "icon16/briefcase.png" ),
+	[ 7 ] = Material( "icon16/cake.png" ),
+	[ 8 ] = Material( "icon16/coins.png" ),
+	[ 9 ] = Material( "icon16/creditcards.png" ),
+	[ 10 ] = Material( "icon16/drink.png" ),
+	[ 11 ] = Material( "icon16/emoticon_grin.png" ),
+	[ 12 ] = Material( "icon16/emoticon_happy.png" ),
+	[ 13 ] = Material( "icon16/emoticon_smile.png" ),
+	[ 14 ] = Material( "icon16/emoticon_surprised.png" ),
+	[ 15 ] = Material( "icon16/emoticon_wink.png" ),
+	[ 16 ] = Material( "icon16/flag_blue.png" ),
+	[ 17 ] = Material( "icon16/flag_green.png" ),
+	[ 18 ] = Material( "icon16/flag_orange.png" ),
+	[ 19 ] = Material( "icon16/flag_pink.png" ),
+	[ 20 ] = Material( "icon16/flag_purple.png" ),
+	[ 21 ] = Material( "icon16/flag_red.png" ),
+	[ 22 ] = Material( "icon16/flag_yellow.png" ),
+	[ 23 ] = Material( "icon16/heart.png" ),
+	[ 24 ] = Material( "icon16/key.png" ),
+	[ 25 ] = Material( "icon16/lightning.png" ),
+	[ 26 ] = Material( "icon16/lock_open.png" ),
+	[ 27 ] = Material( "icon16/medal_bronze_1.png" ),
+	[ 28 ] = Material( "icon16/medal_gold_3.png" ),
+	[ 29 ] = Material( "icon16/medal_silver_2.png" ),
+	[ 30 ] = Material( "icon16/money.png" ),
+	[ 31 ] = Material( "icon16/money_dollar.png" ),
+	[ 32 ] = Material( "icon16/money_euro.png" ),
+	[ 33 ] = Material( "icon16/money_pound.png" ),
+	[ 34 ] = Material( "icon16/money_yen.png" ),
+	[ 35 ] = Material( "icon16/rainbow.png" ),
+	[ 36 ] = Material( "icon16/ruby.png" ),
+	[ 37 ] = Material( "icon16/star.png" ),
+	[ 38 ] = Material( "icon16/thumbs_up.png" ),
+	[ 39 ] = Material( "icon16/tick.png" ),
+	[ 40 ] = Material( "icon16/wand.png" ),
 }
 
 function ENT:SetupDataTables()
@@ -126,10 +163,12 @@ if CLIENT then
 		ang:RotateAroundAxis( ang:Right(), -90 )
 		
 		cam.Start3D2D( self:GetPos() + ang:Up() * 17.4 + ang:Forward() * 16, ang, 0.2 )
+
 			local slots = self:GetSlots()
 			for i = 1, 3 do
 				DrawSlot( 0, i * 55, 50, 50, self.Icons[ slots[ i ] ] )
 			end
+
 		cam.End3D2D()
 		
 	end
