@@ -100,10 +100,10 @@ end
 if CLIENT then
 
 	local icons = {
-		[0] = Material( "icon16/cross.png" ),
-		[1] = Material( "icon16/coins.png" ),
-		[2] = Material( "icon16/star.png" ),
-		[3] = Material( "icon16/heart.png" )
+		[ 0 ] = Material( "icon16/cross.png" ),
+		[ 1 ] = Material( "icon16/coins.png" ),
+		[ 2 ] = Material( "icon16/star.png" ),
+		[ 3 ] = Material( "icon16/heart.png" )
 	}
 	
 	local function DrawSlot( x, y, w, h, mat )
