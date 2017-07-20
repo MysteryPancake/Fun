@@ -30,6 +30,6 @@ function TOOL:LeftClick( trace )
 end
 
 function TOOL.BuildCPanel( CPanel )
-	CPanel:AddControl( "Header", { Text = "#tool.demolisher.name", Description	= "#tool.demolisher.desc" } )
+	CPanel:AddControl( "Header", { Text = "#tool.demolisher.name", Description = "#tool.demolisher.desc" } )
 	CPanel:AddControl( "Label", { Text = "#tool.demolisher.0" } )
 end
