@@ -51,11 +51,14 @@ if SERVER then
 	end
 	
 	function ENT:HasWon()
+		
 		local slots = self:GetSlots()
 		if slots.x == slots.y and slots.x == slots.z then
 			return true
 		end
+		
 		return false
+		
 	end
 	
 	function ENT:GivePrize()
@@ -72,14 +75,14 @@ if SERVER then
 			self:SetSpinning( true )
 			
 			timer.Simple( 1, function()
-			
+					
 				self:SetSpinning( false )
 				self:RandomizeSlots()
-				
+					
 				if self:HasWon() then
 					self:GivePrize()
 				end
-				
+					
 			end )
 			
 		end
