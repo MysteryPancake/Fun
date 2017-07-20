@@ -16,59 +16,66 @@ ENT.Icons = {
 	[ 0 ] = Material( "icon16/cross.png" ),
 	[ 1 ] = Material( "icon16/accept.png" ),
 	[ 2 ] = Material( "icon16/award_star_bronze_1.png" ),
-	[ 3 ] = Material( "icon16/award_star_gold_3.png" ),
-	[ 4 ] = Material( "icon16/award_star_silver_2.png" ),
-	[ 5 ] = Material( "icon16/bell.png" ),
-	[ 6 ] = Material( "icon16/briefcase.png" ),
-	[ 7 ] = Material( "icon16/cake.png" ),
-	[ 8 ] = Material( "icon16/coins.png" ),
-	[ 9 ] = Material( "icon16/creditcards.png" ),
-	[ 10 ] = Material( "icon16/drink.png" ),
-	[ 11 ] = Material( "icon16/emoticon_grin.png" ),
-	[ 12 ] = Material( "icon16/emoticon_happy.png" ),
-	[ 13 ] = Material( "icon16/emoticon_smile.png" ),
-	[ 14 ] = Material( "icon16/emoticon_surprised.png" ),
-	[ 15 ] = Material( "icon16/emoticon_wink.png" ),
-	[ 16 ] = Material( "icon16/flag_blue.png" ),
-	[ 17 ] = Material( "icon16/flag_green.png" ),
-	[ 18 ] = Material( "icon16/flag_orange.png" ),
-	[ 19 ] = Material( "icon16/flag_pink.png" ),
-	[ 20 ] = Material( "icon16/flag_purple.png" ),
-	[ 21 ] = Material( "icon16/flag_red.png" ),
-	[ 22 ] = Material( "icon16/flag_yellow.png" ),
-	[ 23 ] = Material( "icon16/heart.png" ),
-	[ 24 ] = Material( "icon16/key.png" ),
-	[ 25 ] = Material( "icon16/lightning.png" ),
-	[ 26 ] = Material( "icon16/lock_open.png" ),
-	[ 27 ] = Material( "icon16/medal_bronze_1.png" ),
-	[ 28 ] = Material( "icon16/medal_gold_3.png" ),
-	[ 29 ] = Material( "icon16/medal_silver_2.png" ),
-	[ 30 ] = Material( "icon16/money.png" ),
-	[ 31 ] = Material( "icon16/money_dollar.png" ),
-	[ 32 ] = Material( "icon16/money_euro.png" ),
-	[ 33 ] = Material( "icon16/money_pound.png" ),
-	[ 34 ] = Material( "icon16/money_yen.png" ),
-	[ 35 ] = Material( "icon16/rainbow.png" ),
-	[ 36 ] = Material( "icon16/ruby.png" ),
-	[ 37 ] = Material( "icon16/star.png" ),
-	[ 38 ] = Material( "icon16/thumbs_up.png" ),
-	[ 39 ] = Material( "icon16/tick.png" ),
-	[ 40 ] = Material( "icon16/wand.png" ),
+	[ 3 ] = Material( "icon16/award_star_bronze_2.png" ),
+	[ 4 ] = Material( "icon16/award_star_bronze_3.png" ),
+	[ 5 ] = Material( "icon16/award_star_gold_1.png" ),
+	[ 6 ] = Material( "icon16/award_star_gold_2.png" ),
+	[ 7 ] = Material( "icon16/award_star_gold_3.png" ),
+	[ 8 ] = Material( "icon16/award_star_silver_1.png" ),
+	[ 9 ] = Material( "icon16/award_star_silver_2.png" ),
+	[ 10 ] = Material( "icon16/award_star_silver_3.png" ),
+	[ 11 ] = Material( "icon16/bell.png" ),
+	[ 12 ] = Material( "icon16/briefcase.png" ),
+	[ 13 ] = Material( "icon16/cake.png" ),
+	[ 14 ] = Material( "icon16/coins.png" ),
+	[ 15 ] = Material( "icon16/creditcards.png" ),
+	[ 16 ] = Material( "icon16/drink.png" ),
+	[ 17 ] = Material( "icon16/emoticon_grin.png" ),
+	[ 18 ] = Material( "icon16/emoticon_happy.png" ),
+	[ 19 ] = Material( "icon16/emoticon_smile.png" ),
+	[ 20 ] = Material( "icon16/emoticon_surprised.png" ),
+	[ 21 ] = Material( "icon16/emoticon_wink.png" ),
+	[ 22 ] = Material( "icon16/heart.png" ),
+	[ 23 ] = Material( "icon16/key.png" ),
+	[ 24 ] = Material( "icon16/lightning.png" ),
+	[ 25 ] = Material( "icon16/lock_open.png" ),
+	[ 26 ] = Material( "icon16/medal_bronze_1.png" ),
+	[ 27 ] = Material( "icon16/medal_bronze_2.png" ),
+	[ 28 ] = Material( "icon16/medal_bronze_3.png" ),
+	[ 29 ] = Material( "icon16/medal_gold_1.png" ),
+	[ 30 ] = Material( "icon16/medal_gold_2.png" ),
+	[ 31 ] = Material( "icon16/medal_gold_3.png" ),
+	[ 32 ] = Material( "icon16/medal_silver_1.png" ),
+	[ 33 ] = Material( "icon16/medal_silver_2.png" ),
+	[ 34 ] = Material( "icon16/medal_silver_3.png" ),
+	[ 35 ] = Material( "icon16/money.png" ),
+	[ 36 ] = Material( "icon16/money_dollar.png" ),
+	[ 37 ] = Material( "icon16/money_euro.png" ),
+	[ 38 ] = Material( "icon16/money_pound.png" ),
+	[ 39 ] = Material( "icon16/money_yen.png" ),
+	[ 40 ] = Material( "icon16/rainbow.png" ),
+	[ 41 ] = Material( "icon16/ruby.png" ),
+	[ 42 ] = Material( "icon16/shield.png" ),
+	[ 43 ] = Material( "icon16/star.png" ),
+	[ 44 ] = Material( "icon16/tick.png" ),
+	[ 45 ] = Material( "icon16/wand.png" ),
 }
 
 function ENT:SetupDataTables()
-	
+
 	self:NetworkVar( "Vector", 0, "Slots" )
 	self:NetworkVar( "Bool", 1, "Spinning" )
-	
+
 end
 
 function ENT:RandomizeSlots()
+
 	self:SetSlots( Vector(
 		math.random( #self.Icons ),
 		math.random( #self.Icons ),
 		math.random( #self.Icons )
 	) )
+
 end
 	
 if SERVER then
