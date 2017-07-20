@@ -57,12 +57,18 @@ ENT.Icons = {
 }
 
 function ENT:SetupDataTables()
+	
 	self:NetworkVar( "Vector", 0, "Slots" )
 	self:NetworkVar( "Bool", 1, "Spinning" )
+	
 end
 
 function ENT:RandomizeSlots()
-	self:SetSlots( Vector( math.random( #self.Icons ), math.random( #self.Icons ), math.random( #self.Icons ) ) )
+	self:SetSlots( Vector(
+		math.random( #self.Icons ),
+		math.random( #self.Icons ),
+		math.random( #self.Icons )
+	) )
 end
 	
 if SERVER then
