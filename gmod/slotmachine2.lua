@@ -111,8 +111,8 @@ if SERVER then
 		local slots = self:GetSlots()
 
 		if slots[ 1 ] == slots[ 2 ] and slots[ 2 ] == slots[ 3 ] then
-			if self:GetUnlocked() then
-				return slots[ 1 ] == self:GetSlot4() and 4
+			if self:GetUnlocked() and slots[ 1 ] == self:GetSlot4() then
+				return 4
 			elseif slots == Vector( 1, 1, 1 ) then
 				self:SetUnlocked( true )
 				return true
