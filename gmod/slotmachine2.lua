@@ -112,20 +112,22 @@ if SERVER then
 
 		if slots[ 1 ] == slots[ 2 ] and slots[ 2 ] == slots[ 3 ] then
 			if self:GetUnlocked() then
-				return slots[ 1 ] == self:GetSlot4()
+				return slots[ 1 ] == self:GetSlot4() and 4
 			elseif slots == Vector( 1, 1, 1 ) then
 				self:SetUnlocked( true )
 				return true
 			else
-				return true	
+				return true
 			end
+		else
+			return false
 		end
 		
 	end
 	
-	function ENT:GivePrize()
+	function ENT:GivePrize( mdl )
 		local can = ents.Create( "prop_physics" )
-		can:SetModel( "models/props_junk/PopCan01a.mdl" )
+		can:SetModel( mdl )
 		can:SetPos( self:LocalToWorld( Vector( 18, -5, -27 ) ) )
 		can:Spawn()
 	end
@@ -161,9 +163,10 @@ if SERVER then
 					self:SetSpinningSlot4( false )
 					self:SetSlot4( self:GetRandomIcon() )
 				end
-
-				if self:HasWon() then
-					self:GivePrize()
+				
+				local won = self:HasWon()
+				if won then
+					self:GivePrize( won == 4 and "models/props_interiors/BathTub01a.mdl" or "models/props_junk/PopCan01a.mdl" )
 				end
 
 			end )
