@@ -67,7 +67,7 @@ function ENT:SetupDataTables()
 end
 
 function ENT:GetRandomIcons()
-	return Vector( math.random( #self.Icons ), math.random( #self.Icons ), math.random( #self.Icons ) ) )
+	return Vector( math.random( #self.Icons ), math.random( #self.Icons ), math.random( #self.Icons ) )
 end
 
 if SERVER then
