@@ -104,9 +104,9 @@ if SERVER then
 		return slots[ 1 ] == slots[ 2 ] and slots[ 2 ] == slots[ 3 ]
 	end
 	
-	function ENT:GivePrize()
+	function ENT:GivePrize( mdl )
 		local can = ents.Create( "prop_physics" )
-		can:SetModel( "models/props_junk/PopCan01a.mdl" )
+		can:SetModel( mdl )
 		can:SetPos( self:LocalToWorld( Vector( 18, -5, -27 ) ) )
 		can:Spawn()
 	end
@@ -118,18 +118,18 @@ if SERVER then
 			self:SetSpinning( true )
 			
 			timer.Simple( 1, function()
-					
+				
 				self:SetSpinning( false )
 				self:SetSlots( self:GetRandomIcons() )
-					
+				
 				if self:HasWon() then
-					self:GivePrize()
+					self:GivePrize( "models/props_junk/PopCan01a.mdl" )
 				end
-					
-			end )
 			
-		end
+			end )
 		
+		end
+	
 	end
 
 end
