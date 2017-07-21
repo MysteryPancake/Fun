@@ -110,7 +110,7 @@ if SERVER then
 	function ENT:HasWon()
 		
 		local slots = self:GetSlots()
-		return slots.x == slots.y and slots.x == slots.z
+		return slots[ 1 ] == slots[ 2 ] and slots[ 2 ] == slots[ 3 ]
 		
 	end
 	
