@@ -64,7 +64,7 @@ ENT.Icons = {
 function ENT:SetupDataTables()
 
 	self:NetworkVar( "Vector", 0, "Slots" )
-	self:NetworkVar( "Bool", 1, "Spinning" )
+	self:NetworkVar( "Bool", 0, "Spinning" )
 
 end
 
