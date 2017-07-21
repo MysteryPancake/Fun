@@ -62,22 +62,14 @@ ENT.Icons = {
 }
 
 function ENT:SetupDataTables()
-
 	self:NetworkVar( "Vector", 0, "Slots" )
 	self:NetworkVar( "Bool", 0, "Spinning" )
-
 end
 
-function ENT:RandomizeSlots()
-
-	self:SetSlots( Vector(
-		math.random( #self.Icons ),
-		math.random( #self.Icons ),
-		math.random( #self.Icons )
-	) )
-
+function ENT:GetRandomIcons()
+	return Vector( math.random( #self.Icons ), math.random( #self.Icons ), math.random( #self.Icons ) ) )
 end
-	
+
 if SERVER then
 
 	function ENT:SpawnFunction( ply, tr, ClassName )
@@ -108,19 +100,15 @@ if SERVER then
 	end
 	
 	function ENT:HasWon()
-		
 		local slots = self:GetSlots()
 		return slots[ 1 ] == slots[ 2 ] and slots[ 2 ] == slots[ 3 ]
-		
 	end
 	
 	function ENT:GivePrize()
-		
 		local can = ents.Create( "prop_physics" )
 		can:SetModel( "models/props_junk/PopCan01a.mdl" )
 		can:SetPos( self:LocalToWorld( Vector( 18, -5, -27 ) ) )
 		can:Spawn()
-		
 	end
 	
 	function ENT:Use( activator, caller )
@@ -132,7 +120,7 @@ if SERVER then
 			timer.Simple( 1, function()
 					
 				self:SetSpinning( false )
-				self:RandomizeSlots()
+				self:SetSlots( self:GetRandomIcons() )
 					
 				if self:HasWon() then
 					self:GivePrize()
@@ -165,13 +153,12 @@ if CLIENT then
 
 		self:DrawModel()
 		
-		if self:GetSpinning() then self:RandomizeSlots() end
+		local slots = self:GetSpinning() and self:GetRandomIcons() or self:GetSlots()
 		
 		local ang = self:GetAngles()
 		ang:RotateAroundAxis( ang:Forward(), 90 )
 		ang:RotateAroundAxis( ang:Right(), -90 )
-		
-		local slots = self:GetSlots()
+	
 		cam.Start3D2D( self:GetPos() + ang:Up() * 17.4 + ang:Forward() * 16, ang, 0.2 )
 			for i = 1, 3 do
 				DrawSlot( 0, i * 55, 50, 50, self.Icons[ slots[ i ] ] )
