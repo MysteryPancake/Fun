@@ -171,13 +171,11 @@ if CLIENT then
 		ang:RotateAroundAxis( ang:Forward(), 90 )
 		ang:RotateAroundAxis( ang:Right(), -90 )
 		
+		local slots = self:GetSlots()
 		cam.Start3D2D( self:GetPos() + ang:Up() * 17.4 + ang:Forward() * 16, ang, 0.2 )
-
-			local slots = self:GetSlots()
 			for i = 1, 3 do
 				DrawSlot( 0, i * 55, 50, 50, self.Icons[ slots[ i ] ] )
 			end
-
 		cam.End3D2D()
 		
 	end
