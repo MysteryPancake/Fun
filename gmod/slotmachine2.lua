@@ -72,7 +72,11 @@ function ENT:SetupDataTables()
 	self:NetworkVar( "Bool", 1, "Unlocked" )
 
 end
-	
+
+function ENT:GetRandomIcon()
+	return math.random( #self.Icons )
+end
+
 if SERVER then
 
 	function ENT:SpawnFunction( ply, tr, ClassName )
@@ -113,7 +117,7 @@ if SERVER then
 				self:SetUnlocked( true )
 				return true
 			else
-				return true
+				return true	
 			end
 		end
 		
@@ -144,7 +148,7 @@ if SERVER then
 					self:SetSpinningSlots( spinning )
 
 					local slots = self:GetSlots()
-					slots[ i ] = math.random( #self.Icons )
+					slots[ i ] = self:GetRandomIcon()
 					self:SetSlots( slots )
 
 				end )
@@ -155,7 +159,7 @@ if SERVER then
 
 				if self:GetUnlocked() then
 					self:SetSpinningSlot4( false )
-					self:SetSlot4( math.random( #self.Icons ) )
+					self:SetSlot4( self:GetRandomIcon() )
 				end
 
 				if self:HasWon() then
@@ -193,13 +197,13 @@ if CLIENT then
 		local slots = self:GetSlots()
 		for i = 1, 3 do
 			if spinning[ i ] == 1 then
-				slots[ i ] = math.random( #self.Icons )
+				slots[ i ] = self:GetRandomIcon()
 			end
 		end
 
 		local slot4 = self:GetSlot4()
 		if self:GetUnlocked() and self:GetSpinningSlot4() then
-			slot4 = math.random( #self.Icons )
+			slot4 = self:GetRandomIcon()
 		end
 
 		local ang = self:GetAngles()
