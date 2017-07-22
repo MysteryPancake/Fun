@@ -115,6 +115,7 @@ if SERVER then
 				return 4
 			else
 				if slots == Vector( 1, 1, 1 ) then
+					self:EmitSound( "garrysmod/save_load" .. math.random( 4 ) .. ".wav"
 					self:SetUnlocked( true )
 				end
 				return true
@@ -130,7 +131,7 @@ if SERVER then
 			local grenade = ents.Create( "npc_grenade_frag" )
 			grenade:SetModel( "models/weapons/w_grenade.mdl" )
 			grenade:SetPos( self:LocalToWorld( Vector( 18, -5, -27 ) ) )
-			grenade:Fire( "SetTimer", "3" )
+			grenade:Fire( "SetTimer", "1" )
 			grenade:Spawn()
 		elseif flag then
 			local can = ents.Create( "prop_physics" )
@@ -144,6 +145,8 @@ if SERVER then
 	
 		if self:GetSpinningSlots():IsZero() and not self:GetSpinningSlot4() then
 			
+			self:EmitSound( "garrysmod/content_downloaded.wav" )
+
 			self:SetSpinningSlots( Vector( 1, 1, 1 ) )
 			if self:GetUnlocked() then
 				self:SetSpinningSlot4( true )
@@ -156,6 +159,8 @@ if SERVER then
 					local spinning = self:GetSpinningSlots()
 					spinning[ i ] = 0
 					self:SetSpinningSlots( spinning )
+
+					self:EmitSound( "garrysmod/balloon_pop_cute.wav" )
 
 					local slots = self:GetSlots()
 					slots[ i ] = self:GetRandomIcon()
