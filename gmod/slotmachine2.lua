@@ -62,15 +62,15 @@ ENT.Icons = {
 }
 
 function ENT:SetupDataTables()
-
+	
 	self:NetworkVar( "Vector", 0, "Slots" )
-	self:NetworkVar( "Vector", 1, "SpinningSlots")
-
+	self:NetworkVar( "Vector", 1, "SpinningSlots" )
+	
 	self:NetworkVar( "Int", 0, "Slot4" )
 	self:NetworkVar( "Bool", 0, "SpinningSlot4" )
-
+	
 	self:NetworkVar( "Bool", 1, "Unlocked" )
-
+	
 end
 
 function ENT:GetRandomIcon()
@@ -116,7 +116,7 @@ if SERVER then
 			else
 				if slots == Vector( 1, 1, 1 ) then
 					self:SetUnlocked( true )
-				end	
+				end
 				return true
 			end
 		else
@@ -125,11 +125,19 @@ if SERVER then
 		
 	end
 	
-	function ENT:GivePrize( mdl )
-		local can = ents.Create( "prop_physics" )
-		can:SetModel( mdl )
-		can:SetPos( self:LocalToWorld( Vector( 18, -5, -27 ) ) )
-		can:Spawn()
+	function ENT:GivePrize( flag )
+		if flag == 4 then
+			local grenade = ents.Create( "npc_grenade_frag" )
+			grenade:SetModel( "models/weapons/w_grenade.mdl" )
+			grenade:SetPos( self:LocalToWorld( Vector( 18, -5, -27 ) ) )
+			grenade:Fire( "SetTimer", "3" )
+			grenade:Spawn()
+		elseif flag then
+			local can = ents.Create( "prop_physics" )
+			can:SetModel( "models/props_junk/PopCan01a.mdl" )
+			can:SetPos( self:LocalToWorld( Vector( 18, -5, -27 ) ) )
+			can:Spawn()
+		end
 	end
 	
 	function ENT:Use( activator, caller )
@@ -158,16 +166,13 @@ if SERVER then
 			end
 
 			timer.Simple( 4, function()
-
+				
 				if self:GetUnlocked() then
 					self:SetSpinningSlot4( false )
 					self:SetSlot4( self:GetRandomIcon() )
 				end
 				
-				local won = self:HasWon()
-				if won then
-					self:GivePrize( won == 4 and "models/props_interiors/BathTub01a.mdl" or "models/props_junk/PopCan01a.mdl" )
-				end
+				self:GivePrize( self:HasWon() )
 
 			end )
 
