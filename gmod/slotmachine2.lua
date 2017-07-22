@@ -145,7 +145,7 @@ if SERVER then
 	
 		if self:GetSpinningSlots():IsZero() and not self:GetSpinningSlot4() then
 			
-			self:EmitSound( "garrysmod/content_downloaded.wav" )
+			self:EmitSound( "garrysmod/ui_click.wav" )
 
 			self:SetSpinningSlots( Vector( 1, 1, 1 ) )
 			if self:GetUnlocked() then
