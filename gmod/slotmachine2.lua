@@ -115,7 +115,6 @@ if SERVER then
 				return 4
 			else
 				if slots == Vector( 1, 1, 1 ) then
-					self:EmitSound( "garrysmod/save_load" .. math.random( 4 ) .. ".wav" )
 					self:SetUnlocked( true )
 				end
 				return true
