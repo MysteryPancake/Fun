@@ -58,7 +58,7 @@ ENT.Icons = {
 	[ 42 ] = Material( "icon16/shield.png" ),
 	[ 43 ] = Material( "icon16/star.png" ),
 	[ 44 ] = Material( "icon16/tick.png" ),
-	[ 45 ] = Material( "icon16/wand.png" ),
+	[ 45 ] = Material( "icon16/wand.png" )
 }
 
 function ENT:SetupDataTables()
