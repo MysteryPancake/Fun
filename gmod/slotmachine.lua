@@ -115,7 +115,7 @@ if SERVER then
 	
 		if not self:GetSpinning() then
 		
-			self:EmitSound( "garrysmod/content_downloaded.wav" )
+			self:EmitSound( "garrysmod/ui_click.wav" )
 			
 			self:SetSpinning( true )
 			
