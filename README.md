@@ -1,2 +1,2 @@
 # Fun Scripts
-Some small scripts for playing with.
+Small fun scripts that I like playing with.
