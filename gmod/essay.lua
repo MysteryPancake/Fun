@@ -17,7 +17,7 @@ surface.CreateFont( "EssayLarge", {
 } )
 
 local function CapitalizeFirst( str )
-	return str:gsub( "^%l", string.upper )
+	return string.gsub( str, "^%l", string.upper )
 end
 
 local function AddText( parent, large, str )
