@@ -7,7 +7,7 @@ local sizeDecay, colorDecay = 1.01, 4
 local minSize, maxSize = 5, 10
 local mat = Material( "sprites/light_glow02_add_noz" )
 
-local function createSparks( pos )
+local function CreateSparks( pos )
 	for i = 1, math.random( minParticles, maxParticles ) do
 		table.insert( sparks, {
 			pos = pos,
@@ -44,5 +44,5 @@ hook.Add( "HUDPaint", "SparkTest", function()
 end )
 
 concommand.Add( "SparkTest", function()
-	createSparks( LocalPlayer():GetEyeTrace().HitPos )
+	CreateSparks( LocalPlayer():GetEyeTrace().HitPos )
 end )
