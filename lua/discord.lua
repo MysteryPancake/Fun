@@ -14,13 +14,13 @@ local numbers = {
 }
 
 for i = 1, #str do
-	local c = string.lower( string.sub( str, i, i ) )
-	local n = tonumber( c )
-	if n then
-		io.write( numbers[ n ] )
-	elseif c == " " then
+	local letter = string.lower( string.sub( str, i, i ) )
+	local number = tonumber( letter )
+	if number then
+		io.write( numbers[ number ] )
+	elseif letter == " " then
 		io.write( " " )
 	else
-		io.write( ":regional_indicator_" .. c .. ": " )
-	end
+		io.write( ":regional_indicator_" .. letter .. ": " )
+	end	
 end
