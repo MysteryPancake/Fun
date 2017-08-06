@@ -7,7 +7,7 @@ local sizeDecay, colorDecay = 1.01, 4
 local minSize, maxSize = 5, 50
 local bounceOffEdges = true
 
-local function createSparks( pos )
+local function CreateSparks( pos )
 	for i = 1, math.random( minParticles, maxParticles ) do
 		table.insert( sparks, {
 			pos = pos,
@@ -18,7 +18,7 @@ local function createSparks( pos )
 	end
 end
 
-local function drawSparks( w, h )
+local function DrawSparks( w, h )
 
 	for k, sp in ipairs( sparks ) do
 
@@ -57,10 +57,10 @@ concommand.Add( "SparkTest", function()
 	function panel:OnMousePressed() self.Depressed = true end
 	function panel:OnMouseReleased() self.Depressed = false end
 	function panel:Paint( w, h )
-		if self.Depressed then createSparks( Vector( self:CursorPos() ) ) end
+		if self.Depressed then CreateSparks( Vector( self:CursorPos() ) ) end
 		surface.SetDrawColor( 0, 0, 0 )
 		surface.DrawRect( 0, 0, w, h )
-		drawSparks( w, h )
+		DrawSparks( w, h )
 	end
 
 end )
