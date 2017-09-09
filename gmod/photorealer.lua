@@ -22,10 +22,7 @@ hook.Add( "PostDrawOpaqueRenderables", "PhotoReal", function()
 			render.ClearStencil()
 
 			rendering = true
-			render.RenderView( {
-				x = 0, y = 0, w = ScrW(), h = ScrH(),
-				origin = pos, angles = ang
-			} )
+			render.RenderView( { x = 0, y = 0, w = ScrW(), h = ScrH(), origin = pos, angles = ang } )
 			rendering = false
 
 		render.SetRenderTarget( oldRT )
