@@ -43,7 +43,7 @@ local function MakeEssay( str )
 	local back = vgui.Create( "Panel", main )
 	back:Dock( FILL )
 	function back:Paint( w, h )
-		surface.SetDrawColor( 255, 255, 255, 255 )
+		surface.SetDrawColor( 255, 255, 255 )
 		surface.DrawRect( 0, 0, w, h )
 	end
 	
