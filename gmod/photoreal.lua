@@ -2,9 +2,9 @@
 
 local pos, ang, mat
 
-hook.Add( "PostDrawOpaqueRenderables", "PhotoReal", function()
+hook.Add( "PostDrawOpaqueRenderables", "PhotoReal", function( depth, skybox )
 	
-	if not mat then return end
+	if not mat or skybox then return end
 	
 	cam.Start3D2D( pos + ang:Forward() * ( math.sqrt( ScrW() * ScrH() ) / 2 ) + ang:Right() * -( ScrW() / 2 ) + ang:Up() * ( ScrH() / 2 ), Angle( 0, ang.y - 90, -ang.p + 90 ), 1 )
 		surface.SetMaterial( mat )
