@@ -7,9 +7,9 @@ local mat = CreateMaterial( "UnlitGeneric", "GMODScreenspace", {
 	[ "$vertexalpha" ] = "1"
 } )
 
-hook.Add( "PostDrawOpaqueRenderables", "PhotoReal", function()
+hook.Add( "PostDrawOpaqueRenderables", "PhotoReal", function( depth, skybox )
 
-	if rendering then return end
+	if rendering or skybox then return end
 
 	if pos and ang then
 
