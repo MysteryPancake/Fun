@@ -145,8 +145,8 @@ if SERVER then
 		if self:GetSpinningSlots():IsZero() and not self:GetSpinningSlot4() then
 			
 			self:EmitSound( "garrysmod/ui_click.wav" )
-
 			self:SetSpinningSlots( Vector( 1, 1, 1 ) )
+			
 			if self:GetUnlocked() then
 				self:SetSpinningSlot4( true )
 			end
@@ -155,11 +155,11 @@ if SERVER then
 
 				timer.Simple( i, function()
 
+					self:EmitSound( "garrysmod/balloon_pop_cute.wav" )
+					
 					local spinning = self:GetSpinningSlots()
 					spinning[ i ] = 0
 					self:SetSpinningSlots( spinning )
-
-					self:EmitSound( "garrysmod/balloon_pop_cute.wav" )
 
 					local slots = self:GetSlots()
 					slots[ i ] = self:GetRandomIcon()
