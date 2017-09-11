@@ -117,13 +117,14 @@ if SERVER then
 		
 		self:EmitSound( "garrysmod/ui_click.wav" )
 		self:SetSpinning( true )
-			
+		
 		timer.Simple( 1, function()
-				
+			
+			self:EmitSound( "garrysmod/balloon_pop_cute.wav" )
+			
 			self:SetSpinning( false )
 			self:SetSlots( self:GetRandomIcons() )
-			self:EmitSound( "garrysmod/balloon_pop_cute.wav" )
-				
+			
 			if self:HasWon() then
 				self:GivePrize( "models/props_junk/PopCan01a.mdl" )
 			end
