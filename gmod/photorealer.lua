@@ -7,30 +7,35 @@ local mat = CreateMaterial( "UnlitGeneric", "GMODScreenspace", {
 	[ "$vertexalpha" ] = "1"
 } )
 
+hook.Add( "RenderScene", "PhotoReal", function()
+
+	if rendering or not pos or not ang then return end
+
+	render.PushRenderTarget( rt )
+
+		render.Clear( 0, 0, 0, 255, true, true )
+
+		rendering = true
+		render.RenderView( { x = 0, y = 0, w = ScrW(), h = ScrH(), origin = pos, angles = ang } )
+		rendering = false
+
+	render.PopRenderTarget()
+
+end )
+
 hook.Add( "PostDrawOpaqueRenderables", "PhotoReal", function( depth, skybox )
 
-	if rendering or skybox then return end
+	if rendering or skybox or not pos or not ang then return end
 
-	if pos and ang then
+	cam.Start3D2D( pos + ang:Forward() * ( math.sqrt( ScrW() * ScrH() ) / 2 ) + ang:Right() * -( ScrW() / 2 ) + ang:Up() * ( ScrH() / 2 ), Angle( 0, ang.y - 90, -ang.p + 90 ), 1 )
 
-		render.PushRenderTarget( rt )
+		mat:SetTexture( "$basetexture", rt )
+		surface.SetDrawColor( 255, 255, 255 )
+		surface.SetMaterial( mat )
+		surface.DrawTexturedRect( 0, 0, ScrW(), ScrH() )
+		
+	cam.End3D2D()
 
-			render.Clear( 0, 0, 0, 255, true, true )
-
-			rendering = true
-			render.RenderView( { x = 0, y = 0, w = ScrW(), h = ScrH(), origin = pos, angles = ang } )
-			rendering = false
-
-		render.PopRenderTarget()
-
-		cam.Start3D2D( pos + ang:Forward() * ( math.sqrt( ScrW() * ScrH() ) / 2 ) + ang:Right() * -( ScrW() / 2 ) + ang:Up() * ( ScrH() / 2 ), Angle( 0, ang.y - 90, -ang.p + 90 ), 1 )
-			mat:SetTexture( "$basetexture", rt )
-			surface.SetDrawColor( 255, 255, 255 )
-			surface.SetMaterial( mat )
-			surface.DrawTexturedRect( 0, 0, ScrW(), ScrH() )
-		cam.End3D2D()
-
-	end
 
 end )
 
