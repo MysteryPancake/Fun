@@ -77,22 +77,22 @@ function ENT:GetRandomIcon()
 	return math.random( #self.Icons )
 end
 
+function ENT:SpawnFunction( ply, tr, ClassName )
+
+	if !tr.Hit then return end
+
+	local SpawnPos = tr.HitPos + tr.HitNormal * 50
+
+	local ent = ents.Create( ClassName )
+	ent:SetPos( SpawnPos )
+	ent:Spawn()
+	ent:Activate()
+
+	return ent
+
+end
+	
 if SERVER then
-
-	function ENT:SpawnFunction( ply, tr, ClassName )
-
-		if !tr.Hit then return end
-
-		local SpawnPos = tr.HitPos + tr.HitNormal * 50
-
-		local ent = ents.Create( ClassName )
-		ent:SetPos( SpawnPos )
-		ent:Spawn()
-		ent:Activate()
-
-		return ent
-
-	end
 
 	function ENT:Initialize()
 
