@@ -113,26 +113,22 @@ if SERVER then
 	
 	function ENT:Use( activator, caller )
 	
-		if not self:GetSpinning() then
+		if self:GetSpinning() then return end
 		
-			self:EmitSound( "garrysmod/ui_click.wav" )
+		self:EmitSound( "garrysmod/ui_click.wav" )
+		self:SetSpinning( true )
 			
-			self:SetSpinning( true )
+		timer.Simple( 1, function()
+				
+			self:SetSpinning( false )
+			self:SetSlots( self:GetRandomIcons() )
+			self:EmitSound( "garrysmod/balloon_pop_cute.wav" )
+				
+			if self:HasWon() then
+				self:GivePrize( "models/props_junk/PopCan01a.mdl" )
+			end
 			
-			timer.Simple( 1, function()
-				
-				self:SetSpinning( false )
-				self:SetSlots( self:GetRandomIcons() )
-				
-				self:EmitSound( "garrysmod/balloon_pop_cute.wav" )
-				
-				if self:HasWon() then
-					self:GivePrize( "models/props_junk/PopCan01a.mdl" )
-				end
-			
-			end )
-		
-		end
+		end )
 	
 	end
 
