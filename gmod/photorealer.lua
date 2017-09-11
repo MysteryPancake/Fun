@@ -1,6 +1,6 @@
 local pos, ang
 local rendering = false
-local rt = GetRenderTarget( "PhotoReal", ScrW(), ScrH(), true )
+local rt = GetRenderTarget( "PhotoReal", ScrW(), ScrH(), false )
 local mat = CreateMaterial( "UnlitGeneric", "GMODScreenspace", {
 	[ "$basetexturetransform" ] = "center .5 .5 scale -1 -1 rotate 0 translate 0 0",
 	[ "$texturealpha" ] = "0",
