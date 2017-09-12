@@ -1,16 +1,18 @@
 AddCSLuaFile()
 
+ENT.Base = "base_entity"
 ENT.Type = "anim"
-ENT.Base = "base_gmodentity"
+
+ENT.Editable = false
+ENT.Spawnable = true
+ENT.AdminOnly = true
 
 ENT.PrintName = "Slot Machine"
 ENT.Author = "MysteryPancake"
-ENT.Category = "Illegal Gambling"
 ENT.Purpose = "Losing money fast"
 ENT.Instructions = "Press USE to make it spin"
-
-ENT.Spawnable = true
-ENT.AdminOnly = true
+ENT.Category = "Illegal Gambling"
+ENT.RenderGroup = RENDERGROUP_OPAQUE
 
 ENT.Icons = {
 	[ 0 ] = Material( "icon16/cross.png" ),
