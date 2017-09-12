@@ -3,9 +3,9 @@ AddCSLuaFile()
 ENT.Base = "base_entity"
 ENT.Type = "anim"
 
-ENT.Editable = false
 ENT.Spawnable = true
 ENT.AdminOnly = true
+ENT.Editable = false
 
 ENT.PrintName = "Slot Machine"
 ENT.Author = "MysteryPancake"
