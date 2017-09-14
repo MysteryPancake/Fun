@@ -13,7 +13,13 @@ function TOOL:LeftClick( trace )
 end
 
 function TOOL:DrawToolScreen( w, h )
-	render.RenderView( { x = 0, y = 0, w = w, h = h, origin = self:GetOwner():GetEyeTrace().HitPos + self:GetOwner():WorldToLocal( self:GetOwner():EyePos() ), angles = self:GetOwner():EyeAngles() } )
+	render.RenderView( {
+		x = 0, y = 0,
+		w = w, h = h,
+		origin = self:GetOwner():GetEyeTrace().HitPos + self:GetOwner():WorldToLocal( self:GetOwner():EyePos() ),
+		angles = self:GetOwner():EyeAngles(),
+		dopostprocess = true, drawviewmodel = false
+	} )
 end
 
 function TOOL.BuildCPanel( CPanel )
