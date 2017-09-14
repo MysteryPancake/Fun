@@ -20,7 +20,9 @@ hook.Add( "RenderScene", "PhotoReal", function()
 			x = 0, y = 0,
 			w = ScrW(), h = ScrH(),
 			origin = pos, angles = ang,
-			dopostprocess = true, drawviewmodel = false
+			drawhud = false,
+			drawmonitors = false,
+			drawviewmodel = false
 		} )
 		rendering = false
 
