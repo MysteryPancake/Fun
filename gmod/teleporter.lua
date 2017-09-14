@@ -13,11 +13,11 @@ function TOOL:LeftClick( trace )
 end
 
 function TOOL:DrawToolScreen( w, h )
+	local ply = self:GetOwner()
 	render.RenderView( {
 		x = 0, y = 0,
 		w = w, h = h,
-		origin = self:GetOwner():GetEyeTrace().HitPos + self:GetOwner():WorldToLocal( self:GetOwner():EyePos() ),
-		angles = self:GetOwner():EyeAngles(),
+		origin = ply:GetEyeTrace().HitPos + ply:WorldToLocal( EyePos() ), angles = EyeAngles(),
 		dopostprocess = true, drawviewmodel = false
 	} )
 end
