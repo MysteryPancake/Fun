@@ -18,10 +18,10 @@ function TOOL:DrawToolScreen( w, h )
 		x = 0, y = 0,
 		w = w, h = h,
 		origin = ply:GetEyeTrace().HitPos + ply:WorldToLocal( EyePos() ), angles = EyeAngles(),
-		drawviewmodel = false,
 		dopostprocess = false,
+		drawviewmodel = false,
 		drawmonitors = false,
-		bloomtone = false,
+		bloomtone = true,
 		drawhud = false
 	} )
 end
