@@ -92,9 +92,7 @@ if SERVER then
 	function ENT:Initialize()
 
 		self:SetModel( "models/props_interiors/VendingMachineSoda01a.mdl" )
-		
 		self:PhysicsInit( SOLID_VPHYSICS )
-		self:SetMoveType( MOVETYPE_VPHYSICS )
 		self:PhysWake()
 		
 		self:SetUseType( SIMPLE_USE )
