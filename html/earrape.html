@@ -1,26 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
+		<meta charset="utf-8">
 		<title>Earrape</title>
+		<meta name="description" content="Do not visit this website.">
+		<meta name="keywords" content="Earrape, Loud, Annoying, Painful">
+		<meta property="og:title" content="Earrape">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/earrape">
+		<meta property="og:site_name" content="Earrape">
+		<meta property="og:description" content="Do not visit this website.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<script>
-			function earrape() {
-				var context = new (window.AudioContext || window.webkitAudioContext)();
-				var oscillator = context.createOscillator();
-				oscillator.type = "sawtooth";
-				oscillator.frequency.value = 500;
-				var gain = context.createGain();
-				gain.gain.value = 999999999;
-				oscillator.connect(gain);
-				gain.connect(context.destination);
-				oscillator.start();
-				setInterval(function() {
-					gain.gain.value = Math.random() * 999999999;
-					oscillator.frequency.value = oscillator.frequency.value - 100;
-					if (oscillator.frequency.value <= 0) {
-						oscillator.frequency.value = 500;
-					}
-				}, 10)
-			}
+		function earrape() {
+			var context = new (window.AudioContext || window.webkitAudioContext)();
+			var oscillator = context.createOscillator();
+			oscillator.type = "sawtooth";
+			oscillator.frequency.value = 500;
+			var gain = context.createGain();
+			gain.gain.value = 999999999;
+			oscillator.connect(gain);
+			gain.connect(context.destination);
+			oscillator.start();
+			setInterval(function() {
+				gain.gain.value = Math.random() * 999999999;
+				oscillator.frequency.value = oscillator.frequency.value - 100;
+				if (oscillator.frequency.value <= 0) {
+					oscillator.frequency.value = 500;
+				}
+			}, 10)
+		}
 		</script>
 	</head>
 	<body onload="earrape();">
