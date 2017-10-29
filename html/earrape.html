@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Earrape</title>
+		<script>
+			function earrape() {
+				var context = new (window.AudioContext || window.webkitAudioContext)();
+				var oscillator = context.createOscillator();
+				oscillator.type = "sawtooth";
+				oscillator.frequency.value = 500;
+				var gain = context.createGain();
+				gain.gain.value = 999999999;
+				oscillator.connect(gain);
+				gain.connect(context.destination);
+				oscillator.start();
+				setInterval(function() {
+					gain.gain.value = Math.random() * 999999999;
+					oscillator.frequency.value = oscillator.frequency.value - 100;
+					if (oscillator.frequency.value <= 0) {
+						oscillator.frequency.value = 500;
+					}
+				}, 10)
+			}
+		</script>
+	</head>
+	<body onload="earrape();">
+		<span>Please turn your volume up to full blast</span>
+	</body>
+</html>
