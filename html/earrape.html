@@ -11,28 +11,34 @@
 		<meta property="og:site_name" content="Earrape">
 		<meta property="og:description" content="Do not visit this website.">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			background-color: black;
+			color: white;
+		}
+		</style>
 		<script>
-			function earrape() {
-				var context = new (window.AudioContext || window.webkitAudioContext)();
-				var oscillator = context.createOscillator();
-				oscillator.type = "sawtooth";
-				oscillator.frequency.value = 500;
-				var gain = context.createGain();
-				gain.gain.value = 999999999;
-				oscillator.connect(gain);
-				gain.connect(context.destination);
-				oscillator.start();
-				setInterval(function() {
-					gain.gain.value = Math.random() * 999999999;
-					oscillator.frequency.value = oscillator.frequency.value - 100;
-					if (oscillator.frequency.value <= 0) {
-						oscillator.frequency.value = 500;
-					}
-				}, 10)
-			}
+		function earrape() {
+			var context = new (window.AudioContext || window.webkitAudioContext)();
+			var oscillator = context.createOscillator();
+			oscillator.type = "sawtooth";
+			oscillator.frequency.value = 500;
+			var gain = context.createGain();
+			gain.gain.value = 999999999;
+			oscillator.connect(gain);
+			gain.connect(context.destination);
+			oscillator.start();
+			setInterval(function() {
+				gain.gain.value = Math.random() * 999999999;
+				oscillator.frequency.value = oscillator.frequency.value - 100;
+				if (oscillator.frequency.value <= 0) {
+					oscillator.frequency.value = 500;
+				}
+			}, 10)
+		}
 		</script>
 	</head>
 	<body onload="earrape();">
-		<span>Please turn your volume up to full blast to experience the best audio you will ever hear.</span>
+		<span>Please turn your volume up to full blast for the full experience.</span>
 	</body>
 </html>
