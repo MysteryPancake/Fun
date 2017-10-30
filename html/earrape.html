@@ -24,12 +24,12 @@
 			oscillator.type = "sawtooth";
 			oscillator.frequency.value = 500;
 			var gain = context.createGain();
-			gain.gain.value = 999999999;
+			gain.gain.value = 100;
 			oscillator.connect(gain);
 			gain.connect(context.destination);
 			oscillator.start();
 			setInterval(function() {
-				gain.gain.value = Math.random() * 999999999;
+				gain.gain.value = Math.random() * 100;
 				oscillator.frequency.value = oscillator.frequency.value - 100;
 				if (oscillator.frequency.value <= 0) {
 					oscillator.frequency.value = 500;
