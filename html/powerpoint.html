@@ -24,8 +24,18 @@
 			text-align: center;
 		}
 		</style>
+		<script>
+		function setup() {
+			window.addEventListener("mousedown", close);
+			window.addEventListener("touchdown", close);
+		}
+		
+		function close(e) {
+			window.close();
+		}
+		</script>
 	</head>
-	<body>
+	<body onload="setup();">
 		<span>End of slide show, click to exit.</span>
 	</body>
 </html>
