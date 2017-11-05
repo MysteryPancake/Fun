@@ -44,7 +44,6 @@ hook.Add( "PostDrawOpaqueRenderables", "PhotoReal", function( _, skybox )
 		surface.DrawTexturedRect( 0, 0, ScrW(), ScrH() )
 	cam.End3D2D()
 
-
 end )
 
 concommand.Add( "PhotoReal", function()
