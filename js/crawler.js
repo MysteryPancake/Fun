@@ -1,8 +1,8 @@
 const request = require("request");
 const cheerio = require("cheerio");
 
-let directories = [];
-let files = ["http://source.maxofs2d.net/rigs/3ds_2009/_WARNING_-_these_files_are_deprecated"];
+const directories = [];
+const files = ["http://source.maxofs2d.net/rigs/3ds_2009/_WARNING_-_these_files_are_deprecated"];
 const ignore = ["mailto:ml.maxofs2d@gmail.com", "http://www.evoluted.net", "&sort=asc", "?dir=./"];
 
 function arrayFind(array, word) {
