@@ -39,7 +39,7 @@ function findFiles(dir) {
 				} else {
 					if (!arrayContains(directories, url)) {
 						directories.push(url);
-						findFiles(dir + url);
+						findFiles("http://source.maxofs2d.net" + url);
 					}
 				}
 			}
