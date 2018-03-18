@@ -1,0 +1,79 @@
+span[data-label="Agree"] > a > img {
+    content: url("https://www.wikipunch.com/images/2/2b/2011rating_Agree.png");
+}
+
+span[data-label="Disagree"] > a > img {
+    content: url("https://www.wikipunch.com/images/b/b2/2011rating_Disagree.png");
+}
+
+span[data-label="Funny"] > a > img {
+    content: url("https://www.wikipunch.com/images/6/6c/2011rating_Funny.png");
+}
+
+span[data-label="Late"] > a > img {
+    content: url("https://www.wikipunch.com/images/3/3d/2011rating_Late.png");
+}
+
+span[data-label="Love"] > a > img {
+    content: url("https://www.wikipunch.com/images/2/20/2011rating_Friendly.png");
+}
+
+span[data-label="Sympathy"] > a > img {
+    content: url("https://www.wikipunch.com/images/2/20/2011rating_Friendly.png");
+}
+
+span[data-label="Artistic"] > a > img {
+    content: url("https://www.wikipunch.com/images/d/d4/2011rating_Artistic.png");
+}
+
+span[data-label="Cookie"] > a > img {
+    content: url("https://www.wikipunch.com/images/d/d8/2011rating_Informative.png");
+}
+
+span[data-label="Child Molester"] > a > img {
+    content: url("https://www.wikipunch.com/images/1/13/2011rating_OIFY_Pinknipple.png");
+}
+
+span[data-label="Baby"] > a > img {
+    content: url("https://www.wikipunch.com/images/5/5e/2011rating_Zing.png");
+}
+
+span[data-label="Coin"] > a > img {
+    content: url("https://www.wikipunch.com/images/2/2c/Star-icon.png");
+}
+
+span[data-label="Good Idea"] > a > img {
+    content: url("https://www.wikipunch.com/images/b/b2/2011rating_Useful.png");
+}
+
+span[data-label="Snowflake"] > a > img {
+    content: url("https://www.wikipunch.com/images/0/04/2011rating_Optimistic.png");
+}
+
+span[data-label="Diamond"] > a > img {
+    content: url("https://www.wikipunch.com/images/2/27/2011rating_Winner.png");
+}
+
+span[data-label="Asshole"] > a > img {
+    content: url("https://www.wikipunch.com/images/d/d2/2011rating_Dumb.png");
+}
+
+span[data-label="Bad Spelling"] > a > img {
+    content: url("https://www.wikipunch.com/images/6/62/Spellcheck.png");
+}
+
+span[data-label="Bad Reading"] > a > img {
+    content: url("https://www.wikipunch.com/images/5/56/Book_error.png");
+}
+
+span[data-label="Cute"] > a > img {
+    content: url("https://www.wikipunch.com/images/2/20/2011rating_Friendly.png");
+}
+
+span[data-label="Lucky"] > a > img {
+    content: url("https://www.wikipunch.com/images/9/97/2011rating_Smarked.png");
+}
+
+span[data-label="Big Woop"] > a > img {
+    content: url("https://www.wikipunch.com/images/d/d2/2011rating_Dumb.png");
+}
