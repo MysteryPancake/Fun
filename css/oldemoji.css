@@ -27,7 +27,7 @@ span[data-label="Artistic"] > a > img {
 }
 
 span[data-label="Cookie"] > a > img {
-    content: url("https://www.wikipunch.com/images/d/d8/2011rating_Informative.png");
+    content: url("https://www.wikipunch.com/images/b/b2/2011rating_Useful.png");
 }
 
 span[data-label="Child Molester"] > a > img {
@@ -43,7 +43,7 @@ span[data-label="Coin"] > a > img {
 }
 
 span[data-label="Good Idea"] > a > img {
-    content: url("https://www.wikipunch.com/images/b/b2/2011rating_Useful.png");
+    content: url("https://www.wikipunch.com/images/d/d8/2011rating_Informative.png");
 }
 
 span[data-label="Snowflake"] > a > img {
