@@ -1,0 +1,7 @@
+div.username > div > div > a:before {
+    content: "((";
+}
+
+div.username > div > div > a:after {
+    content: "))";
+}
