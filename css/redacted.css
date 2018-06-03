@@ -1,0 +1,7 @@
+label:before, a:before {
+	content: "{{";
+}
+
+label:after, a:after {
+	content: "}}";
+}
