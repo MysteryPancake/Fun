@@ -1,0 +1,25 @@
+<levelXML>
+  <info v="1.8" x="506" y="5093" c="2" f="t" h="f" bg="0" bgc="0" e="1"/>
+  <shapes>
+    <sh t="0" p0="354" p1="5255" p2="350" p3="100" p4="0" p5="t" p6="f" p7="1" p8="0" p9="-1" p10="100" p11="1"/>
+    <sh t="0" i="f" p0="708" p1="5217" p2="200" p3="50" p4="0" p5="f" p6="f" p7="1" p8="65280" p9="-1" p10="100" p11="1"/>
+    <sh t="0" p0="708" p1="5092" p2="60" p3="60" p4="0" p5="f" p6="f" p7="1" p8="16711680" p9="-1" p10="100" p11="3"/>
+  </shapes>
+  <specials>
+    <sp t="16" p0="645" p1="5045" p2="0" p3="16711680" p4="5" p5="13" p6="1" p8="100">
+      <p7><![CDATA[Collision 3 Shape]]></p7>
+    </sp>
+    <sp t="16" p0="557" p1="5171" p2="0" p3="65280" p4="4" p5="15" p6="1" p8="100">
+      <p7><![CDATA[Type 4 trigger (fix shape) attached to shape]]></p7>
+    </sp>
+    <sp t="16" p0="768" p1="5087" p2="0" p3="16711680" p4="5" p5="15" p6="2" p8="100">
+      <p7><![CDATA[Doesn't get triggered.
+Type 3 also does not work.]]></p7>
+    </sp>
+  </specials>
+  <triggers>
+    <t x="708" y="5216" w="200" h="50" a="0" b="4" t="1" r="1" sd="f" d="0">
+      <sh i="2" a="1"/>
+    </t>
+  </triggers>
+</levelXML>
