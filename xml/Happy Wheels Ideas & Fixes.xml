@@ -1,0 +1,233 @@
+<levelXML>
+  <info v="1.81" x="94" y="5091" c="3" f="t" h="f" bg="0" bgc="11184810" e="1"/>
+  <shapes>
+    <sh t="0" i="f" p0="7657" p1="5114" p2="5000" p3="5000" p4="0" p5="t" p6="f" p7="1" p8="16776960" p9="-1" p10="0" p11="1"/>
+    <sh t="0" p0="2500" p1="5385" p2="5000" p3="400" p4="0" p5="t" p6="f" p7="1" p8="0" p9="-1" p10="100" p11="1"/>
+    <sh t="0" p0="7498" p1="5400" p2="5000" p3="430" p4="0" p5="t" p6="f" p7="1" p8="0" p9="-1" p10="100" p11="1"/>
+    <sh t="0" p0="757" p1="5101" p2="70" p3="70" p4="0" p5="f" p6="f" p7="1" p8="4032711" p9="-1" p10="100" p11="3"/>
+    <sh t="0" i="f" p0="7541" p1="5144" p2="55" p3="80" p4="0" p5="t" p6="f" p7="1" p8="16711680" p9="-1" p10="100" p11="1"/>
+    <sh t="0" i="f" p0="7756" p1="5144" p2="55" p3="80" p4="0" p5="t" p6="f" p7="1" p8="65280" p9="-1" p10="100" p11="1"/>
+  </shapes>
+  <specials>
+    <sp t="16" p0="181" p1="5090" p2="0" p3="0" p4="5" p5="28" p6="1" p8="100">
+      <p7><![CDATA[Fixes/Ideas]]></p7>
+    </sp>
+    <sp t="27" p0="540" p1="5175" p2="250" p3="18" p4="0"/>
+    <sp t="6" p0="543" p1="5124" p2="-180" p3="f" p4="20" p5="f"/>
+    <sp t="16" p0="421" p1="5057" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[Rails STILL bleed. R.I.P. Updates]]></p7>
+    </sp>
+    <sp t="16" p0="2497.5" p1="5014.5" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[Idea- seventh collision setting-
+'Only with players'.
+
+Idea- eighth collsion setting-
+'Only with shapes of this setting- 
+but NOT fixed shapes  (unless they have this setting)]]></p7>
+    </sp>
+    <sp t="16" p0="3030" p1="4956" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[New tick boxes-
+
+Triggers- 'Hide'
+Hides the trigger and all lines 
+showing what it is connected to.
+
+Joints- 'Hide'
+Hides the joint and all lines showing
+what it's joined to.]]></p7>
+    </sp>
+    <sp t="16" p0="3383" p1="4935" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[New thing- 'The layers panel'
+
+Like the layers panel in Photoshop,
+this allows players to easily visually
+position layers by dragging instead of holding CTRL
+and hoping that it won't screw up.]]></p7>
+    </sp>
+    <sp t="16" p0="3385" p1="5050" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[In the layer panel, you can also click an eye icon
+to toggle whether the layer is visible or not for easy selection.
+
+If you select a layer, it will be selected with the select tool.]]></p7>
+    </sp>
+    <sp t="16" p0="3952" p1="4983" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[Boosts- enable AND disable options (like with triggers).
+
+Buildings- 'Interactive' tick box, as they are usually used
+as art. Rotatable as well.
+
+Finish lines- rotatable, but NaN doesn't work.]]></p7>
+    </sp>
+    <sp t="16" p0="938" p1="5001" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[NPCs, ability to position polygons and other stuff
+IN FRONT OF THEM without having to group the stuff
+and tick 'foreground'.
+
+Also, if an NPC is grouped, polygons should be able
+to go in front of it,]]></p7>
+    </sp>
+    <sp t="16" p0="938" p1="5111" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[for example if you wanted an NPC with clothes, and you
+don't want to make a new group and join it hoping the physics
+don't spaz out like they usually do.]]></p7>
+    </sp>
+    <sp t="16" p0="1848" p1="4915" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[Sliding joints- an option to go back and forth.
+Seriously, what is the point of them at the moment.
+
+You could use this with crushers and stuff, or moving platforms]]></p7>
+    </sp>
+    <sp t="16" p0="1428" p1="5064" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[Tick box for NPCs- 'Limbs as separate layers'
+Makes it so polygons can be displayed BEHIND
+the torso (for example) but NOT behind some parts,
+like if you wanted gloves for BOTH hands of an NPC.]]></p7>
+    </sp>
+    <sp t="16" p0="1848" p1="4987" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[instead of making a complicated trigger mess.
+This back and forth option would only be available if the joint
+has 'limit range' ticked, so it will go back and forth in the range.]]></p7>
+    </sp>
+    <sp t="16" p0="1847" p1="5041" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[This option should have a 'smooth' slider, which would make it
+slow down when coming to a limit, and slowly go back to the normal
+speed, instead of being jolty (which would be possible if the setting]]></p7>
+    </sp>
+    <sp t="16" p0="1848" p1="5097" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[was set as 0). Also, there should be a 'maintain' slider, which changes
+the time (in increments) of how long the back-and-forth thing should stay
+at the limit before returning.]]></p7>
+    </sp>
+    <sp t="16" p0="4492" p1="4978" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[Empty groups and text fields should be automatically deleted. For example,
+the two empty things shown below. They can really clog up a level if you don't
+know they're there.]]></p7>
+    </sp>
+    <sp t="16" p0="4601" p1="5085" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[]]></p7>
+    </sp>
+    <sp t="16" p0="4649" p1="5084" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[]]></p7>
+    </sp>
+    <sp t="16" p0="4491" p1="5035" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[Note- sometimes empty groups DO NOT get removed, although I can't
+find any examples in my XMLs.]]></p7>
+    </sp>
+    <sp t="16" p0="5212" p1="4914" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[NEW TOOL- ENTITY SPAWNER]]></p7>
+    </sp>
+    <sp t="16" p0="5211" p1="4937" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[Sometimes,you need entites to keep getting spawned, like if you have two
+fake portals and you need a ball to continuously go through, without it going
+back to the top.]]></p7>
+    </sp>
+    <sp t="16" p0="5209" p1="4993" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[The entity spawner would automatically spawn a ball every specified interval,
+making it seem like the ball keeps going.
+Triggers could automatically delete this entity if their repeat type was 2]]></p7>
+    </sp>
+    <sp t="16" p0="5205" p1="5047" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[and their 'triggered by' setting was 4, with the entity spawner selected.
+
+The spawner could spawn groups, NPCs, or whatever, but it would have limits
+so the game doesn't crash.]]></p7>
+    </sp>
+    <sp t="16" p0="5202" p1="5119" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[The limits would be the ones currently in the editor.
+Triggers could activate this, and enable or disable it.]]></p7>
+    </sp>
+    <sp t="16" p0="632" p1="5025" p2="0" p3="0" p4="2" p5="15" p6="2" p8="100">
+      <p7><![CDATA[Possible bug- collision type 3 shapes
+do not trigger type 4 triggers.]]></p7>
+    </sp>
+    <sp t="16" p0="5897" p1="5030" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[New option-
+Go to Editor Menu / Level Options
+
+Why is there not a tick box that enables
+seeing the background WHILE in the editor?
+This'd be REALLY useful if you have a lot of white
+shapes in a ]]></p7>
+    </sp>
+    <sp t="16" p0="5982" p1="5136" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[black-backgrounded level.]]></p7>
+    </sp>
+    <sp t="16" p0="6325" p1="4961" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[New thing- Checkpoints.
+
+It's an action from the trigger tool.
+Action- Level checkpoint.
+Checkpoints spawn the player from them, and in the ESC
+menu, a 'Restart from checkpoint' option will be ]]></p7>
+    </sp>
+    <sp t="16" p0="6325" p1="5068" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[available, perhaps above the normal 'restart level' option
+so restarting the whole level doesn't happen accidentally.
+
+Pressing ESC+R when a checkpoint is active will restart the level]]></p7>
+    </sp>
+    <sp t="16" p0="6980" p1="5004" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[New thing for the servers- color presets.
+
+Why not make all the color presets defined by
+a user in the color panel be stored on the TJF
+servers instead of just as a local file?]]></p7>
+    </sp>
+    <sp t="16" p0="6976" p1="5103" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[I had a disk defragment, and all my colors were lost.
+At least add a tick-box for whether ]]></p7>
+    </sp>
+    <sp t="16" p0="6327" p1="5141" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[from the checkpoint instead of the level start, just in case.
+ESC+E will restart the whole level instead when a checkpoint is triggered.]]></p7>
+    </sp>
+    <sp t="16" p0="6976" p1="5141" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[colors should be stored locally or on the servers.
+Automatically, it should be stored locally, just in case.]]></p7>
+    </sp>
+    <sp t="16" p0="7935.5" p1="5088" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[New sound available to play from
+the trigger sound menu- 'Level Victory'.
+The 'DUN DUN DUN' earrape. Optional to put there,
+but it'd be great for trolling...]]></p7>
+    </sp>
+    <sp t="9" p0="8558" p1="5205"/>
+    <sp t="16" p0="8461" p1="5098" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[Alright, I think that's all.]]></p7>
+    </sp>
+    <sp t="16" p0="7417" p1="4993" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[Triggers should be able to change shape and polygon colors,
+as well as the level background color, as shown with the red trigger.
+Triggers should ALSO be able to alter the FOREGROUND color, which]]></p7>
+    </sp>
+    <sp t="16" p0="7419" p1="5048" p2="0" p3="0" p4="2" p5="15" p6="1" p8="100">
+      <p7><![CDATA[would be useful for fog and stuff, the green trigger will show what I mean.
+It'd be a better alternative than creating a lot of 5000x5000 blocks.]]></p7>
+    </sp>
+    <sp t="16" p0="7498" p1="5091" p2="0" p3="16711680" p4="5" p5="10" p6="1" p8="100">
+      <p7><![CDATA[BACKGROUND]]></p7>
+    </sp>
+    <sp t="16" p0="7713" p1="5091" p2="0" p3="65280" p4="5" p5="10" p6="1" p8="100">
+      <p7><![CDATA[FOREGROUND]]></p7>
+    </sp>
+  </specials>
+  <groups>
+    <g x="-6690886.6" y="-6700886.2" r="0" ox="-4695" oy="-5101" s="f" f="f" o="100" im="f"/>
+    <g x="-6690886.6" y="-6700886.4" r="0" ox="-4611" oy="-5124" s="f" f="f" o="100" im="f"/>
+    <g x="-6690886.5" y="-6700886.3" r="0" ox="-4605.5" oy="-5130.5" s="f" f="f" o="100" im="f"/>
+    <g x="7587.2" y="5063.2" r="0" ox="-7587.2" oy="-5063.2" s="f" f="t" o="0" im="f">
+      <sh t="0" i="f" p0="7587" p1="5063" p2="5000" p3="5000" p4="0" p5="t" p6="f" p7="1" p8="14540253" p9="-1" p10="100" p11="1"/>
+    </g>
+  </groups>
+  <triggers>
+    <t x="757" y="5169" w="100" h="5" a="0" b="4" t="1" r="1" sd="f" d="0">
+      <sh i="3" a="6"/>
+    </t>
+    <t x="7756" y="5144" w="55" h="80" a="0" b="1" t="1" r="1" sd="f" d="0">
+      <g i="3" a="1" p0="80" p1="1"/>
+    </t>
+    <t x="7541" y="5145" w="55" h="80" a="0" b="1" t="1" r="1" sd="f" d="0">
+      <sh i="0" a="3" p0="100" p1="1"/>
+    </t>
+  </triggers>
+</levelXML>
