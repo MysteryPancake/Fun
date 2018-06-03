@@ -1,0 +1,3 @@
+div.postuser, div.editinfo, div.head > a, .username, div.forumevent {
+    display: none;
+}
