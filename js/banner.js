@@ -6,4 +6,6 @@ if (header) {
 	var fullSize = url.replace("-fcrop64=1,00005a57ffffa5a8-nd-c0xffffffff-rj-k-no", "");
 	var fullWidth = fullSize.replace("w2120", "w2560");
 	window.open(fullWidth);
+} else {
+	console.log("Couldn't find a banner!");
 }
