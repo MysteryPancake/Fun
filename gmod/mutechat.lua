@@ -10,9 +10,9 @@ hook.Add( "PlayerSay", "MuteMessage", function( ply )
     end
 end )
 
-hook.Add( "PlayerSay", "ChatCommand", function( ply, txt )
-	if ply:IsAdmin() and string.sub( string.lower( txt ), 1, 5 ) == "!mute" then
-		local target = string.sub( txt, 7 )
+hook.Add( "PlayerSay", "ChatCommand", function( ply, text )
+	if ply:IsAdmin() and string.sub( string.lower( text ), 1, 5 ) == "!mute" then
+		local target = string.sub( text, 7 )
 		muted[ target ] = true
 		return ""
 	end
