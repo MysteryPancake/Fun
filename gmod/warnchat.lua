@@ -1,7 +1,7 @@
-hook.Add( "PlayerSay", "WarnCommand", function( ply, txt )
-	if ply:IsAdmin() and string.sub( string.lower( txt ), 1, 5 ) == "!warn" then
+hook.Add( "PlayerSay", "WarnCommand", function( ply, text )
+	if ply:IsAdmin() and string.sub( string.lower( text ), 1, 5 ) == "!warn" then
 		local target
-		local args = string.sub( txt, 7 )
+		local args = string.sub( text, 7 )
 		for _, v in ipairs( player.GetHumans() ) do
 			if v:Nick() == args then
 				target = v
