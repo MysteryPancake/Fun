@@ -6,10 +6,10 @@ hook.Add( "CheckPassword", "CheckBanned", function( id )
 	end
 end )
 
-hook.Add( "PlayerSay", "BanCommand", function( ply, txt )
-	if ply:IsAdmin() and string.sub( string.lower( txt ), 1, 4 ) == "!ban" then
+hook.Add( "PlayerSay", "BanCommand", function( ply, text )
+	if ply:IsAdmin() and string.sub( string.lower( text ), 1, 4 ) == "!ban" then
 		local target
-		local args = string.Split( string.sub( txt, 6 ), " " )
+		local args = string.Split( string.sub( text, 6 ), " " )
 		for _, v in ipairs( player.GetHumans() ) do
 			if v:Nick() == args[ 1 ] then
 				target = v
