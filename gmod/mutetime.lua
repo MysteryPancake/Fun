@@ -10,9 +10,9 @@ hook.Add( "PlayerSay", "MuteMessage", function( ply )
     end
 end )
 
-hook.Add( "PlayerSay", "ChatCommand", function( ply, txt )
-	if ply:IsAdmin() and string.sub( string.lower( txt ), 1, 5 ) == "!mute" then
-		local args = string.Split( string.sub( txt, 7 ), " " )
+hook.Add( "PlayerSay", "ChatCommand", function( ply, text )
+	if ply:IsAdmin() and string.sub( string.lower( text ), 1, 5 ) == "!mute" then
+		local args = string.Split( string.sub( text, 7 ), " " )
 		muted[ args[ 1 ] ] = true
 		timer.Simple( tonumber( args[ 2 ] or 0 ), function()
 			muted[ args[ 1 ] ] = false
