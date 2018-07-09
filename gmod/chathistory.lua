@@ -1,8 +1,8 @@
 local history = {}
 
-hook.Add( "OnPlayerChat", "HistoryAdd", function( ply, txt )
+hook.Add( "OnPlayerChat", "HistoryAdd", function( ply, text )
 	if ply == LocalPlayer() then
-		table.insert( history, txt )
+		table.insert( history, text )
 	end
 end )
 
