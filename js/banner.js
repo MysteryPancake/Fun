@@ -7,5 +7,5 @@ if (header) {
 	var fullWidth = fullSize.replace("w2120", "w2560");
 	window.open(fullWidth);
 } else {
-	console.error("Couldn't find a banner!");
+	window.alert("Couldn't find a banner!");
 }
