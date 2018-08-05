@@ -28,7 +28,7 @@
 			oscillator.connect(gain);
 			gain.connect(context.destination);
 			oscillator.start();
-			setInterval(function() {
+			window.setInterval(function() {
 				gain.gain.setValueAtTime(Math.random() * 100, context.currentTime);
 				oscillator.frequency.setValueAtTime(oscillator.frequency.value - 100, context.currentTime);
 				if (oscillator.frequency.value <= 0) {
