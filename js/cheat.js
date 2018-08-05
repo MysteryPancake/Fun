@@ -9,13 +9,13 @@ function clickButton(div) {
 
 function cheat() {
 	document.getElementsByClassName("long-answer-box")[0].innerHTML = "Not sure";
-	setTimeout(function() {
+	window.setTimeout(function() {
 		clickButton(document.getElementsByClassName("submit")[0]);
-		setTimeout(function() {
+		window.setTimeout(function() {
 			document.getElementsByClassName("star-4")[0].click();
-			setTimeout(function() {
+			window.setTimeout(function() {
 				clickButton(document.getElementsByClassName("edit")[0]);
-				setTimeout(function() {
+				window.setTimeout(function() {
 					var answer = document.getElementsByClassName("model-answer")[0].textContent.replace("Example Model Answer", "").trim();
 					document.getElementsByClassName("long-answer-box")[0].innerHTML = answer;
 					var keywords = document.getElementsByClassName("answer-keyword")[0].textContent.replace("Keywords", "").trim();
