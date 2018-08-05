@@ -19,7 +19,7 @@ function cheat() {
 					var answer = document.getElementsByClassName("model-answer")[0].textContent.replace("Example Model Answer", "").trim();
 					document.getElementsByClassName("long-answer-box")[0].innerHTML = answer;
 					var keywords = document.getElementsByClassName("answer-keyword")[0].textContent.replace("Keywords", "").trim();
-					document.getElementsByClassName("long-answer-input")[0].appendChild(document.createTextNode("Keywords: " + keywords));
+					document.getElementsByClassName("long-answer-input")[0].innerHTML += "Keywords: " + keywords;
 				}, 500);
 			}, 500);
 		}, 500);
@@ -28,7 +28,6 @@ function cheat() {
 
 var menu = document.getElementsByClassName("sa-navigation-controls-content")[0];
 var button = document.createElement("BUTTON");
-var text = document.createTextNode("Cheat");
-button.appendChild(text);
+button.innerHTML = "Cheat";
 button.onclick = cheat;
 menu.appendChild(button);
