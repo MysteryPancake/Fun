@@ -15,4 +15,5 @@ var randoms = [Double]()
 for _ in 0...100 {
   randoms.append(random())
 }
+
 randoms.map{ $0 }
