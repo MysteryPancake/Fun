@@ -1,0 +1,7 @@
+_                      _ :skin-tone-1:
+OKAY _         _ :skin-tone-2:
+_                      _ :skin-tone-3:
+------------------
+_                      _ :skin-tone-4:
+NOT OKAY :skin-tone-5:
+_                      _ :black_large_square:
