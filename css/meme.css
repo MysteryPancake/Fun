@@ -14,7 +14,7 @@ a, .tabmenu li.selected a, .linkflairlabel {
 	color: green !important;
 }
 
-.author:hover, .link a.title:hover, .morelink a:hover, .reddit-link-title:hover, .search-result mark {
+.author:hover, .link a.title:hover, .morelink a:hover, .reddit-link-title:hover, .search-result mark, .tabmenu a:hover {
 	text-transform: uppercase;
 }
 
@@ -96,6 +96,10 @@ div.stickied {
 #header .tabmenu li.selected a {
 	border: 2px solid green;
 	border-bottom: 2px solid white;
+}
+
+#header-img:hover {
+	animation: spin 0.5s;
 }
 
 #hsts_pixel {
