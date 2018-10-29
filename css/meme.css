@@ -131,7 +131,7 @@ div.stickied {
 .linkflairlabel {
 	background: white;
 	border: 1px solid green;
-	border-radius: 8px 8px 8px 0;
+	border-radius: 0;
 	font-size: medium;
 	overflow: visible;
 }
