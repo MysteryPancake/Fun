@@ -144,6 +144,8 @@ div.stickied {
 	background: green;
 	border: none;
 	box-shadow: 0 0 2px 2px yellow;
+	position: relative;
+	top: 28px;
 }
 
 .morelink:hover {
@@ -208,4 +210,9 @@ div.stickied {
 
 .titlebox h1 a:hover:after {
 	content: " sucks lol";
+}
+
+.titlebox h1 {
+	position: relative;
+	bottom: 88px;
 }
