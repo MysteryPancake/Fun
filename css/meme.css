@@ -1,0 +1,201 @@
+* {
+	font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+a, .tabmenu li.selected a, .linkflairlabel {
+	color: green;
+}
+
+.approval-checkmark, div.nub {
+	display: none;
+}
+
+.author, h2, .linefield .title, .link .score, .link .title, .md a, .morecomments a, .morelink a:hover, .search-result a, .search-result mark, .submitter, .submit_text h1, .tagline a, .titlebox a {
+	color: green !important;
+}
+
+.author:hover, .link a.title:hover, .morelink a:hover, .reddit-link-title:hover, .search-result mark {
+	text-transform: uppercase;
+}
+
+.c-btn-primary {
+	background-color: lightgreen;
+	border-bottom: 2px solid green;
+}
+
+.c-btn-primary:focus, .c-btn-primary:hover, .tabmenu.formtab .selected a {
+	background-color: green;
+}
+
+.comment .child, .comment .showreplies {
+	border-left: 1px solid green;
+}
+
+div.content {
+	margin-right: 315px;
+}
+
+div.score:before {
+	content: "-";
+	position: absolute;
+	text-indent: -0.5em;
+}
+
+div.stickied {
+	background-color: lightgreen;
+	border: 2px solid green;
+}
+
+.footer-parent:after {
+	color: gray;
+	content: "Theme created by MysteryPancake.";
+	font-size: smaller;
+}
+
+.formtabs-content {
+	border-top: 4px solid green;
+}
+
+.flair {
+	background: green;
+	border: 1px solid black;
+	color: yellow;
+}
+
+.flair, .linkflairlabel {
+	padding: 0 4px;
+}
+
+#header {
+	background-attachment: fixed;
+	background-image: url(%%compressedbanner%%);
+	background-position: top center;
+	background-size: contain;
+	border-bottom: 2px solid green;
+	height: 128px;
+}
+
+#header .pagename {
+	bottom: 0;
+	color: white;
+	left: 16px;
+	position: absolute;
+}
+
+#header .pagename a {
+	color: white;
+}
+
+#header .tabmenu {
+	bottom: 0;
+	left: 128px;
+	position: absolute;
+}
+
+#header .tabmenu li.selected a {
+	border: 2px solid green;
+	border-bottom: 2px solid white;
+}
+
+#hsts_pixel {
+	background-image: url(%%secrethat%%);
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	height: 64px;
+	margin-top: 8px;
+	width: 100%;
+}
+
+.linefield, .roundfield {
+	background-color: lightgreen !important;
+	border: 2px solid green !important;
+}
+
+.link {
+	border: 2px solid lightgreen;
+	box-shadow: 2px 2px 4px lightgray;
+	padding: 2px;
+}
+
+.link .title {
+	font-size: large;
+	text-shadow: 1px 1px yellow;
+}
+
+.link.last-clicked {
+	border: 2px solid green;
+}
+
+.linkflairlabel {
+	background: white;
+	border: 1px solid green;
+	font-size: medium;
+	overflow: visible;
+}
+
+.morelink {
+	background: green;
+	border: none;
+	box-shadow: 0 0 2px 2px yellow;
+}
+
+.morelink:hover {
+	background: yellow;
+	box-shadow: 0 0 2px 2px green;
+}
+
+.morelink a {
+	color: yellow;
+	letter-spacing: 2px;
+}
+
+.new-comment .usertext-body {
+	background-color: transparent;
+	border: none;
+}
+
+.reddit-link-title {
+	margin-right: 4px;
+}
+
+.side .md p {
+   line-height: normal;
+}
+
+@-webkit-keyframes spin {
+	0% { -webkit-transform: rotate(0deg); }
+	100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+.submit_text p {
+	animation: spin 0.5s linear infinite;
+	font-size: xx-large;
+	text-align: center;
+}
+
+.subscribe-button .option {
+	background-size: contain !important;
+	background-position: left !important;
+	background-repeat: no-repeat !important;
+	border: none !important;
+	color: transparent !important;
+	padding: 16px !important;
+}
+
+.subscribe-button .add {
+	background: url(%%subscribe%%);
+}
+
+.subscribe-button .remove {
+	background: url(%%subscribed%%);
+}
+
+.titlebox h1 a:hover:after {
+	content: " sucks lol";
+}
