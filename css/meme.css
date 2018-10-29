@@ -59,6 +59,7 @@ div.stickied {
 .flair {
 	background: green;
 	border: 1px solid black;
+	border-radius: 4px;
 	color: yellow;
 }
 
@@ -130,6 +131,7 @@ div.stickied {
 .linkflairlabel {
 	background: white;
 	border: 1px solid green;
+	border-radius: 8px 8px 8px 0;
 	font-size: medium;
 	overflow: visible;
 }
@@ -194,6 +196,10 @@ div.stickied {
 
 .subscribe-button .remove {
 	background: url(%%subscribed%%);
+}
+
+.tabmenu li a {
+	border-radius: 0 8px 0 0;
 }
 
 .titlebox h1 a:hover:after {
