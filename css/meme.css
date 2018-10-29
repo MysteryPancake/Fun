@@ -198,7 +198,7 @@ div.stickied {
 	background: url(%%subscribed%%);
 }
 
-.tabmenu li a {
+.tabmenu a {
 	border-radius: 0 8px 0 0;
 }
 
