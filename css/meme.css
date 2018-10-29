@@ -6,7 +6,7 @@ a, .tabmenu li.selected a, .linkflairlabel {
 	color: green;
 }
 
-.approval-checkmark, div.nub {
+.approval-checkmark, div.nub, .subscribers .word {
 	display: none;
 }
 
@@ -16,6 +16,16 @@ a, .tabmenu li.selected a, .linkflairlabel {
 
 .author:hover, .link a.title:hover, .morelink a:hover, .reddit-link-title:hover, .search-result mark, .tabmenu a:hover {
 	text-transform: uppercase;
+}
+
+@-webkit-keyframes bounce {
+	0% { -webkit-transform: translateY(0px); }
+	100% { -webkit-transform: translateY(-16px); }
+}
+
+@keyframes bounce {
+	0% { transform: translateY(0px); }
+	100% { transform: translateY(-16px); }
 }
 
 .c-btn-primary {
@@ -100,6 +110,7 @@ div.stickied {
 
 #header-img:hover {
 	animation: spin 0.5s;
+	-webkit-animation: spin 0.5s;
 }
 
 #hsts_pixel {
@@ -110,6 +121,11 @@ div.stickied {
 	height: 64px;
 	margin-top: 8px;
 	width: 100%;
+}
+
+#hsts_pixel:hover {
+	animation: bounce 0.25s infinite alternate;
+	-webkit-animation: bounce 0.25s infinite alternate;
 }
 
 .linefield, .roundfield {
@@ -145,7 +161,7 @@ div.stickied {
 	border: none;
 	box-shadow: 0 0 2px 2px yellow;
 	position: relative;
-	top: 28px;
+	top: 62px;
 }
 
 .morelink:hover {
@@ -185,6 +201,7 @@ div.stickied {
 	animation: spin 0.5s linear infinite;
 	font-size: xx-large;
 	text-align: center;
+	-webkit-animation: spin 0.5s linear infinite;
 }
 
 .subscribe-button .option {
@@ -192,8 +209,10 @@ div.stickied {
 	background-position: left !important;
 	background-repeat: no-repeat !important;
 	border: none !important;
+	bottom: 86px !important;
 	color: transparent !important;
 	padding: 16px !important;
+	position: relative !important;
 }
 
 .subscribe-button .add {
@@ -202,6 +221,16 @@ div.stickied {
 
 .subscribe-button .remove {
 	background: url(%%subscribed%%);
+	padding: 14px !important;
+}
+
+.subscribers .number {
+	border: 1px solid lightgray;
+	border-radius: 0 2px 2px 0;
+	bottom: 85px;
+	padding: 4px;
+	position: relative;
+	right: 6px;
 }
 
 .tabmenu a {
