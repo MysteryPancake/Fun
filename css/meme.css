@@ -161,7 +161,7 @@ div.stickied {
 	border: none;
 	box-shadow: 0 0 2px 2px yellow;
 	position: relative;
-	top: 62px;
+	top: 28px;
 }
 
 .morelink:hover {
@@ -208,8 +208,8 @@ div.stickied {
 	background-size: contain !important;
 	background-position: left !important;
 	background-repeat: no-repeat !important;
+	bottom: 3px !important;
 	border: none !important;
-	bottom: 86px !important;
 	color: transparent !important;
 	padding: 16px !important;
 	position: relative !important;
@@ -227,7 +227,7 @@ div.stickied {
 .subscribers .number {
 	border: 1px solid lightgray;
 	border-radius: 0 2px 2px 0;
-	bottom: 85px;
+	bottom: 2px;
 	padding: 4px;
 	position: relative;
 	right: 6px;
