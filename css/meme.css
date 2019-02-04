@@ -179,6 +179,10 @@ div.stickied {
 	border: none;
 }
 
+.premium-banner-outer {
+	display: none;
+}
+
 .reddit-link-title {
 	margin-right: 4px;
 }
