@@ -27,6 +27,7 @@
 		}
 		</style>
 		<script>
+		var pageTitle = "Face Reveal";
 		var paragraph1 = "Hi! Um, this is what I look like. This is my face reveal, not that I, really hold a face reveal in very high regard, but I just thought that, you know, why not. I've got to, at some point, reveal my face, since I do plan on using, my face in a video. Originally I was thinking I might just, you know, use it in a video one day, without saying anything, but, um, I'm here now. This is my face. Sorry about the whole shaky camera, but um, it's actually quite hard to hold a DSLR with one hand, I found. So um, yeah, ha ha. So this is my face. I didn't think it was a massive deal. There is a couple of channel updates I'll get into now, but um, yeah. This is my face. It's been revealed. Woohoo.";
 		var paragraph2 = "Vlogging is so weird to me cause I normally just record and then edit. So basically, this is my temporary set up, my normal desktop computer has broken down, today I'm going to see if I can get it fixed, if not I'll have to get a new one. So there are all the cords from that. Here are the two monitors I normally use, for now I'm just using my little laptop with my massive keyboard, that's my phone.";
 		var paragraph3 = "I have a lot of Star Wars posters, and like, merch and stuff, like, it's actually sort of stupid, it's.";
@@ -44,6 +45,7 @@
 			document.getElementById("paragraph5").innerHTML = paragraph5;
 			document.getElementById("paragraph6").innerHTML = paragraph6;
 			document.getElementById("paragraph7").innerHTML = paragraph7;
+			document.title = pageTitle;
 		}
 
 		var punctuation = { "!": true, "?": true, ".": true, ",": true };
@@ -80,14 +82,18 @@
 			document.getElementById("paragraph5").innerHTML = ruin(paragraph5, amount);
 			document.getElementById("paragraph6").innerHTML = ruin(paragraph6, amount);
 			document.getElementById("paragraph7").innerHTML = ruin(paragraph7, amount);
-			document.title = ruin("Face Reveal", amount);
+		}
+
+		function changed(amount) {
+			document.title = ruin(pageTitle, amount);
+			corrupt(amount);
 		}
 		</script>
 	</head>
 	<body onload="setup();">
 		<label for="slider" id="label">Corruption: 0%</label>
 		<br>
-		<input id="slider" type="range" min="0" max="100" value="0" oninput="corrupt(this.value);" onchange="corrupt(this.value);">
+		<input id="slider" type="range" min="0" max="100" value="0" oninput="corrupt(this.value);" onchange="changed(this.value);">
 		<hr>
 		<p id="paragraph1"></p>
 		<p id="paragraph2"></p>
