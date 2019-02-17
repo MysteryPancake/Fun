@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Face Reveal</title>
+		<meta name="description" content="Do not visit this website.">
+		<meta name="keywords" content="TomJedi9, Corrupt, Face Reveal, Star Wars News, Tom">
+		<meta property="og:title" content="Face Reveal">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/corrupt">
+		<meta property="og:site_name" content="Face Reveal">
+		<meta property="og:description" content="Do not visit this website.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		html, body {
+			background-color: black;
+		}
+		
+		label, p {
+			color: white;
+			font-family: "Comic Sans MS", cursive, sans-serif;
+			font-size: medium;
+		}
+
+		input[type="range"] {
+			width: 100%;
+		}
+		</style>
+		<script>
+		var paragraph1 = "Hi! Um, this is what I look like. This is my face reveal, not that I, really hold a face reveal in very high regard, but I just thought that, you know, why not. I've got to, at some point, reveal my face, since I do plan on using, my face in a video. Originally I was thinking I might just, you know, use it in a video one day, without saying anything, but, um, I'm here now. This is my face. Sorry about the whole shaky camera, but um, it's actually quite hard to hold a DSLR with one hand, I found. So um, yeah, ha ha. So this is my face. I didn't think it was a massive deal. There is a couple of channel updates I'll get into now, but um, yeah. This is my face. It's been revealed. Woohoo.";
+		var paragraph2 = "Vlogging is so weird to me cause I normally just record and then edit. So basically, this is my temporary set up, my normal desktop computer has broken down, today I'm going to see if I can get it fixed, if not I'll have to get a new one. So there are all the cords from that. Here are the two monitors I normally use, for now I'm just using my little laptop with my massive keyboard, that's my phone.";
+		var paragraph3 = "I have a lot of Star Wars posters, and like, merch and stuff, like, it's actually sort of stupid, it's.";
+		var paragraph4 = "I find it quite weird because it's now, I've got my YouTube channel to the point it is, and now I'm sort of, putting my personal life more into it, like with the live streaming for example, thank you all those who have come to the live streams, they've been a blast. Um, I won't be able to do any live streams for a little while obviously, my laptop isn't, I'm not sure if it's really capable of doing that unless I was to play, I don't know, some really simple game like Minecraft or if it was just a live chat. Um, I don't know. There's a lot of stuff we can do, a lot of stuff we can't.";
+		var paragraph5 = "The computer situation for now is under control. Like I've got, I can't use the monitors with my laptop cause I haven't got a HDMI cord.";
+		var paragraph6 = "So I actually lost Meme Compilation 2 unfortunately, um, since I was working on that on my old, computer, or, the one that's broken right now, so I'm going to start Meme Compilation again. If I can manage to get my computer fixed, um, I'll combine what I had from Meme Compilation 2 on that computer with one going to work on now, so I'll have a mix of it, better video. Um, I'm gonna make Meme Compilation 2 really good since you guys did seem to like the first one, I'm also thinking about doing Chopper With Subtitles 2, because there are two videos that um, people have requested sequels for.";
+		var paragraph7 = "New videos coming soon, um, I'm making deal with what I've got, with my laptop, thank you all for watching and um, have a great day.";
+		var curses = ["anal", "anus", "arse", "ass", "ballsack", "balls", "bastard", "bitch", "bloody", "blowjob", "bollock", "boner", "boob", "bugger", "bum", "butt", "buttplug", "clitoris", "cock", "coon", "crap", "cunt", "damn", "dick", "dildo", "dyke", "fag", "feck", "fellate", "fellatio", "felching", "fuck", "fudgepacker", "flange", "hell", "homo", "jerk", "jizz", "knob", "labia", "muff", "nigger", "nigga", "penis", "piss", "poo", "prick", "pube", "pussy", "queer", "scrotum", "sex", "shit", "slut", "smegma", "spunk", "tit", "turd", "twat", "vagina", "wank", "whore"];
+
+		function setup() {
+			document.getElementById("paragraph1").innerHTML = paragraph1;
+			document.getElementById("paragraph2").innerHTML = paragraph2;
+			document.getElementById("paragraph3").innerHTML = paragraph3;
+			document.getElementById("paragraph4").innerHTML = paragraph4;
+			document.getElementById("paragraph5").innerHTML = paragraph5;
+			document.getElementById("paragraph6").innerHTML = paragraph6;
+			document.getElementById("paragraph7").innerHTML = paragraph7;
+		}
+
+		var punctuation = { "!": true, "?": true, ".": true, ",": true };
+
+		function ruin(str, amount) {
+			var words = str.match(/[\w']+|[!?.,]/g);
+			for (var i = 0; i < words.length; i++) {
+				if (punctuation[words[i]]) continue;
+				if (Math.random() < amount / 100) {
+					var word = words[i];
+					var curse = curses[Math.floor(Math.random() * curses.length)];
+					if (word === word.toUpperCase()) {
+						words[i] = curse.toUpperCase();
+					} else if (word.charAt(0) === word.charAt(0).toUpperCase()) {
+						words[i] = curse.charAt(0).toUpperCase() + curse.slice(1);
+					} else {
+						words[i] = curse;
+					}
+				}
+			}
+			return words.join(" ").replace(/\s+(?=[!?.,])/g, "");
+		}
+
+		function corrupt(amount) {
+			document.getElementById("label").innerHTML = "Corruption: " + amount + "%";
+			document.getElementById("paragraph1").innerHTML = ruin(paragraph1, amount);
+			document.getElementById("paragraph2").innerHTML = ruin(paragraph2, amount);
+			document.getElementById("paragraph3").innerHTML = ruin(paragraph3, amount);
+			document.getElementById("paragraph4").innerHTML = ruin(paragraph4, amount);
+			document.getElementById("paragraph5").innerHTML = ruin(paragraph5, amount);
+			document.getElementById("paragraph6").innerHTML = ruin(paragraph6, amount);
+			document.getElementById("paragraph7").innerHTML = ruin(paragraph7, amount);
+			document.title = ruin("Face Reveal", amount);
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<label for="slider" id="label">Corruption: 0%</label>
+		<br>
+		<input id="slider" type="range" min="0" max="100" value="0" oninput="corrupt(this.value);" onchange="corrupt(this.value);">
+		<hr>
+		<p id="paragraph1"></p>
+		<p id="paragraph2"></p>
+		<p id="paragraph3"></p>
+		<p id="paragraph4"></p>
+		<p id="paragraph5"></p>
+		<p id="paragraph6"></p>
+		<p id="paragraph7"></p>
+	</body>
+</html>
