@@ -55,10 +55,14 @@
 				if (Math.random() < amount / 100) {
 					var word = words[i];
 					var curse = curses[Math.floor(Math.random() * curses.length)];
-					if (word === word.toUpperCase()) {
-						words[i] = curse.toUpperCase();
-					} else if (word.charAt(0) === word.charAt(0).toUpperCase()) {
-						words[i] = curse.charAt(0).toUpperCase() + curse.slice(1);
+					if (word.length > 1) {
+						if (word === word.toUpperCase()) {
+							words[i] = curse.toUpperCase();
+						} else if (word.charAt(0) === word.charAt(0).toUpperCase()) {
+							words[i] = curse.charAt(0).toUpperCase() + curse.slice(1);
+						} else {
+							words[i] = curse;
+						}
 					} else {
 						words[i] = curse;
 					}
