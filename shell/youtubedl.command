@@ -14,6 +14,9 @@ read link
 # FOR YOUTUBE:
 # youtube-dl -f bestvideo+bestaudio --add-metadata $link
 
+# FOR YOUTUBE WAV:
+# youtube-dl -f bestaudio -x --audio-format wav --add-metadata $link
+
 # FOR YOUTUBE MP4:
 youtube-dl -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio' --merge-output-format mp4 --add-metadata $link
 
