@@ -225,7 +225,7 @@ div.stickied {
 
 .subscribe-button .remove {
 	background: url(%%subscribed%%);
-	padding: 14px !important;
+	padding: 32px !important;
 }
 
 .subscribers .number {
