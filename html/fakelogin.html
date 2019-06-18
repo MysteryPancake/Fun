@@ -1,0 +1,159 @@
+<html>
+	<head>
+		<script>
+			function setup() {
+				document.getElementById("url").innerHTML = window.location.href;
+				var box = document.getElementById("username");
+				var pwd = document.getElementById("password");
+				box.addEventListener("blur", function(e) {
+					if (e.relatedTarget !== pwd) {
+						box.focus();
+					}
+				});
+				pwd.addEventListener("blur", function(e) {
+					if (e.relatedTarget !== box) {
+						box.focus();
+					}
+				});
+			}
+			function submitted(elem) {
+				var user = document.getElementById("username").value;
+				var pass = document.getElementById("password").value
+				if (user && pass) {
+					// do stuff
+				}
+				return false;
+			}
+		</script>
+		<style>
+			/*#fakewrapper {
+				position: fixed;
+				top: 0;
+				left: 0;
+				height: 100%;
+				width: 100%;
+				display: flex;
+				justify-content: center;
+				align-items: start;
+			}*/
+
+			#fakelogin input {
+				outline: none;
+			}
+
+			#fakelogin #title {
+				font-size: medium;
+			}
+
+			#fakelogin {
+				user-select: none;
+				box-shadow: 0 4px 16px 0px #00000060;
+				padding: 12px;
+				border-radius: 0 0 4px 4px;
+				border: 1px solid #000000db;
+				border-top: none;
+				font-family: system-ui;
+				background-color: #292a2d;
+				z-index: 1;
+				width: 424px;
+			}
+
+			#fakelogin p, #fakelogin td {
+				font-size: small;
+				color: #e1e1e1;
+				padding: 6px;
+				margin: 0;
+			}
+
+			#fakelogin input {
+				border-radius: 4px;
+				border: none;
+			}
+
+			#fakelogin .faketext {
+				width: 100%;
+				font-size: small;
+				background-color: #1d1d1f;
+				color: #e1e1e1;
+				padding: 8px;
+			}
+
+			#fakelogin .faketext:focus {
+				border: 2px solid #295e80;
+				margin: -2px;
+			}
+
+			#fakelogin #buttons {
+				float: right;
+				padding: 0 8px 4px 0;
+			}
+
+			#fakelogin input[type="submit"] {
+				transition: background-color 0.2s;
+				padding: 8px 18px;
+				font-weight: 500;
+			}
+
+			#fakelogin #cancel {
+				border: 1px solid #5f6368;
+				background-color: #292a2d;
+				color: #8cb5f6;
+			}
+
+			#fakelogin #cancel:hover {
+				background-color: #303339;
+			}
+
+			#fakelogin #cancel:active {
+				background-color: #363b46;
+				transition: none;
+			}
+
+			#fakelogin #submit {
+				background-color: #8cb5f6;
+				margin-left: 4px;
+				color: #202124;
+			}
+
+			#fakelogin #submit:hover {
+				background-color: #8db2ed;
+			}
+
+			#fakelogin #submit:active {
+				background-color: #83a1d0;
+				transition: none;
+			}
+
+			#fakelogin .fakebig {
+				width: 100%;
+			}
+
+			#fakelogin table {
+				padding: 12px 0;
+				width: 100%;
+			}
+		</style>
+	</head>
+	<body onload="setup();">
+		<!--<div id="fakewrapper">-->
+			<form id="fakelogin" onsubmit="return submitted(this);">
+				<p id="title">Sign in</p>
+				<p id="url"></p>
+				<table>
+					<tr>
+						<td align="left">Username</td>
+						<td align="left" class="fakebig"><input type="text" autofocus class="faketext" id="username" autocomplete="off"></td>
+					</tr>
+					<tr>
+						<td align="left">Password</td>
+						<td align="left" class="fakebig"><input type="password" class="faketext" id="password" autocomplete="off"></td>
+					</tr>
+				</table>
+				<div id="buttons">
+					<input type="submit" value="Cancel" id="cancel">
+					<input type="submit" value="Sign In" id="submit">
+				</div>
+			</form>
+		<!--</div>-->
+	</body>
+</html>
