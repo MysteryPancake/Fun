@@ -2,7 +2,7 @@
 	<head>
 		<script>
 			function setup() {
-				document.getElementById("url").innerHTML = window.location.href;
+				document.getElementById("url").innerHTML = window.parent.document.location.href;
 				var box = document.getElementById("username");
 				var pwd = document.getElementById("password");
 				box.addEventListener("blur", function(e) {
@@ -26,17 +26,6 @@
 			}
 		</script>
 		<style>
-			/*#fakewrapper {
-				position: fixed;
-				top: 0;
-				left: 0;
-				height: 100%;
-				width: 100%;
-				display: flex;
-				justify-content: center;
-				align-items: start;
-			}*/
-
 			#fakelogin input {
 				outline: none;
 			}
@@ -47,7 +36,6 @@
 
 			#fakelogin {
 				user-select: none;
-				box-shadow: 0 4px 16px 0px #00000060;
 				padding: 12px;
 				border-radius: 0 0 4px 4px;
 				border: 1px solid #000000db;
@@ -135,25 +123,23 @@
 		</style>
 	</head>
 	<body onload="setup();">
-		<!--<div id="fakewrapper">-->
-			<form id="fakelogin" onsubmit="return submitted(this);">
-				<p id="title">Sign in</p>
-				<p id="url"></p>
-				<table>
-					<tr>
-						<td align="left">Username</td>
-						<td align="left" class="fakebig"><input type="text" autofocus class="faketext" id="username" autocomplete="off"></td>
-					</tr>
-					<tr>
-						<td align="left">Password</td>
-						<td align="left" class="fakebig"><input type="password" class="faketext" id="password" autocomplete="off"></td>
-					</tr>
-				</table>
-				<div id="buttons">
-					<input type="submit" value="Cancel" id="cancel">
-					<input type="submit" value="Sign In" id="submit">
-				</div>
-			</form>
-		<!--</div>-->
+		<form id="fakelogin" onsubmit="return submitted(this);">
+			<p id="title">Sign in</p>
+			<p id="url"></p>
+			<table>
+				<tr>
+					<td align="left">Username</td>
+					<td align="left" class="fakebig"><input type="text" autofocus class="faketext" id="username" autocomplete="off"></td>
+				</tr>
+				<tr>
+					<td align="left">Password</td>
+					<td align="left" class="fakebig"><input type="password" class="faketext" id="password" autocomplete="off"></td>
+				</tr>
+			</table>
+			<div id="buttons">
+				<input type="submit" value="Cancel" id="cancel">
+				<input type="submit" value="Sign In" id="submit">
+			</div>
+		</form>
 	</body>
 </html>
