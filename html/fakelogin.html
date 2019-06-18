@@ -26,6 +26,17 @@
 			}
 		</script>
 		<style>
+			#fakewrapper {
+				align-items: start;
+				display: flex;
+				height: 100%;
+				justify-content: center;
+				left: 0;
+				position: fixed;
+				top: 0;
+				width: 100%;
+			}
+
 			#fakelogin input {
 				outline: none;
 			}
@@ -35,22 +46,23 @@
 			}
 
 			#fakelogin {
-				user-select: none;
-				padding: 12px;
-				border-radius: 0 0 4px 4px;
-				border: 1px solid #000000db;
-				border-top: none;
-				font-family: system-ui;
 				background-color: #292a2d;
-				z-index: 1;
+				border-radius: 0 0 4px 4px;
+				border-top: none;
+				border: 1px solid #000000db;
+				box-shadow: 0 4px 16px 0px #00000060;
+				font-family: system-ui;
+				padding: 12px;
+				user-select: none;
 				width: 424px;
+				z-index: 1;
 			}
 
 			#fakelogin p, #fakelogin td {
-				font-size: small;
 				color: #e1e1e1;
-				padding: 6px;
+				font-size: small;
 				margin: 0;
+				padding: 6px;
 			}
 
 			#fakelogin input {
@@ -59,11 +71,11 @@
 			}
 
 			#fakelogin .faketext {
-				width: 100%;
-				font-size: small;
 				background-color: #1d1d1f;
 				color: #e1e1e1;
+				font-size: small;
 				padding: 8px;
+				width: 100%;
 			}
 
 			#fakelogin .faketext:focus {
@@ -77,14 +89,14 @@
 			}
 
 			#fakelogin input[type="submit"] {
-				transition: background-color 0.2s;
-				padding: 8px 18px;
 				font-weight: 500;
+				padding: 8px 18px;
+				transition: background-color 0.2s;
 			}
 
 			#fakelogin #cancel {
-				border: 1px solid #5f6368;
 				background-color: #292a2d;
+				border: 1px solid #5f6368;
 				color: #8cb5f6;
 			}
 
@@ -99,8 +111,8 @@
 
 			#fakelogin #submit {
 				background-color: #8cb5f6;
-				margin-left: 4px;
 				color: #202124;
+				margin-left: 4px;
 			}
 
 			#fakelogin #submit:hover {
@@ -123,23 +135,25 @@
 		</style>
 	</head>
 	<body onload="setup();">
-		<form id="fakelogin" onsubmit="return submitted(this);">
-			<p id="title">Sign in</p>
-			<p id="url"></p>
-			<table>
-				<tr>
-					<td align="left">Username</td>
-					<td align="left" class="fakebig"><input type="text" autofocus class="faketext" id="username" autocomplete="off"></td>
-				</tr>
-				<tr>
-					<td align="left">Password</td>
-					<td align="left" class="fakebig"><input type="password" class="faketext" id="password" autocomplete="off"></td>
-				</tr>
-			</table>
-			<div id="buttons">
-				<input type="submit" value="Cancel" id="cancel">
-				<input type="submit" value="Sign In" id="submit">
-			</div>
-		</form>
+		<div id="fakewrapper">
+			<form id="fakelogin" onsubmit="return submitted(this);">
+				<p id="title">Sign in</p>
+				<p id="url"></p>
+				<table>
+					<tr>
+						<td align="left">Username</td>
+						<td align="left" class="fakebig"><input type="text" autofocus class="faketext" id="username" autocomplete="off"></td>
+					</tr>
+					<tr>
+						<td align="left">Password</td>
+						<td align="left" class="fakebig"><input type="password" class="faketext" id="password" autocomplete="off"></td>
+					</tr>
+				</table>
+				<div id="buttons">
+					<input type="submit" value="Cancel" id="cancel">
+					<input type="submit" value="Sign In" id="submit">
+				</div>
+			</form>
+		</div>
 	</body>
 </html>
