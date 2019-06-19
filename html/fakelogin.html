@@ -1,139 +1,200 @@
 <html>
 	<head>
-		<script>
-			function setup() {
-				document.getElementById("url").innerHTML = window.parent.document.location.href;
-				var box = document.getElementById("username");
-				var pwd = document.getElementById("password");
-				box.addEventListener("blur", function(e) {
-					if (e.relatedTarget !== pwd) {
-						box.focus();
-					}
-				});
-				pwd.addEventListener("blur", function(e) {
-					if (e.relatedTarget !== box) {
-						box.focus();
-					}
-				});
-			}
-			
-			function submitted(elem) {
-				var user = document.getElementById("username").value;
-				var pass = document.getElementById("password").value
-				if (user && pass) {
-					// do stuff
-				}
-				return false;
-			}
-		</script>
+		<meta charset="utf-8">
+		<title>Login</title>
+		<meta name="description" content="Fake login popup.">
+		<meta name="keywords" content="Login, Fake, Hack, Password">
+		<meta property="og:title" content="Login">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/fakelogin">
+		<meta property="og:site_name" content="Login">
+		<meta property="og:description" content="Fake login popup.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<style>
-			#fakewrapper {
-				align-items: start;
-				display: flex;
-				height: 100%;
-				justify-content: center;
-				left: 0;
-				position: fixed;
-				top: 0;
-				width: 100%;
-			}
+		#fakewrapper {
+			align-items: start;
+			display: flex;
+			height: 100%;
+			justify-content: center;
+			left: 0;
+			position: fixed;
+			top: 0;
+			width: 100%;
+			z-index: 1;
+		}
 
-			#fakelogin input {
-				outline: none;
-			}
+		#fakelogin input {
+			outline: none;
+		}
 
-			#fakelogin #title {
-				font-size: medium;
-			}
+		#fakelogin #title {
+			font-size: medium;
+		}
 
-			#fakelogin {
-				background-color: #292a2d;
-				border-radius: 0 0 4px 4px;
-				border-top: none;
-				border: 1px solid #000000db;
-				box-shadow: 0 4px 16px 0px #00000060;
-				font-family: system-ui;
-				padding: 12px;
-				user-select: none;
-				width: 424px;
-				z-index: 1;
-			}
+		#fakelogin {
+			animation: twist 0.25s ease-out;
+			background-color: #292a2d;
+			border-radius: 0 0 4px 4px;
+			border-top: none;
+			border: 1px solid #000000db;
+			box-shadow: 0 4px 16px 0px #00000060;
+			font-family: system-ui;
+			padding: 12px;
+			user-select: none;
+			width: 424px;
+			z-index: 1;
+		}
 
-			#fakelogin p, #fakelogin td {
-				color: #e1e1e1;
-				font-size: small;
-				margin: 0;
-				padding: 6px;
+		@keyframes twist {
+			0% {
+				transform: perspective(400px) rotateX(20deg) translateY(-30px);
+				opacity: 0;
 			}
+			100% {
+				transform: none;
+				opacity: 1;
+			}
+		}
 
-			#fakelogin input {
-				border-radius: 4px;
-				border: none;
+		@keyframes twistBack {
+			0% {
+				transform: none;
+				opacity: 1;
 			}
+			50% {
+				transform: perspective(400px) rotateX(20deg) translateY(-30px);
+				opacity: 0;
+			}
+			100% {
+				transform: none;
+				opacity: 1;
+			}
+		}
 
-			#fakelogin .faketext {
-				background-color: #1d1d1f;
-				color: #e1e1e1;
-				font-size: small;
-				padding: 8px;
-				width: 100%;
-			}
+		#fakelogin p, #fakelogin td {
+			color: #e1e1e1;
+			font-size: small;
+			margin: 0;
+			padding: 6px;
+		}
 
-			#fakelogin .faketext:focus {
-				border: 2px solid #295e80;
-				margin: -2px;
-			}
+		#fakelogin input {
+			border-radius: 4px;
+			border: none;
+		}
 
-			#fakelogin #buttons {
-				float: right;
-				padding: 0 8px 4px 0;
-			}
+		#fakelogin .faketext {
+			background-color: #1d1d1f;
+			box-sizing: border-box;
+			color: #e1e1e1;
+			font-size: small;
+			padding: 8px;
+			width: 100%;
+		}
 
-			#fakelogin input[type="submit"] {
-				font-weight: 500;
-				padding: 8px 18px;
-				transition: background-color 0.2s;
-			}
+		#fakelogin .faketext:focus {
+			border: 2px solid #295e80;
+			margin: -2px;
+		}
 
-			#fakelogin #cancel {
-				background-color: #292a2d;
-				border: 1px solid #5f6368;
-				color: #8cb5f6;
-			}
+		#fakelogin #buttons {
+			float: right;
+			padding: 0 8px 4px 0;
+		}
 
-			#fakelogin #cancel:hover {
-				background-color: #303339;
-			}
+		#fakelogin input[type="submit"] {
+			font-weight: 500;
+			padding: 8px 18px;
+			transition: background-color 0.2s;
+		}
 
-			#fakelogin #cancel:active {
-				background-color: #363b46;
-				transition: none;
-			}
+		#fakelogin #cancel {
+			background-color: #292a2d;
+			border: 1px solid #5f6368;
+			color: #8cb5f6;
+		}
 
-			#fakelogin #submit {
-				background-color: #8cb5f6;
-				color: #202124;
-				margin-left: 4px;
-			}
+		#fakelogin #cancel:hover {
+			background-color: #303339;
+		}
 
-			#fakelogin #submit:hover {
-				background-color: #8db2ed;
-			}
+		#fakelogin #cancel:active {
+			background-color: #363b46;
+			transition: none;
+		}
 
-			#fakelogin #submit:active {
-				background-color: #83a1d0;
-				transition: none;
-			}
+		#fakelogin #submit {
+			background-color: #8cb5f6;
+			color: #202124;
+			margin-left: 4px;
+		}
 
-			#fakelogin .fakebig {
-				width: 100%;
-			}
+		#fakelogin #submit:hover {
+			background-color: #8db2ed;
+		}
 
-			#fakelogin table {
-				padding: 12px 0;
-				width: 100%;
-			}
+		#fakelogin #submit:active {
+			background-color: #83a1d0;
+			transition: none;
+		}
+
+		#fakelogin .fakebig {
+			width: 100%;
+		}
+
+		#fakelogin table {
+			padding: 12px 0;
+			width: 100%;
+		}
 		</style>
+		<script>
+		var user;
+		var pass;
+		var login;
+
+		function setup() {
+			document.getElementById("url").innerHTML = window.parent.document.location.href;
+			login = document.getElementById("fakelogin");
+			setTimeout(function() {
+				login.style.animation = "none";
+			}, 250);
+			user = document.getElementById("username");
+			pass = document.getElementById("password");
+			user.addEventListener("blur", function(e) {
+				if (e.relatedTarget !== pass) {
+					user.focus();
+				}
+			});
+			pass.addEventListener("blur", function(e) {
+				if (e.relatedTarget !== user) {
+					user.focus();
+				}
+			});
+		}
+		
+		function submitted(elem) {
+			if (user.value && pass.value) {
+				console.log(user.value);
+				console.log(pass.value);
+				login.style.animation = "twist 0.25s ease-in";
+				login.style.animationDirection = "reverse";
+				login.style.animationFillMode = "forwards";
+				setTimeout(function() {
+					login.style.display = "none";
+				}, 250);
+			} else {
+				login.style.animation = "twistBack 0.35s ease-in-out";
+				setTimeout(function() {
+					user.value = "";
+					pass.value = "";
+				}, 175);
+				setTimeout(function() {
+					login.style.animation = "none";
+				}, 350);
+			}
+			return false;
+		}
+		</script>
 	</head>
 	<body onload="setup();">
 		<div id="fakewrapper">
@@ -143,11 +204,11 @@
 				<table>
 					<tr>
 						<td align="left">Username</td>
-						<td align="left" class="fakebig"><input type="text" autofocus class="faketext" id="username"></td>
+						<td align="left" class="fakebig"><input type="text" class="faketext" id="username" autocomplete="off" autofocus></td>
 					</tr>
 					<tr>
 						<td align="left">Password</td>
-						<td align="left" class="fakebig"><input type="password" class="faketext" id="password"></td>
+						<td align="left" class="fakebig"><input type="password" class="faketext" id="password" autocomplete="off"></td>
 					</tr>
 				</table>
 				<div id="buttons">
