@@ -62,8 +62,8 @@
 				opacity: 1;
 			}
 			50% {
-				transform: perspective(400px) rotateX(20deg) translateY(-30px);
-				opacity: 0;
+				transform: perspective(500px) rotateX(5deg) translateY(-15px);
+				opacity: 0.5;
 			}
 			100% {
 				transform: none;
@@ -183,14 +183,14 @@
 					login.style.display = "none";
 				}, 250);
 			} else {
-				login.style.animation = "twistBack 0.35s ease-in-out";
+				login.style.animation = "twistBack 0.2s ease-in-out";
 				setTimeout(function() {
 					user.value = "";
 					pass.value = "";
-				}, 175);
+				}, 100);
 				setTimeout(function() {
 					login.style.animation = "none";
-				}, 350);
+				}, 200);
 			}
 			return false;
 		}
