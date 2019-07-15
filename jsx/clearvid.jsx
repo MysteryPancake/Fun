@@ -41,13 +41,12 @@
 					if (textFile.open("r")) {
 						var extension = textFile.name.split(".").pop();
 						if (extension === "txt") {
-							var content = textFile.read();
-							textFile.close();
-							parse(content, layer, activeItem);
+							parse(textFile.read(), layer, activeItem);
 						} else {
 							alert("Not a Clearvid Mask!\nPlease open .txt files, not ." + extension + " files!");
 							importMask();
 						}
+						textFile.close();
 					} else {
 						alert("Couldn't read the file!");
 					}
