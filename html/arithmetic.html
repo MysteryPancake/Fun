@@ -3,6 +3,13 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Arithmetic Sequence Calculator</title>
+		<meta name="description" content="Arithmetic sequence calculator.">
+		<meta name="keywords" content="Arithmetic, Calculator, Math, Sequence">
+		<meta property="og:title" content="Arithmetic Sequence Calculator">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/arithmetic">
+		<meta property="og:site_name" content="Arithmetic Sequence Calculator">
+		<meta property="og:description" content="Arithmetic sequence calculator.">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<style>
 		* {
@@ -24,13 +31,7 @@
 		}
 		</style>
 		<script>
-		/*
-		TI-Nspire CX:
-		Define diff(a,b,c,d)=(d-b)/(c-a)
-		Define law(x,a,b,c,d)=b+(x-a)*diff(a,b,c,d)
-		Define print(x,a,b,c,d)=b&"+("&x&"-"&a&")*("&d&"-"&b&")/("&c&"-"&a&")"
-		*/
-		function val(elem) {
+		function nice(elem) {
 			return elem.value === "" ? elem.placeholder : elem.value;
 		}
 
@@ -48,9 +49,9 @@
 			var eq1 = ((parseFloat(x.value) - parseFloat(b.value)) / diff) + parseFloat(a.value);
 			var eq2 = parseFloat(b.value) + (parseFloat(n.value) - parseFloat(a.value)) * diff;
 			if (isNaN(diff)) {
-				difference.innerHTML = "Difference = (" + val(d) + " - " + val(b) + ") / (" + val(c) + " - " + val(a) + ")";
+				difference.innerHTML = "Difference = (" + nice(d) + " - " + nice(b) + ") / (" + nice(c) + " - " + nice(a) + ")";
 			} else {
-				difference.innerHTML = "Difference = (" + val(d) + " - " + val(b) + ") / (" + val(c) + " - " + val(a) + ") = " + diff;
+				difference.innerHTML = "Difference = (" + nice(d) + " - " + nice(b) + ") / (" + nice(c) + " - " + nice(a) + ") = " + diff;
 			}
 			if (elem.id === "n") {
 				x.value = eq2;
@@ -63,14 +64,14 @@
 			}
 			var diffStr = isNaN(diff) ? "difference" : diff;
 			if (n.value === "") {
-				equation1.innerHTML = "((" + val(x) + " - " + val(b) + ") / " + diffStr + ") + " + val(a);
+				equation1.innerHTML = "((" + nice(x) + " - " + nice(b) + ") / " + diffStr + ") + " + nice(a);
 			} else {
-				equation1.innerHTML = "((" + val(x) + " - " + val(b) + ") / " + diffStr + ") + " + val(a) + " = " + n.value;
+				equation1.innerHTML = "((" + nice(x) + " - " + nice(b) + ") / " + diffStr + ") + " + nice(a) + " = " + n.value;
 			}
 			if (x.value === "") {
-				equation2.innerHTML = val(b) + " + (" + val(n) + " - " + val(a) + ") * " + diffStr;
+				equation2.innerHTML = nice(b) + " + (" + nice(n) + " - " + nice(a) + ") * " + diffStr;
 			} else {
-				equation2.innerHTML = val(b) + " + (" + val(n) + " - " + val(a) + ") * " + diffStr + " = " + x.value;
+				equation2.innerHTML = nice(b) + " + (" + nice(n) + " - " + nice(a) + ") * " + diffStr + " = " + x.value;
 			}
 		}
 		</script>
