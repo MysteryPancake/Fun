@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Arithmetic Sequence Calculator</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: Arial, Helvetica, sans-serif;
+		}
+
+		.equationbox {
+			background-color: lightgray;
+			display: inline-block;
+		}
+
+		.equation {
+			font-size: small;
+			margin: 0;
+		}
+
+		#term {
+			vertical-align: top;
+		}
+		</style>
+		<script>
+		/*
+		TI-Nspire CX:
+		Define diff(a,b,c,d)=(d-b)/(c-a)
+		Define law(x,a,b,c,d)=b+(x-a)*diff(a,b,c,d)
+		Define print(x,a,b,c,d)=b&"+("&x&"-"&a&")*("&d&"-"&b&")/("&c&"-"&a&")"
+		*/
+		function val(elem) {
+			return elem.value === "" ? elem.placeholder : elem.value;
+		}
+
+		function update(elem) {
+			var a = document.getElementById("a");
+			var b = document.getElementById("b");
+			var c = document.getElementById("c");
+			var d = document.getElementById("d");
+			var n = document.getElementById("n");
+			var x = document.getElementById("x");
+			var difference = document.getElementById("difference");
+			var equation1 = document.getElementById("equation1");
+			var equation2 = document.getElementById("equation2");
+			var diff = (parseFloat(d.value) - parseFloat(b.value)) / (parseFloat(c.value) - parseFloat(a.value));
+			var eq1 = ((parseFloat(x.value) - parseFloat(b.value)) / diff) + parseFloat(a.value);
+			var eq2 = parseFloat(b.value) + (parseFloat(n.value) - parseFloat(a.value)) * diff;
+			if (isNaN(diff)) {
+				difference.innerHTML = "Difference = (" + val(d) + " - " + val(b) + ") / (" + val(c) + " - " + val(a) + ")";
+			} else {
+				difference.innerHTML = "Difference = (" + val(d) + " - " + val(b) + ") / (" + val(c) + " - " + val(a) + ") = " + diff;
+			}
+			if (elem.id === "n") {
+				x.value = eq2;
+			} else if (elem.id === "x") {
+				n.value = eq1;
+			} else if (!isNaN(eq2)) {
+				x.value = eq2;
+			} else if (!isNaN(eq1)) {
+				n.value = eq1;
+			}
+			var diffStr = isNaN(diff) ? "difference" : diff;
+			if (n.value === "") {
+				equation1.innerHTML = "((" + val(x) + " - " + val(b) + ") / " + diffStr + ") + " + val(a);
+			} else {
+				equation1.innerHTML = "((" + val(x) + " - " + val(b) + ") / " + diffStr + ") + " + val(a) + " = " + n.value;
+			}
+			if (x.value === "") {
+				equation2.innerHTML = val(b) + " + (" + val(n) + " - " + val(a) + ") * " + diffStr;
+			} else {
+				equation2.innerHTML = val(b) + " + (" + val(n) + " - " + val(a) + ") * " + diffStr + " = " + x.value;
+			}
+		}
+		</script>
+	</head>
+	<body>
+		<h1>Arithmetic Sequence</h1>
+		<input id="a" type="number" oninput="update(this);" placeholder="a"><span>th term = </span><input id="b" type="number" placeholder="b" oninput="update(this);">
+		<br>
+		<input id="c" type="number" oninput="update(this);" placeholder="c"><span>th term = </span><input id="d" type="number" placeholder="d" oninput="update(this);">
+		<p id="difference">Difference = (d - b) / (c - a)</p>
+		<h2>Solution</h2>
+		<div class="equationbox">
+			<input id="n" type="number" oninput="update(this);" placeholder="n">
+			<p id="equation1" class="equation">((x - b) / difference) + a</p>
+		</div>
+		<span id="term">th term =</span>
+		<div class="equationbox">
+			<input id="x" type="number" placeholder="x" oninput="update(this);">
+			<p id="equation2" class="equation">b + (n - a) * difference</p>
+		</div>
+	</body>
+</html>
