@@ -33,6 +33,7 @@
 		}
 
 		#fakelogin {
+			-moz-user-select: none;
 			animation: twist 0.25s ease-out;
 			background-color: #292A2D;
 			border-radius: 0 0 4px 4px;
@@ -154,7 +155,7 @@
 		var login;
 
 		function setup() {
-			document.getElementById("fakeurl").innerHTML = window.parent.document.location.href;
+			document.getElementById("fakeurl").innerHTML = window.parent.document.location.origin;
 			login = document.getElementById("fakelogin");
 			setTimeout(function() {
 				login.style.animation = "none";
