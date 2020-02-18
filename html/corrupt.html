@@ -48,12 +48,14 @@
 			document.title = pageTitle;
 		}
 
-		var punctuation = { "!": true, "?": true, ".": true, ",": true };
+		function isPunctuation(char) {
+			return "!?.,".indexOf(char) !== -1;
+		}
 
 		function ruin(str, amount) {
 			var words = str.match(/[\w']+|[!?.,]/g);
 			for (var i = 0; i < words.length; i++) {
-				if (punctuation[words[i]]) continue;
+				if (isPunctuation(words[i])) continue;
 				if (Math.random() < amount / 100) {
 					var word = words[i];
 					var curse = curses[Math.floor(Math.random() * curses.length)];
