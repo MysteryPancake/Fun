@@ -7,7 +7,7 @@ local function searchProjects()
             local code = readProjectTab( p .. ":" .. t )
             local i = 1
             for l in string.gmatch( code, "([^\r\n]*)\r?\n?" ) do
-                if string.find( l, Search, 1, true ) then
+                if string.find( l, Search ) then
                     table.insert( matches, { project = p, tab = t, line = i, code = l } )
                     print( p, t, i, l )
                 end
