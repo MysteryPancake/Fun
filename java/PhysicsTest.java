@@ -8,9 +8,11 @@ class PhysicsTest {
 	
 	public static void main(String[] args) {
 		long t = System.currentTimeMillis();
-		long end = t + 4096;
+		boolean droppedFloor = false;
+		long floorDrop = t + 4096;
+		long end = t + 8192;
 		long delay = 32;
-		int ground = 16;
+		int ground = 8;
 		int wall = 64;
 		double xPos = 0;
 		double yPos = 0;
@@ -22,6 +24,10 @@ class PhysicsTest {
 			try {
 				Thread.currentThread().sleep(delay);
 			} catch (Exception e) {}
+			if (!droppedFloor && System.currentTimeMillis() > floorDrop) {
+				ground *= 2;
+				droppedFloor = true;
+			}
 			xPos += xVel;
 			yVel += yAcc;
 			yPos += yVel;
