@@ -18,8 +18,9 @@ class Art extends JPanel {
 		frame.setVisible(true);
 	}
 
+	private static Random r = new Random();
+
 	public void paintComponent(Graphics g) {
-		Random r = new Random();
 		for (int i = 0; i < getHeight(); i++) {
 			float scaled = (float)i / getHeight();
 			g.setColor(new Color(1 - scaled, r.nextFloat(), scaled));
