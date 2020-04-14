@@ -23,7 +23,7 @@ class PixelPerPixel extends JPanel {
 	public void paintComponent(Graphics g) {
 		for (int i = 0; i < getWidth(); i++) {
 			for (int j = 0; j < getHeight(); j++) {
-				g.setColor(new Color(i, j, 0));
+				g.setColor(new Color(r.nextFloat(), r.nextFloat(), r.nextFloat()));
 				g.fillRect(i, j, 1, 1);
 			}
 		}
