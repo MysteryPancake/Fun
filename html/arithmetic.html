@@ -49,9 +49,9 @@
 			var eq1 = ((parseFloat(x.value) - parseFloat(b.value)) / diff) + parseFloat(a.value);
 			var eq2 = parseFloat(b.value) + (parseFloat(n.value) - parseFloat(a.value)) * diff;
 			if (isNaN(diff)) {
-				difference.innerHTML = "Difference = (" + nice(d) + " - " + nice(b) + ") / (" + nice(c) + " - " + nice(a) + ")";
+				difference.textContent = "Difference = (" + nice(d) + " - " + nice(b) + ") / (" + nice(c) + " - " + nice(a) + ")";
 			} else {
-				difference.innerHTML = "Difference = (" + nice(d) + " - " + nice(b) + ") / (" + nice(c) + " - " + nice(a) + ") = " + diff;
+				difference.textContent = "Difference = (" + nice(d) + " - " + nice(b) + ") / (" + nice(c) + " - " + nice(a) + ") = " + diff;
 			}
 			if (elem.id === "n") {
 				x.value = eq2;
@@ -64,14 +64,14 @@
 			}
 			var diffStr = isNaN(diff) ? "difference" : diff;
 			if (n.value === "") {
-				equation1.innerHTML = "((" + nice(x) + " - " + nice(b) + ") / " + diffStr + ") + " + nice(a);
+				equation1.textContent = "((" + nice(x) + " - " + nice(b) + ") / " + diffStr + ") + " + nice(a);
 			} else {
-				equation1.innerHTML = "((" + nice(x) + " - " + nice(b) + ") / " + diffStr + ") + " + nice(a) + " = " + n.value;
+				equation1.textContent = "((" + nice(x) + " - " + nice(b) + ") / " + diffStr + ") + " + nice(a) + " = " + n.value;
 			}
 			if (x.value === "") {
-				equation2.innerHTML = nice(b) + " + (" + nice(n) + " - " + nice(a) + ") * " + diffStr;
+				equation2.textContent = nice(b) + " + (" + nice(n) + " - " + nice(a) + ") * " + diffStr;
 			} else {
-				equation2.innerHTML = nice(b) + " + (" + nice(n) + " - " + nice(a) + ") * " + diffStr + " = " + x.value;
+				equation2.textContent = nice(b) + " + (" + nice(n) + " - " + nice(a) + ") * " + diffStr + " = " + x.value;
 			}
 		}
 		</script>
