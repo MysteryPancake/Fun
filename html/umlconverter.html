@@ -175,20 +175,24 @@
 		function update(elem) {
 			let title = false;
 			const lines = elem.value.split("\n");
+			let result = "";
 			while (lines.length > 0) {
 				const line = lines.shift().trim();
 				if (!line) continue;
 				if (title) {
 					const text = parseChars(line);
 					if (text) {
-						codeElem.textContent += text + "\n";
+						result += text + "\n";
 					}
 				} else {
-					codeElem.textContent = "public class " + line + "\n{\n";
+					result += "public class " + line + "\n{\n";
 					title = true;
 				}
 			}
-			codeElem.textContent += "}";
+			if (result) {
+				result += "}";
+			}
+			codeElem.textContent = result;
 		};
 
 		function setup() {
