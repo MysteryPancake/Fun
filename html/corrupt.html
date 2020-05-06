@@ -38,13 +38,13 @@
 		var curses = ["anal", "anus", "arse", "ass", "ballsack", "balls", "bastard", "bitch", "bloody", "blowjob", "bollock", "boner", "boob", "bugger", "bum", "butt", "buttplug", "clitoris", "cock", "coon", "crap", "cunt", "damn", "dick", "dildo", "dyke", "fag", "fellate", "fellatio", "felching", "fuck", "hell", "homo", "jerk", "jizz", "knob", "muff", "nigger", "nigga", "penis", "piss", "poo", "prick", "pube", "pussy", "queer", "sack", "scrotum", "sex", "shit", "slut", "smegma", "spunk", "tit", "turd", "twat", "vagina", "wank", "whore"];
 
 		function setup() {
-			document.getElementById("paragraph1").innerHTML = paragraph1;
-			document.getElementById("paragraph2").innerHTML = paragraph2;
-			document.getElementById("paragraph3").innerHTML = paragraph3;
-			document.getElementById("paragraph4").innerHTML = paragraph4;
-			document.getElementById("paragraph5").innerHTML = paragraph5;
-			document.getElementById("paragraph6").innerHTML = paragraph6;
-			document.getElementById("paragraph7").innerHTML = paragraph7;
+			document.getElementById("paragraph1").textContent = paragraph1;
+			document.getElementById("paragraph2").textContent = paragraph2;
+			document.getElementById("paragraph3").textContent = paragraph3;
+			document.getElementById("paragraph4").textContent = paragraph4;
+			document.getElementById("paragraph5").textContent = paragraph5;
+			document.getElementById("paragraph6").textContent = paragraph6;
+			document.getElementById("paragraph7").textContent = paragraph7;
 			document.title = pageTitle;
 		}
 
@@ -76,14 +76,14 @@
 		}
 
 		function corrupt(amount) {
-			document.getElementById("label").innerHTML = "Corruption: " + amount + "%";
-			document.getElementById("paragraph1").innerHTML = ruin(paragraph1, amount);
-			document.getElementById("paragraph2").innerHTML = ruin(paragraph2, amount);
-			document.getElementById("paragraph3").innerHTML = ruin(paragraph3, amount);
-			document.getElementById("paragraph4").innerHTML = ruin(paragraph4, amount);
-			document.getElementById("paragraph5").innerHTML = ruin(paragraph5, amount);
-			document.getElementById("paragraph6").innerHTML = ruin(paragraph6, amount);
-			document.getElementById("paragraph7").innerHTML = ruin(paragraph7, amount);
+			document.getElementById("label").textContent = "Corruption: " + amount + "%";
+			document.getElementById("paragraph1").textContent = ruin(paragraph1, amount);
+			document.getElementById("paragraph2").textContent = ruin(paragraph2, amount);
+			document.getElementById("paragraph3").textContent = ruin(paragraph3, amount);
+			document.getElementById("paragraph4").textContent = ruin(paragraph4, amount);
+			document.getElementById("paragraph5").textContent = ruin(paragraph5, amount);
+			document.getElementById("paragraph6").textContent = ruin(paragraph6, amount);
+			document.getElementById("paragraph7").textContent = ruin(paragraph7, amount);
 		}
 
 		function changed(amount) {
