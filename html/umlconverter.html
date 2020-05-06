@@ -102,6 +102,9 @@
 				} else if (mode === "argsname") {
 					if (char === ":") {
 						mode = "argstype";
+					} else if (char === ",") {
+						currentArg = { name: "", type: "" };
+						args.push(currentArg);
 					} else if (char === ")") {
 						mode = "name";
 						currentArg = undefined;
@@ -140,8 +143,16 @@
 			}
 			if (args.length) {
 				result += "(";
+				let randomChar = 97;
 				for (let j = 0; j < args.length; j++) {
-					const combined = args[j].type.trim() + " " + args[j].name.trim();
+					let type = args[j].type.trim();
+					let name = args[j].name.trim();
+					if (name && !type) {
+						type = name;
+						name = String.fromCharCode(randomChar);
+						randomChar++;
+					}
+					const combined = type + " " + name;
 					if (j > 0) {
 						result += ", ";
 					}
