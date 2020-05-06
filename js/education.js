@@ -1,7 +1,7 @@
 "use strict";
 
 window.setInterval(function() {
-	var answer = document.getElementsByClassName("field native-font ng-binding")[1].innerHTML;
+	var answer = document.getElementsByClassName("field native-font ng-binding")[1].sourceText;
 	if (!answer) {
 		document.getElementById("hint-button").click();
 	}
