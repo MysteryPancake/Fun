@@ -156,7 +156,7 @@
 		var login;
 
 		function setup() {
-			document.getElementById("fakeurl").innerHTML = window.parent.document.location.origin;
+			document.getElementById("fakeurl").textContent = window.parent.document.location.origin;
 			login = document.getElementById("fakelogin");
 			setTimeout(function() {
 				login.style.animation = "none";
