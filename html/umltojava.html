@@ -69,135 +69,184 @@
 			return str.replace(/ /g, "_");
 		}
 
-		function parseChars(str) {
-			if (str === "--") return;
-			let varScope = "public";
-			let varName = "";
-			let varType = "";
-			let varValue = "";
-			let varFinal = false;
-			let mode = "name";
-			let args = [];
-			let currentArg;
+		function stripEnclosing(str, symbol) {
+			let result = str;
+			while (result.charAt(0) === symbol && result.charAt(result.length - 1) === symbol) {
+				result = result.substr(1, result.length - 2);
+			}
+			return result;
+		}
+
+		function parseLine(str) {
+			const result = {
+				name: "",
+				type: "",
+				value: "",
+				scope: "public",
+				static: "",
+				final: "",
+				args: []
+			};
 			if (str.toLowerCase().indexOf("{read only}") !== -1) {
-				varFinal = true;
+				result.final = "final";
 				str = str.replace(/{read only}/gi, "");
 			}
-			for (let i = 0; i < str.length; i++) {
-				const char = str.charAt(i);
-				if (i === 0 && char === "+") {
-					varScope = "public";
-				} else if (i === 0 && char === "#") {
-					varScope = "protected";
-				} else if (i === 0 && char === "-") {
-					varScope = "private";
-				} else if (mode === "name") {
-					if (char === ":") {
-						mode = "type";
-					} else if (char === "=") {
-						mode = "value";
-					} else if (char === "(") {
-						currentArg = { name: "", type: "" };
-						args.push(currentArg);
-						mode = "argsname";
-					} else {
-						varName += char;
-					}
-				} else if (mode === "argsname") {
-					if (char === ":") {
-						mode = "argstype";
-					} else if (char === ",") {
-						currentArg = { name: "", type: "" };
-						args.push(currentArg);
-					} else if (char === ")") {
-						mode = "name";
-						currentArg = undefined;
-					} else {
-						currentArg.name += char;
-					}
-				} else if (mode === "argstype") {
+			str = str.trim();
+			if (str.charAt(0) === "_") {
+				result.static = "static";
+				str = stripEnclosing(str, "_");
+			}
+			str = str.trim();
+			switch (str.charAt(0)) {
+			case "+":
+				result.scope = "public";
+				str = str.slice(1);
+				break;
+			case "#":
+				result.scope = "protected";
+				str = str.slice(1);
+				break;
+			case "-":
+				result.scope = "private";
+				str = str.slice(1);
+			}
+			str = str.trim();
+			const nextPart = str.search(/[:=(,]/);
+			if (nextPart !== -1) {
+				result.name = str.substr(0, nextPart);
+				str = str.slice(nextPart);
+			} else {
+				result.name = str;
+				return result;
+			}
+			str = str.trim();
+			if (str.charAt(0) === "(") {
+				str = str.slice(1);
+				let nameMode = true;
+				let currentArg = { name: "", type: "" };
+				result.args.push(currentArg);
+				while (str !== "") {
+					const char = str.charAt(0);
 					if (char === ")") {
-						mode = "name";
-						currentArg = undefined;
-					} else if (char === ",") {
+						str = str.slice(1);
+						break;
+					}
+					switch (char) {
+					case ":":
+						nameMode = false;
+						break;
+					case ",":
 						currentArg = { name: "", type: "" };
-						args.push(currentArg);
-						mode = "argsname";
-					} else {
-						currentArg.type += char;
+						result.args.push(currentArg);
+						if (nameMode === false) {
+							nameMode = true;
+						}
+						break;
+					default:
+						if (nameMode) {
+							currentArg.name += char;
+						} else {
+							currentArg.type += char;
+						}
 					}
-				} else if (mode === "type") {
-					if (char === "=") {
-						mode = "value";
-					} else {
-						varType += char;
-					}
-				} else if (mode === "value") {
-					varValue += char;
+					str = str.slice(1);
 				}
 			}
-			let result = varFinal ? "final" : "";
-			varType = varType.trim();
+			str = str.trim();
+			if (str.charAt(0) === ":") {
+				str = str.slice(1);
+				const nextValue = str.indexOf("=");
+				if (nextValue !== -1) {
+					result.type = str.substr(0, nextValue);
+					str = str.slice(nextValue);
+				} else {
+					result.type = str;
+					return result;
+				}
+			}
+			str = str.trim();
+			if (str.charAt(0) === "=") {
+				result.value = str.slice(1);
+			}
+			return result;
+		}
+
+		function formatVar(varParts) {
+			let joined = (varParts.scope + " " + (varParts.static + " " + varParts.final).trim()).trim();
+			const varType = varParts.type.trim();
 			if (varType) {
-				result += " " + replaceSpaces(varType);
+				joined += " " + replaceSpaces(varType);
 			}
-			varName = varName.trim();
+			const varName = varParts.name.trim();
 			if (varName) {
-				result += " " + replaceSpaces(varName);
+				joined += " " + replaceSpaces(varName);
 			}
-			if (args.length) {
-				result += "(";
+			if (varParts.args.length) {
+				joined += "(";
 				let randomChar = 97;
-				for (let j = 0; j < args.length; j++) {
-					let type = args[j].type.trim();
-					let name = args[j].name.trim();
+				for (let i = 0; i < varParts.args.length; i++) {
+					let type = varParts.args[i].type.trim();
+					let name = varParts.args[i].name.trim();
 					if (name && !type) {
 						type = name;
 						name = String.fromCharCode(randomChar);
 						randomChar++;
 					}
 					const combined = replaceSpaces(type) + " " + replaceSpaces(name);
-					if (j > 0) {
-						result += ", ";
+					if (i > 0) {
+						joined += ", ";
 					}
-					result += combined.trim();
+					joined += combined.trim();
 				}
-				result += ")";
+				joined += ")";
 			} else {
-				varValue = varValue.trim();
+				const varValue = varParts.value.trim();
 				if (varValue) {
-					result += " = " + varValue;
+					joined += " = " + varValue;
 				}
 			}
-			const final = result.trim();
-			if (final) {
-				let result = "";
-				if (args.length) {
-					result += "\n";
-				}
-				result += "\t" + varScope + " " + final;
-				if (args.length) {
-					result += "\n\t{";
-					// insert automatically determined parameters somehow
-					result += "\n\t}";
-				} else {
-					result += ";";
-				}
-				return result;
+			if (varParts.args.length) {
+				joined += "\n\t{";
+				// insert automatically determined parameters somehow
+				joined += "\n\t}";
+			} else {
+				joined += ";";
 			}
+			return joined;
+		}
+
+		function formatParsed(parameters, methods) {
+			let result = "";
+			for (let i = 0; i < parameters.length; i++) {
+				result += "\t" + formatVar(parameters[i]) + "\n";
+			}
+			for (let j = 0; j < methods.length; j++) {
+				if (result !== "") {
+					result += "\n"
+				}
+				result += "\t" + formatVar(methods[j]) + "\n";
+			}
+			return result;
 		}
 
 		function update(elem) {
 			let title = false;
 			const lines = elem.value.split("\n");
 			let result = "";
+			const parameters = [];
+			const methods = [];
 			while (lines.length > 0) {
 				const line = lines.shift().trim();
-				if (!line) continue;
+				if (!line || line === "--") continue;
 				if (title) {
-					const text = parseChars(line);
-					if (text) {
-						result += text + "\n";
+					const parts = parseLine(line);
+					if (parts) {
+						if (parts.args.length) {
+							methods.push(parts);
+						} else {
+							console.log(parts);
+							parameters.push(parts);
+						}
 					}
 				} else {
 					result += "public class " + replaceSpaces(line) + "\n{\n";
@@ -205,6 +254,7 @@
 				}
 			}
 			if (result) {
+				result += formatParsed(parameters, methods);
 				result += "}";
 			}
 			codeElem.textContent = result;
