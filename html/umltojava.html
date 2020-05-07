@@ -24,16 +24,39 @@
 		}
 
 		div {
+			box-shadow: inset 0 0 4px black;
 			box-sizing: border-box;
 			display: inline-block;
 			float: left;
 			height: 100%;
+			padding: 16px;
 			width: 50%;
+		}
+
+		#copy {
+			background-color: #DDDDDD;
+			border-radius: 4px;
+			color: black;
+			cursor: pointer;
+			display: none;
+			float: right;
+			font-size: medium;
+			padding: 8px 16px;
+			position: fixed;
+			right: 8px;
+			top: 8px;
+		}
+
+		#copy:hover {
+			background-color: white;
+		}
+
+		#copy:active {
+			background-color: #DDDDDD;
 		}
 
 		#umlbox {
 			background-color: #DDDDDD;
-			border: 1px solid black;
 		}
 
 		#uml {
@@ -42,28 +65,24 @@
 			box-sizing: border-box;
 			font-size: large;
 			height: 100%;
+			margin: 0;
 			outline: none;
-			padding: 8px;
+			padding: 0;
 			resize: none;
 			width: 100%;
 		}
 
 		#code {
-			background-color: black;
+			background-color: hsl(60, 17%, 11%);
 			color: white;
 			font-size: medium;
 			overflow: auto;
-			padding: 16px;
 			white-space: pre-wrap;
-		}
-
-		#code p {
-			margin: 0;
-			padding: 0;
 		}
 		</style>
 		<script>
 		let codeElem;
+		let buttonElem;
 
 		function replaceSpaces(str) {
 			return str.replace(/ /g, "_");
@@ -290,6 +309,15 @@
 			return result;
 		}
 
+		function copyCode() {
+			var range = document.createRange();
+			range.selectNode(codeElem);
+			window.getSelection().removeAllRanges();
+			window.getSelection().addRange(range);
+			document.execCommand("copy");
+			buttonElem.textContent = "Copied";
+		}
+
 		function update(elem) {
 			let className = "";
 			const lines = elem.value.split("\n");
@@ -318,10 +346,13 @@
 				result += "}";
 			}
 			codeElem.textContent = result;
+			buttonElem.style.display = codeElem.textContent ? "block" : "none";
+			buttonElem.textContent = "Copy";
 		};
 
 		function setup() {
 			codeElem = document.getElementById("code");
+			buttonElem = document.getElementById("copy");
 		}
 		</script>
 	</head>
@@ -329,6 +360,7 @@
 		<div id="umlbox">
 			<textarea id="uml" autocomplete="off" spellcheck="false" oninput="update(this);" autofocus></textarea>
 		</div>
+		<a id="copy" onclick="copyCode();">Copy</a>
 		<div id="code"></div>
 	</body>
 </html>
