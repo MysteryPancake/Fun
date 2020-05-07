@@ -69,12 +69,11 @@
 			return str.replace(/ /g, "_");
 		}
 
-		function stripEnclosing(str, symbol) {
-			let result = str;
-			while (result.charAt(0) === symbol && result.charAt(result.length - 1) === symbol) {
-				result = result.substr(1, result.length - 2);
+		function stripStatic(str) {
+			while (str.charAt(0) === "_" && str.charAt(str.length - 1) === "_") {
+				str = str.substr(1, str.length - 2);
 			}
-			return result;
+			return str.trim();
 		}
 
 		function sanitize(str) {
@@ -109,7 +108,7 @@
 			str = str.trim();
 			if (str.charAt(0) === "_") {
 				result.static = "static";
-				str = stripEnclosing(str, "_").trim();
+				str = stripStatic(str);
 			}
 			switch (str.charAt(0)) {
 			case "+":
@@ -127,7 +126,7 @@
 			str = str.trim();
 			if (!result.static && str.charAt(0) === "_") {
 				result.static = "static";
-				str = stripEnclosing(str, "_").trim();
+				str = stripStatic(str);
 			}
 			const nextPart = str.search(/[:=(,]/);
 			if (nextPart !== -1) {
