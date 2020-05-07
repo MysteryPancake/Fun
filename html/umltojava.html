@@ -215,7 +215,7 @@
 			}
 			str = str.trim();
 			if (str.charAt(0) === "=") {
-				result.value = str.slice(1);
+				result.value = str.slice(1).trim();
 			}
 			return result;
 		}
@@ -225,13 +225,13 @@
 			return (paramLowered === targetName) || (classLowered + paramLowered === targetName);
 		}
 
-		function checkParameters(varParts, parameters, className) {
+		function generateMethod(varParts, parameters, className) {
 			let result = "";
 			const classLowered = className.toLowerCase();
 			const lowered = varParts.name.toLowerCase();
 			const setter = lowered.startsWith("set");
 			const firstArg = varParts.args[0];
-			if (lowered.startsWith("get")) {
+			if (lowered.startsWith("get") && !varParts.value) {
 				const targetName = lowered.slice(3);
 				for (let i = 0; i < parameters.length; i++) {
 					if (roughlyMatches(parameters[i].name, targetName, classLowered) && parameters[i].type === varParts.type) {
@@ -257,6 +257,9 @@
 					}
 				}
 			}
+			if (varParts.value) {
+				result += "\n\t\treturn " + varParts.value + ";";
+			}
 			if (!result) {
 				result += "\n\t\t// Enter stuff here";
 			}
@@ -281,14 +284,13 @@
 				}
 				joined += ")";
 			} else {
-				const varValue = varParts.value.trim();
-				if (varValue) {
-					joined += " = " + varValue;
+				if (varParts.value) {
+					joined += " = " + varParts.value;
 				}
 			}
 			if (varParts.args.length) {
 				joined += "\n\t{";
-				joined += checkParameters(varParts, parameters, className);
+				joined += generateMethod(varParts, parameters, className);
 				joined += "\n\t}";
 			} else {
 				joined += ";";
