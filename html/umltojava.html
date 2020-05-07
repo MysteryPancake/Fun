@@ -48,11 +48,11 @@
 		}
 
 		#copy:hover {
-			background-color: white;
+			background-color: #EEEEEE;
 		}
 
 		#copy:active {
-			background-color: #DDDDDD;
+			background-color: #CCCCCC;
 		}
 
 		#umlbox {
@@ -81,6 +81,7 @@
 		}
 		</style>
 		<script>
+		let umlElem;
 		let codeElem;
 		let buttonElem;
 
@@ -315,7 +316,8 @@
 			window.getSelection().removeAllRanges();
 			window.getSelection().addRange(range);
 			document.execCommand("copy");
-			buttonElem.textContent = "Copied";
+			buttonElem.value = "Copied";
+			umlElem.focus();
 		}
 
 		function update(elem) {
@@ -347,10 +349,11 @@
 			}
 			codeElem.textContent = result;
 			buttonElem.style.display = codeElem.textContent ? "block" : "none";
-			buttonElem.textContent = "Copy";
+			buttonElem.value = "Copy";
 		};
 
 		function setup() {
+			umlElem = document.getElementById("uml");
 			codeElem = document.getElementById("code");
 			buttonElem = document.getElementById("copy");
 		}
@@ -360,7 +363,7 @@
 		<div id="umlbox">
 			<textarea id="uml" autocomplete="off" spellcheck="false" oninput="update(this);" autofocus></textarea>
 		</div>
-		<a id="copy" onclick="copyCode();">Copy</a>
+		<input type="button" id="copy" value="Copy" onclick="copyCode();">
 		<div id="code"></div>
 	</body>
 </html>
