@@ -77,6 +77,21 @@
 			return result;
 		}
 
+		function sanitize(str) {
+			return replaceSpaces(str.trim());
+		}
+
+		function fixArg(arg, randomChar) {
+			arg.name = sanitize(arg.name);
+			arg.type = sanitize(arg.type);
+			if (arg.name && !arg.type) {
+				arg.type = arg.name;
+				arg.name = String.fromCharCode(randomChar);
+				return 1;
+			}
+			return 0;
+		}
+
 		function parseLine(str) {
 			const result = {
 				name: "",
@@ -94,9 +109,8 @@
 			str = str.trim();
 			if (str.charAt(0) === "_") {
 				result.static = "static";
-				str = stripEnclosing(str, "_");
+				str = stripEnclosing(str, "_").trim();
 			}
-			str = str.trim();
 			switch (str.charAt(0)) {
 			case "+":
 				result.scope = "public";
@@ -111,21 +125,26 @@
 				str = str.slice(1);
 			}
 			str = str.trim();
+			if (!result.static && str.charAt(0) === "_") {
+				result.static = "static";
+				str = stripEnclosing(str, "_").trim();
+			}
 			const nextPart = str.search(/[:=(,]/);
 			if (nextPart !== -1) {
-				result.name = str.substr(0, nextPart);
+				result.name = sanitize(str.substr(0, nextPart));
 				str = str.slice(nextPart);
 			} else {
-				result.name = str;
+				result.name = sanitize(str);
 				return result;
 			}
 			str = str.trim();
 			if (str.charAt(0) === "(") {
 				str = str.slice(1);
 				let nameMode = true;
+				let randomChar = 97;
 				let currentArg = { name: "", type: "" };
 				result.args.push(currentArg);
-				while (str !== "") {
+				while (str) {
 					const char = str.charAt(0);
 					if (char === ")") {
 						str = str.slice(1);
@@ -136,6 +155,7 @@
 						nameMode = false;
 						break;
 					case ",":
+						randomChar += fixArg(currentArg, randomChar);
 						currentArg = { name: "", type: "" };
 						result.args.push(currentArg);
 						if (nameMode === false) {
@@ -151,16 +171,17 @@
 					}
 					str = str.slice(1);
 				}
+				fixArg(currentArg, randomChar);
 			}
 			str = str.trim();
 			if (str.charAt(0) === ":") {
 				str = str.slice(1);
 				const nextValue = str.indexOf("=");
 				if (nextValue !== -1) {
-					result.type = str.substr(0, nextValue);
+					result.type = sanitize(str.substr(0, nextValue));
 					str = str.slice(nextValue);
 				} else {
-					result.type = str;
+					result.type = sanitize(str);
 					return result;
 				}
 			}
@@ -171,32 +192,65 @@
 			return result;
 		}
 
-		function formatVar(varParts) {
-			let joined = (varParts.scope + " " + (varParts.static + " " + varParts.final).trim()).trim();
-			const varType = varParts.type.trim();
-			if (varType) {
-				joined += " " + replaceSpaces(varType);
+		function roughlyMatches(paramName, targetName, classLowered) {
+			const paramLowered = paramName.toLowerCase();
+			return (paramLowered === targetName) || (classLowered + paramLowered === targetName);
+		}
+
+		function checkParameters(varParts, parameters, className) {
+			let result = "";
+			const classLowered = className.toLowerCase();
+			const lowered = varParts.name.toLowerCase();
+			const setter = lowered.startsWith("set");
+			const firstArg = varParts.args[0];
+			if (lowered.startsWith("get")) {
+				const targetName = lowered.slice(3);
+				for (let i = 0; i < parameters.length; i++) {
+					if (roughlyMatches(parameters[i].name, targetName, classLowered) && parameters[i].type === varParts.type) {
+						result += "\n\t\treturn this." + parameters[i].name + ";";
+					}
+				}
+			} else if (setter || lowered.startsWith("change") && firstArg) {
+				const targetName = lowered.slice(setter ? 3 : 6);
+				for (let j = 0; j < parameters.length; j++) {
+					if (roughlyMatches(parameters[j].name, targetName, classLowered) && parameters[j].type === firstArg.type) {
+						result += "\n\t\tthis." + parameters[j].name + " = " + firstArg.name + ";";
+					}
+				}
+			} else if (varParts.name === className) {
+				for (let k = 0; k < varParts.args.length; k++) {
+					const name = varParts.args[k].name;
+					const type = varParts.args[k].type;
+					const loweredName = name.toLowerCase();
+					for (let l = 0; l < parameters.length; l++) {
+						if (parameters[l].type !== type) continue;
+						if (roughlyMatches(parameters[l].name, loweredName, classLowered) || k === l) {
+							result += "\n\t\tthis." + parameters[l].name + " = " + name + ";";
+						}
+					}
+				}
 			}
-			const varName = varParts.name.trim();
-			if (varName) {
-				joined += " " + replaceSpaces(varName);
+			if (!result) {
+				result += "\n\t\t\/\/ Enter stuff here";
+			}
+			return result;
+		}
+
+		function formatVar(varParts, parameters, className) {
+			let joined = (varParts.scope + " " + (varParts.static + " " + varParts.final).trim()).trim();
+			if (varParts.type) {
+				joined += " " + varParts.type;
+			}
+			if (varParts.name) {
+				joined += " " + varParts.name;
 			}
 			if (varParts.args.length) {
 				joined += "(";
-				let randomChar = 97;
 				for (let i = 0; i < varParts.args.length; i++) {
-					let type = varParts.args[i].type.trim();
-					let name = varParts.args[i].name.trim();
-					if (name && !type) {
-						type = name;
-						name = String.fromCharCode(randomChar);
-						randomChar++;
-					}
-					const combined = replaceSpaces(type) + " " + replaceSpaces(name);
 					if (i > 0) {
 						joined += ", ";
 					}
-					joined += combined.trim();
+					joined += (varParts.args[i].type + " " + varParts.args[i].name).trim();
 				}
 				joined += ")";
 			} else {
@@ -207,7 +261,7 @@
 			}
 			if (varParts.args.length) {
 				joined += "\n\t{";
-				// insert automatically determined parameters somehow
+				joined += checkParameters(varParts, parameters, className);
 				joined += "\n\t}";
 			} else {
 				joined += ";";
@@ -215,22 +269,22 @@
 			return joined;
 		}
 
-		function formatParsed(parameters, methods) {
+		function formatParsed(parameters, methods, className) {
 			let result = "";
 			for (let i = 0; i < parameters.length; i++) {
 				result += "\t" + formatVar(parameters[i]) + "\n";
 			}
 			for (let j = 0; j < methods.length; j++) {
-				if (result !== "") {
+				if (result) {
 					result += "\n"
 				}
-				result += "\t" + formatVar(methods[j]) + "\n";
+				result += "\t" + formatVar(methods[j], parameters, className) + "\n";
 			}
 			return result;
 		}
 
 		function update(elem) {
-			let title = false;
+			let className = "";
 			const lines = elem.value.split("\n");
 			let result = "";
 			const parameters = [];
@@ -238,23 +292,22 @@
 			while (lines.length > 0) {
 				const line = lines.shift().trim();
 				if (!line || line === "--") continue;
-				if (title) {
+				if (className) {
 					const parts = parseLine(line);
 					if (parts) {
 						if (parts.args.length) {
 							methods.push(parts);
 						} else {
-							console.log(parts);
 							parameters.push(parts);
 						}
 					}
 				} else {
-					result += "public class " + replaceSpaces(line) + "\n{\n";
-					title = true;
+					className = replaceSpaces(line);
+					result += "public class " + className + "\n{\n";
 				}
 			}
 			if (result) {
-				result += formatParsed(parameters, methods);
+				result += formatParsed(parameters, methods, className);
 				result += "}";
 			}
 			codeElem.textContent = result;
