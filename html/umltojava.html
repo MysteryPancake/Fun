@@ -69,13 +69,6 @@
 			return str.replace(/ /g, "_");
 		}
 
-		function stripStatic(str) {
-			while (str.charAt(0) === "_" && str.charAt(str.length - 1) === "_") {
-				str = str.substr(1, str.length - 2);
-			}
-			return str.trim();
-		}
-
 		function sanitize(str) {
 			return replaceSpaces(str.trim());
 		}
@@ -85,10 +78,22 @@
 			arg.type = sanitize(arg.type);
 			if (arg.name && !arg.type) {
 				arg.type = arg.name;
+				arg.placeholder = true;
 				arg.name = String.fromCharCode(randomChar);
 				return 1;
 			}
 			return 0;
+		}
+
+		function cleanMess(str, startPos, endPos) {
+			while (str.charAt(endPos) === "_") {
+				str = str.slice(0, endPos) + str.slice(endPos + 1);
+				endPos--;
+			}
+			while (str.charAt(startPos) === "_") {
+				str = str.slice(0, startPos) + str.slice(startPos + 1);
+			}
+			return str.trim();
 		}
 
 		function parseLine(str) {
@@ -106,9 +111,10 @@
 				str = str.replace(/{read only}/gi, "");
 			}
 			str = str.trim();
-			if (str.charAt(0) === "_") {
+			const lastLine = str.lastIndexOf("_");
+			if (str.charAt(0) === "_" && lastLine !== 0) {
 				result.static = "static";
-				str = stripStatic(str);
+				str = cleanMess(str, 0, lastLine);
 			}
 			switch (str.charAt(0)) {
 			case "+":
@@ -124,9 +130,12 @@
 				str = str.slice(1);
 			}
 			str = str.trim();
-			if (!result.static && str.charAt(0) === "_") {
-				result.static = "static";
-				str = stripStatic(str);
+			if (!result.static) {
+				const lastLine = str.lastIndexOf("_");
+				if (str.charAt(0) === "_" && lastLine !== 0) {
+					result.static = "static";
+					str = cleanMess(str, 0, lastLine);
+				}
 			}
 			const nextPart = str.search(/[:=(,]/);
 			if (nextPart !== -1) {
@@ -218,13 +227,12 @@
 				}
 			} else if (varParts.name === className) {
 				for (let k = 0; k < varParts.args.length; k++) {
-					const name = varParts.args[k].name;
-					const type = varParts.args[k].type;
-					const loweredName = name.toLowerCase();
+					const argument = varParts.args[k];
+					const loweredName = argument.name.toLowerCase();
 					for (let l = 0; l < parameters.length; l++) {
-						if (parameters[l].type !== type) continue;
-						if (roughlyMatches(parameters[l].name, loweredName, classLowered) || k === l) {
-							result += "\n\t\tthis." + parameters[l].name + " = " + name + ";";
+						if (parameters[l].type !== argument.type) continue;
+						if (roughlyMatches(parameters[l].name, loweredName, classLowered) || (argument.placeholder && k === l)) {
+							result += "\n\t\tthis." + parameters[l].name + " = " + argument.name + ";";
 						}
 					}
 				}
