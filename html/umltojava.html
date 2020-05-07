@@ -111,10 +111,10 @@
 				str = str.replace(/{read only}/gi, "");
 			}
 			str = str.trim();
-			const lastLine = str.lastIndexOf("_");
-			if (str.charAt(0) === "_" && lastLine !== 0) {
+			const last = str.lastIndexOf("_");
+			if (str.charAt(0) === "_" && last !== 0) {
 				result.static = "static";
-				str = cleanMess(str, 0, lastLine);
+				str = cleanMess(str, 0, last);
 			}
 			switch (str.charAt(0)) {
 			case "+":
@@ -238,7 +238,7 @@
 				}
 			}
 			if (!result) {
-				result += "\n\t\t\/\/ Enter stuff here";
+				result += "\n\t\t// Enter stuff here";
 			}
 			return result;
 		}
@@ -296,7 +296,7 @@
 			let result = "";
 			const parameters = [];
 			const methods = [];
-			while (lines.length > 0) {
+			while (lines.length) {
 				const line = lines.shift().trim();
 				if (!line || line === "--") continue;
 				if (className) {
