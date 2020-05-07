@@ -2,13 +2,13 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>UML Converter</title>
+		<title>UML to Java Converter</title>
 		<meta name="description" content="Converts UML syntax to Java code.">
 		<meta name="keywords" content="UMLet, UML, Java, Convert, Diagram, Code">
-		<meta property="og:title" content="UML Converter">
+		<meta property="og:title" content="UML to Java Converter">
 		<meta property="og:type" content="website">
-		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/umlconverter">
-		<meta property="og:site_name" content="UML Converter">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/umltojava">
+		<meta property="og:site_name" content="UML to Java">
 		<meta property="og:description" content="Converts UML syntax to Java code.">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<style>
@@ -64,6 +64,10 @@
 		</style>
 		<script>
 		let codeElem;
+
+		function replaceSpaces(str) {
+			return str.replace(/ /g, "_");
+		}
 
 		function parseChars(str) {
 			if (str === "--") return;
@@ -135,11 +139,11 @@
 			let result = varFinal ? "final" : "";
 			varType = varType.trim();
 			if (varType) {
-				result += " " + varType;
+				result += " " + replaceSpaces(varType);
 			}
 			varName = varName.trim();
 			if (varName) {
-				result += " " + varName;
+				result += " " + replaceSpaces(varName);
 			}
 			if (args.length) {
 				result += "(";
@@ -152,7 +156,7 @@
 						name = String.fromCharCode(randomChar);
 						randomChar++;
 					}
-					const combined = type + " " + name;
+					const combined = replaceSpaces(type) + " " + replaceSpaces(name);
 					if (j > 0) {
 						result += ", ";
 					}
@@ -196,7 +200,7 @@
 						result += text + "\n";
 					}
 				} else {
-					result += "public class " + line + "\n{\n";
+					result += "public class " + replaceSpaces(line) + "\n{\n";
 					title = true;
 				}
 			}
