@@ -5,7 +5,7 @@ IF /i %number% == 1 GOTO one
 IF /i %number% == 2 GOTO two
 IF /i %number% == 3 GOTO three
 echo "NOT ONE, TWO OR THREE";
-goto start
+GOTO start
 :one
 echo "ONE"
 :two
