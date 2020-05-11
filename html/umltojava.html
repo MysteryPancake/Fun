@@ -99,7 +99,6 @@
 			if (arg.name && !arg.type) {
 				const spaceIndex = arg.name.indexOf(" ");
 				if (spaceIndex === -1) {
-					arg.placeholder = true;
 					arg.type = replaceSpaces(arg.name);
 					arg.name = String.fromCharCode(97 + (charIndex + 23) % 26);
 					if (charIndex >= 26) {
