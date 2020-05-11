@@ -151,6 +151,7 @@
 			case "-":
 				result.scope = "private";
 				str = str.slice(1);
+				break;
 			}
 			str = str.trim();
 			if (!result.static) {
@@ -199,6 +200,7 @@
 						} else {
 							currentArg.type += char;
 						}
+						break;
 					}
 					str = str.slice(1);
 				}
