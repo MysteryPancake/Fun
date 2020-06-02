@@ -5,6 +5,14 @@ class PhysicsTest {
 			new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
 		} catch (Exception e) {}
 	}
+
+	private static String repeat(String s, int number) {
+		String result = "";
+		for (int i = 0; i < number; i++) {
+			result += s;
+		}
+		return result;
+	}
 	
 	public static void main(String[] args) {
 		long t = System.currentTimeMillis();
@@ -44,13 +52,13 @@ class PhysicsTest {
 			}
 			clearScreen();
 			for (int i = 0; i < Math.floor(yPos); i++) {
-				System.out.println(" ".repeat(wall) + "|");
+				System.out.println(repeat(" ", wall) + "|");
 			}
-			System.out.println(" ".repeat((int)xPos) + "O" + " ".repeat(wall - (int)xPos - 1) + "|");
+			System.out.println(repeat(" ", (int)xPos) + "O" + repeat(" ", wall - (int)xPos - 1) + "|");
 			for (int j = 0; j < ground - Math.floor(yPos) - 1; j++) {
-				System.out.println(" ".repeat(wall) + "|");
+				System.out.println(repeat(" ", wall) + "|");
 			}
-			System.out.println("-".repeat(wall));
+			System.out.println(repeat("-", wall));
 		}
 	}
 }
