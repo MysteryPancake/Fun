@@ -22,27 +22,30 @@
 		}
 
 		body {
-			padding: 16px 32px;
+			padding: 16px;
 		}
 
 		h1 {
 			margin: 0;
-			padding: 8px 0;
+			padding-bottom: 8px;
 		}
 
 		div {
 			padding-bottom: 8px;
 		}
 
-		div > * {
+		div > input {
 			display: block;
 			padding-bottom: 4px;
 		}
 
-		input[type="number"], input[type="button"] {
+		input {
 			box-sizing: border-box;
-			padding: 4px;
 			width: 100%;
+		}
+
+		input[type="number"], input[type="button"] {
+			padding: 4px;
 		}
 
 		input[type="button"] {
@@ -99,6 +102,7 @@
 				const max = parseFloat(maxElem.value);
 				const total = parseFloat(totalElem.value);
 				let sum = 0;
+				const offset = context.currentTime;
 				while (sum < total) {
 					const source = context.createBufferSource();
 					const buffer = buffers[Math.floor(Math.random() * buffers.length)];
@@ -108,7 +112,7 @@
 					if (sum + duration > total) {
 						duration = total - sum;
 					}
-					source.start(context.currentTime + sum, randomBetween(0, buffer.duration - duration), duration);
+					source.start(offset + sum, randomBetween(0, buffer.duration - duration), duration);
 					bufferNodes.push(source);
 					sum += duration;
 				}
@@ -126,11 +130,11 @@
 		</div>
 		<div>
 			<label for="min">Minimum segment duration (seconds)</label>
-			<input id="min" type="number" value="0.05">
+			<input id="min" type="number" value="0.1">
 		</div>
 		<div>
 			<label for="max">Maximum segment duration (seconds)</label>
-			<input id="max" type="number" value="0.2">
+			<input id="max" type="number" value="0.5">
 		</div>
 		<div>
 			<label for="total">Total duration (seconds)</label>
