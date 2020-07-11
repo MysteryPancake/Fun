@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Random Audio Splicer</title>
+		<meta name="description" content="Randomly splices audio.">
+		<meta name="keywords" content="Audio, Chop, Cut, Music, Random, Splice">
+		<meta property="og:title" content="Random Audio Splicer">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/audiosplicer">
+		<meta property="og:site_name" content="Random Audio Splicer">
+		<meta property="og:description" content="Randomly splices audio.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: "Trebuchet MS", Helvetica, sans-serif;
+		}
+
+		h1 {
+			margin: 0;
+			padding: 8px 0;
+		}
+
+		div {
+			padding-bottom: 8px;
+		}
+
+		div > * {
+			display: block;
+			padding-bottom: 4px;
+		}
+
+		input[type="number"], input[type="button"] {
+			box-sizing: border-box;
+			padding: 4px;
+			width: 50%;
+		}
+
+		input[type="button"] {
+			cursor: pointer;
+		}
+		</style>
+		<script>
+		let bufferNodes = [];
+		let buffers = [];
+		let context;
+		let minElem;
+		let maxElem;
+		let totalElem;
+		let loader;
+
+		function updateBuffers(elem) {
+			loader.textContent = `Audio files (loaded 0 of ${elem.files.length})`;
+			if (!context) {
+				context = new (window.AudioContext || window.webkitAudioContext)();
+			}
+			buffers = [];
+			for (let i = 0; i < elem.files.length; i++) {
+				const reader = new FileReader();
+				reader.onload = function() {
+					context.decodeAudioData(this.result, function(buffer) {
+						buffers.push(buffer);
+						loader.textContent = `Audio files (loaded ${buffers.length} of ${elem.files.length})`;
+					})
+				};
+				reader.readAsArrayBuffer(elem.files[i]);
+			}
+		}
+
+		function randomBetween(min, max) {
+			return Math.random() * (max - min) + min;
+		}
+
+		function setup() {
+			minElem = document.getElementById("min");
+			maxElem = document.getElementById("max");
+			totalElem = document.getElementById("total");
+			loader = document.getElementById("load");
+		}
+
+		function play() {
+			if (buffers.length) {
+				if (bufferNodes.length) {
+					for (let i = 0; i < bufferNodes.length; i++) {
+						bufferNodes[i].stop();
+					}
+					bufferNodes = [];
+				}
+				const min = parseFloat(minElem.value);
+				const max = parseFloat(maxElem.value);
+				const total = parseFloat(totalElem.value);
+				let sum = 0;
+				while (sum < total) {
+					const source = context.createBufferSource();
+					const buffer = buffers[Math.floor(Math.random() * buffers.length)];
+					source.buffer = buffer;
+					source.connect(context.destination);
+					let duration = randomBetween(min, max);
+					if (sum + duration > total) {
+						duration = total - sum;
+					}
+					source.start(context.currentTime + sum, randomBetween(0, buffer.duration - duration), duration);
+					bufferNodes.push(source);
+					sum += duration;
+				}
+			} else {
+				window.alert("Please upload audio files first!");
+			}
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<h1>Random Audio Splicer</h1>
+		<div>
+			<span id="load">Audio files</span>
+			<input multiple id="file" type="file" accept="audio/*,video/*" onchange="updateBuffers(this);">
+		</div>
+		<div>
+			<span>Minimum segment duration (seconds)</span>
+			<input id="min" type="number" value="0.05">
+		</div>
+		<div>
+			<span>Maximum segment duration (seconds)</span>
+			<input id="max" type="number" value="0.2">
+		</div>
+		<div>
+			<span>Total duration (seconds)</span>
+			<input id="total" type="number" value="5">
+		</div>
+		<input type="button" value="Play Random Segments" onclick="play();">
+	</body>
+</html>
