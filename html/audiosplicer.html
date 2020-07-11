@@ -16,6 +16,15 @@
 			font-family: "Trebuchet MS", Helvetica, sans-serif;
 		}
 
+		html, body {
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			padding: 16px 32px;
+		}
+
 		h1 {
 			margin: 0;
 			padding: 8px 0;
@@ -33,7 +42,7 @@
 		input[type="number"], input[type="button"] {
 			box-sizing: border-box;
 			padding: 4px;
-			width: 50%;
+			width: 100%;
 		}
 
 		input[type="button"] {
@@ -112,19 +121,19 @@
 	<body onload="setup();">
 		<h1>Random Audio Splicer</h1>
 		<div>
-			<span id="load">Audio files</span>
+			<label id="load" for="file">Audio files</label>
 			<input multiple id="file" type="file" accept="audio/*,video/*" onchange="updateBuffers(this);">
 		</div>
 		<div>
-			<span>Minimum segment duration (seconds)</span>
+			<label for="min">Minimum segment duration (seconds)</label>
 			<input id="min" type="number" value="0.05">
 		</div>
 		<div>
-			<span>Maximum segment duration (seconds)</span>
+			<label for="max">Maximum segment duration (seconds)</label>
 			<input id="max" type="number" value="0.2">
 		</div>
 		<div>
-			<span>Total duration (seconds)</span>
+			<label for="total">Total duration (seconds)</label>
 			<input id="total" type="number" value="5">
 		</div>
 		<input type="button" value="Play Random Segments" onclick="play();">
