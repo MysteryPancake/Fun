@@ -23,28 +23,13 @@
 			padding: 0;
 		}
 
-		div {
-			box-shadow: inset 0 0 4px black;
-			box-sizing: border-box;
-			display: inline-block;
-			float: left;
-			height: 100%;
-			padding: 16px;
-			width: 50%;
-		}
-
 		#copy {
 			background-color: #DDDDDD;
 			border-radius: 4px;
 			color: black;
 			cursor: pointer;
-			display: none;
-			float: right;
 			font-size: medium;
 			padding: 8px 16px;
-			position: fixed;
-			right: 8px;
-			top: 8px;
 		}
 
 		#copy:hover {
@@ -53,6 +38,24 @@
 
 		#copy:active {
 			background-color: #CCCCCC;
+		}
+
+		#sidecontrols {
+			display: none;
+			float: right;
+			position: fixed;
+			right: 8px;
+			text-align: right;
+			top: 8px;
+		}
+
+		#sidecontrols > div {
+			padding-top: 8px;
+		}
+
+		#sameline, #samelinelabel {
+			color: white;
+			cursor: pointer;
 		}
 
 		#umlbox {
@@ -79,11 +82,23 @@
 			overflow: auto;
 			white-space: pre-wrap;
 		}
+
+		#umlbox, #code {
+			box-shadow: inset 0 0 4px black;
+			box-sizing: border-box;
+			display: inline-block;
+			float: left;
+			height: 100%;
+			padding: 16px;
+			width: 50%;
+		}
 		</style>
 		<script>
 		let umlElem;
 		let codeElem;
 		let buttonElem;
+		let sideControlElem;
+		let sameLine = false;
 
 		function replaceSpaces(str) {
 			return str.replace(/ /g, "_");
@@ -301,7 +316,7 @@
 				}
 			}
 			if (varParts.args.length) {
-				joined += "\n\t{";
+				joined += sameLine ? " {" : "\n\t{";
 				joined += generateMethod(varParts, parameters, className);
 				joined += "\n\t}";
 			} else {
@@ -334,9 +349,14 @@
 			umlElem.focus();
 		}
 
-		function update(elem) {
+		function toggleSameLine(elem) {
+			sameLine = elem.checked;
+			update();
+		}
+
+		function update() {
 			let className = "";
-			const lines = elem.value.split("\n");
+			const lines = umlElem.value.split("\n");
 			let result = "";
 			const parameters = [];
 			const methods = [];
@@ -354,7 +374,7 @@
 					}
 				} else {
 					className = replaceSpaces(line);
-					result += "class " + className + "\n{\n";
+					result += "class " + className + (sameLine ? " {\n\n" : "\n{\n");
 				}
 			}
 			if (result) {
@@ -362,7 +382,7 @@
 				result += "}";
 			}
 			codeElem.textContent = result;
-			buttonElem.style.display = codeElem.textContent ? "block" : "none";
+			sideControlElem.style.display = codeElem.textContent ? "block" : "none";
 			buttonElem.value = "Copy";
 		};
 
@@ -370,14 +390,21 @@
 			umlElem = document.getElementById("uml");
 			codeElem = document.getElementById("code");
 			buttonElem = document.getElementById("copy");
+			sideControlElem = document.getElementById("sidecontrols");
 		}
 		</script>
 	</head>
 	<body onload="setup();">
 		<div id="umlbox">
-			<textarea id="uml" autocomplete="off" spellcheck="false" oninput="update(this);" autofocus></textarea>
+			<textarea id="uml" autocomplete="off" spellcheck="false" oninput="update();" autofocus></textarea>
 		</div>
-		<input type="button" id="copy" value="Copy" onclick="copyCode();">
+		<div id="sidecontrols">
+			<input type="button" id="copy" value="Copy" onclick="copyCode();">
+			<div>
+				<input type="checkbox" id="sameline" onclick="toggleSameLine(this);">
+				<label for="sameline" id="samelinelabel">Same line brackets</label>
+			</div>
+		</div>
 		<div id="code"></div>
 	</body>
 </html>
