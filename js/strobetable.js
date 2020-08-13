@@ -3,8 +3,8 @@ function randomSymbol() {
 }
 
 setInterval(function() {
-	var shit = document.querySelectorAll("th, td");
-	for (var i = 0; i < shit.length; i++) {
-		shit[i].style.backgroundColor = "#" + randomSymbol() + randomSymbol() + randomSymbol();
+	var stuff = document.querySelectorAll("th, td");
+	for (var i = 0; i < stuff.length; i++) {
+		stuff[i].style.backgroundColor = "#" + randomSymbol() + randomSymbol() + randomSymbol();
 	}
 }, 10);
