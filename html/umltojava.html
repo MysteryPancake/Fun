@@ -119,6 +119,7 @@
 					arg.type = replaceSpaces(arg.name);
 					arg.name = "";
 					arg.placeholder = true;
+					return;
 				} else {
 					arg.type = arg.name.slice(0, spaceIndex).trim();
 					arg.name = arg.name.slice(spaceIndex).trim();
