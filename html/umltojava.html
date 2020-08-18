@@ -110,19 +110,15 @@
 			return replaceSpaces(str.trim());
 		}
 
-		function sanitizeArg(arg, charIndex) {
+		function sanitizeArg(arg) {
 			arg.name = arg.name.trim();
 			arg.type = arg.type.trim();
 			if (arg.name && !arg.type) {
 				const spaceIndex = arg.name.indexOf(" ");
 				if (spaceIndex === -1) {
 					arg.type = replaceSpaces(arg.name);
-					arg.name = String.fromCharCode(97 + (charIndex + 23) % 26);
-					if (charIndex >= 26) {
-						arg.name += (1 + Math.floor(charIndex / 26));
-					}
+					arg.name = "";
 					arg.placeholder = true;
-					return 1;
 				} else {
 					arg.type = arg.name.slice(0, spaceIndex).trim();
 					arg.name = arg.name.slice(spaceIndex).trim();
@@ -130,7 +126,6 @@
 			}
 			arg.name = replaceSpaces(arg.name);
 			arg.type = replaceSpaces(arg.type);
-			return 0;
 		}
 
 		function cleanMess(str, startPos, endPos) {
@@ -198,7 +193,6 @@
 			if (str.charAt(0) === "(") {
 				str = str.slice(1);
 				let nameMode = true;
-				let charIndex = 0;
 				let currentArg = { name: "", type: "" };
 				result.args.push(currentArg);
 				while (str) {
@@ -212,7 +206,7 @@
 						nameMode = false;
 						break;
 					case ",":
-						charIndex += sanitizeArg(currentArg, charIndex);
+						sanitizeArg(currentArg);
 						currentArg = { name: "", type: "" };
 						result.args.push(currentArg);
 						if (!nameMode) {
@@ -229,7 +223,7 @@
 					}
 					str = str.slice(1);
 				}
-				sanitizeArg(currentArg, charIndex);
+				sanitizeArg(currentArg);
 			}
 			str = str.trim();
 			if (str.charAt(0) === ":") {
@@ -278,8 +272,10 @@
 				const targetName = lowered.slice(setter ? 3 : 6);
 				for (let i = 0; i < parameters.length; i++) {
 					if (roughlyMatches(parameters[i].name, targetName, classLowered) && parameters[i].type === firstArg.type) {
+						// Fill in placeholders
 						if (firstArg.placeholder) {
 							firstArg.name = "new" + capitalizeFirst(parameters[i].name);
+							firstArg.placeholder = false;
 						}
 						varParts.method += "\n\t\tthis." + parameters[i].name + " = " + firstArg.name + ";";
 					}
@@ -308,8 +304,10 @@
 					const argument = varParts.args[j];
 					for (let k = 0; k < parameters.length; k++) {
 						if (parameters[k].type !== argument.type || usedParams.indexOf(k) !== -1) continue;
+						// Fill in placeholders
 						if (argument.placeholder) {
 							argument.name = parameters[k].name;
+							argument.placeholder = false;
 						}
 						usedArgs[j] = "\n\t\tthis." + parameters[k].name + " = " + argument.name + ";";
 						usedParams.push(k);
@@ -328,12 +326,22 @@
 			if (!varParts.method) {
 				varParts.method += "\n\t\t// Type stuff here";
 			}
+			// Generate arguments for display
 			let joined = "";
+			let charIndex = 0;
 			for (let i = 0; i < varParts.args.length; i++) {
 				if (i > 0) {
 					joined += ", ";
 				}
-				joined += (varParts.args[i].type + " " + varParts.args[i].name).trim();
+				const argument = varParts.args[i];
+				if (argument.placeholder) {
+					argument.name = String.fromCharCode(97 + (charIndex + 23) % 26);
+					if (charIndex >= 26) {
+						argument.name += (1 + Math.floor(charIndex / 26));
+					}
+					charIndex++;
+				}
+				joined += (argument.type + " " + argument.name).trim();
 			}
 			return joined;
 		}
