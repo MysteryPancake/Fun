@@ -56,6 +56,8 @@
 		#sameline, #samelinelabel {
 			color: white;
 			cursor: pointer;
+			user-select: none;
+			-moz-user-select: none;
 		}
 
 		#umlbox {
@@ -119,6 +121,7 @@
 					if (charIndex >= 26) {
 						arg.name += (1 + Math.floor(charIndex / 26));
 					}
+					arg.placeholder = true;
 					return 1;
 				} else {
 					arg.type = arg.name.slice(0, spaceIndex).trim();
@@ -212,7 +215,7 @@
 						charIndex += sanitizeArg(currentArg, charIndex);
 						currentArg = { name: "", type: "" };
 						result.args.push(currentArg);
-						if (nameMode === false) {
+						if (!nameMode) {
 							nameMode = true;
 						}
 						break;
@@ -252,8 +255,12 @@
 			return (paramLowered === targetName) || (classLowered + paramLowered === targetName);
 		}
 
-		function generateMethod(varParts, parameters, className) {
-			let result = "";
+		function capitalizeFirst(str) {
+			return str.charAt(0).toUpperCase() + str.slice(1);
+		}
+
+		function associateArgs(varParts, parameters, className) {
+			varParts.method = "";
 			const classLowered = className.toLowerCase();
 			const lowered = varParts.name.toLowerCase();
 			const setter = lowered.startsWith("set");
@@ -263,7 +270,7 @@
 				const targetName = lowered.slice(3);
 				for (let i = 0; i < parameters.length; i++) {
 					if (roughlyMatches(parameters[i].name, targetName, classLowered) && parameters[i].type === varParts.type) {
-						result += "\n\t\treturn this." + parameters[i].name + ";";
+						varParts.method += "\n\t\treturn this." + parameters[i].name + ";";
 					}
 				}
 			} else if (setter || lowered.startsWith("change") && firstArg) {
@@ -271,7 +278,10 @@
 				const targetName = lowered.slice(setter ? 3 : 6);
 				for (let i = 0; i < parameters.length; i++) {
 					if (roughlyMatches(parameters[i].name, targetName, classLowered) && parameters[i].type === firstArg.type) {
-						result += "\n\t\tthis." + parameters[i].name + " = " + firstArg.name + ";";
+						if (firstArg.placeholder) {
+							firstArg.name = "new" + capitalizeFirst(parameters[i].name);
+						}
+						varParts.method += "\n\t\tthis." + parameters[i].name + " = " + firstArg.name + ";";
 					}
 				}
 			} else if (varParts.name === className) {
@@ -298,6 +308,9 @@
 					const argument = varParts.args[j];
 					for (let k = 0; k < parameters.length; k++) {
 						if (parameters[k].type !== argument.type || usedParams.indexOf(k) !== -1) continue;
+						if (argument.placeholder) {
+							argument.name = parameters[k].name;
+						}
 						usedArgs[j] = "\n\t\tthis." + parameters[k].name + " = " + argument.name + ";";
 						usedParams.push(k);
 						break;
@@ -306,16 +319,23 @@
 				// Third pass: add results in order of argument index
 				for (let l = 0; l < usedArgs.length; l++) {
 					if (usedArgs[l] === undefined) continue;
-					result += usedArgs[l];
+					varParts.method += usedArgs[l];
 				}
 			}
 			if (varParts.value) {
-				result += "\n\t\treturn " + varParts.value + ";";
+				varParts.method += "\n\t\treturn " + varParts.value + ";";
 			}
-			if (!result) {
-				result += "\n\t\t// Type stuff here";
+			if (!varParts.method) {
+				varParts.method += "\n\t\t// Type stuff here";
 			}
-			return result;
+			let joined = "";
+			for (let i = 0; i < varParts.args.length; i++) {
+				if (i > 0) {
+					joined += ", ";
+				}
+				joined += (varParts.args[i].type + " " + varParts.args[i].name).trim();
+			}
+			return joined;
 		}
 
 		function formatVar(varParts, parameters, className) {
@@ -328,12 +348,7 @@
 			}
 			if (varParts.args.length) {
 				joined += "(";
-				for (let i = 0; i < varParts.args.length; i++) {
-					if (i > 0) {
-						joined += ", ";
-					}
-					joined += (varParts.args[i].type + " " + varParts.args[i].name).trim();
-				}
+				joined += associateArgs(varParts, parameters, className);
 				joined += ")";
 			} else {
 				if (varParts.value) {
@@ -342,7 +357,7 @@
 			}
 			if (varParts.args.length) {
 				joined += sameLine ? " {" : "\n\t{";
-				joined += generateMethod(varParts, parameters, className);
+				joined += varParts.method;
 				joined += "\n\t}";
 			} else {
 				joined += ";";
