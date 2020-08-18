@@ -113,10 +113,7 @@
 		function sanitizeArg(arg) {
 			arg.name = arg.name.trim();
 			arg.type = arg.type.trim();
-			if (!arg.name && !arg.type) {
-				arg.placeholder = true;
-				return;
-			} else if (arg.name && !arg.type) {
+			if (arg.name && !arg.type) {
 				const spaceIndex = arg.name.indexOf(" ");
 				if (spaceIndex === -1) {
 					arg.type = replaceSpaces(arg.name);
