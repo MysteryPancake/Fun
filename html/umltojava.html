@@ -366,7 +366,7 @@
 		function formatVar(varParts, parameters, className) {
 			let joined = "";
 			if (varParts.comment) {
-				joined += "// " + varParts.comment;
+				joined += "//" + varParts.comment;
 				if (!varParts.commentOnly) {
 					joined += "\n\t";
 				}
