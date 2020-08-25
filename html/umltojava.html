@@ -53,7 +53,7 @@
 			padding-top: 8px;
 		}
 
-		#sameline, #samelinelabel {
+		#sameline, #samelinelabel, #javamode, #javamodelabel {
 			color: white;
 			cursor: pointer;
 			user-select: none;
@@ -99,8 +99,10 @@
 		let umlElem;
 		let codeElem;
 		let buttonElem;
+		let sameLineElem;
 		let sideControlElem;
 		let sameLine = false;
+		let javaMode = false;
 
 		function replaceSpaces(str) {
 			return str.replace(/ /g, "_");
@@ -140,14 +142,16 @@
 			return str.trim();
 		}
 
-		function parseLine(str) {
+		function parseLineUML(str) {
 			const result = {
 				name: "",
 				type: "",
 				value: "",
-				scope: "public",
+				scope: "",
 				static: "",
 				final: "",
+				comment: "",
+				commentOnly: false,
 				args: []
 			};
 			if (str.toLowerCase().indexOf("{read only}") !== -1) {
@@ -155,8 +159,17 @@
 				str = str.replace(/{read only}/gi, "");
 			}
 			str = str.trim();
+			const comment = str.indexOf("%%");
+			if (comment !== -1) {
+				result.comment = str.substr(comment + 2);
+				str = str.slice(0, comment);
+				if (str.length <= 0) {
+					result.commentOnly = true;
+					return result;
+				}
+			}
 			const last = str.lastIndexOf("_");
-			if (str.charAt(0) === "_" && last !== 0) {
+			if (str.charAt(0) === "_" && last !== -1) {
 				result.static = "static";
 				str = cleanMess(str, 0, last);
 			}
@@ -173,11 +186,14 @@
 				result.scope = "private";
 				str = str.slice(1);
 				break;
+			default:
+				result.scope = "public";
+				break;
 			}
 			str = str.trim();
 			if (!result.static) {
 				const lastLine = str.lastIndexOf("_");
-				if (str.charAt(0) === "_" && lastLine !== 0) {
+				if (str.charAt(0) === "_" && lastLine !== -1) {
 					result.static = "static";
 					str = cleanMess(str, 0, lastLine);
 				}
@@ -348,7 +364,14 @@
 		}
 
 		function formatVar(varParts, parameters, className) {
-			let joined = (varParts.scope + " " + (varParts.static + " " + varParts.final).trim()).trim();
+			let joined = "";
+			if (varParts.comment) {
+				joined += "// " + varParts.comment;
+				if (!varParts.commentOnly) {
+					joined += "\n\t";
+				}
+			}
+			joined += (varParts.scope + " " + (varParts.static + " " + varParts.final).trim()).trim();
 			if (varParts.type) {
 				joined += " " + varParts.type;
 			}
@@ -368,13 +391,13 @@
 				joined += sameLine ? " {" : "\n\t{";
 				joined += varParts.method;
 				joined += "\n\t}";
-			} else {
+			} else if (!varParts.commentOnly) {
 				joined += ";";
 			}
 			return joined;
 		}
 
-		function formatParsed(parameters, methods, className) {
+		function formatFromUML(parameters, methods, className) {
 			let result = "";
 			for (let i = 0; i < parameters.length; i++) {
 				result += "\t" + formatVar(parameters[i]) + "\n";
@@ -403,7 +426,13 @@
 			update();
 		}
 
-		function update() {
+		function toggleJavaMode(elem) {
+			javaMode = elem.checked;
+			sameLineElem.style.display = javaMode ? "none" : "block";
+			update();
+		}
+
+		function updateUML() {
 			let className = "";
 			const lines = umlElem.value.split("\n");
 			let result = "";
@@ -413,7 +442,7 @@
 				const line = lines.shift().trim();
 				if (!line || line === "--") continue;
 				if (className) {
-					const parts = parseLine(line);
+					const parts = parseLineUML(line);
 					if (parts) {
 						if (parts.args.length) {
 							methods.push(parts);
@@ -427,11 +456,220 @@
 				}
 			}
 			if (result) {
-				result += formatParsed(parameters, methods, className);
+				result += formatFromUML(parameters, methods, className);
 				result += "}";
 			}
 			codeElem.textContent = result;
-			sideControlElem.style.display = codeElem.textContent ? "block" : "none";
+			
+		}
+
+		function parseLineJava(str) {
+			const result = {
+				name: "",
+				type: "",
+				value: "",
+				scope: "",
+				static: false,
+				final: false,
+				args: []
+			};
+			if (str.startsWith("public")) {
+				result.scope = "+";
+				str = str.slice(6);
+			} else if (str.startsWith("protected")) {
+				result.scope = "#";
+				str = str.slice(9);
+			} else if (str.startsWith("private")) {
+				result.scope = "-";
+				str = str.slice(7);
+			}
+			str = str.trim();
+			if (str.startsWith("static")) {
+				result.static = true;
+				str = str.slice(6);
+			} else if (str.startsWith("final")) {
+				result.final = true;
+				str = str.slice(5);
+			}
+			str = str.trim();
+			// This is dumb but repeat again just in case
+			if (str.startsWith("static")) {
+				result.static = true;
+				str = str.slice(6);
+			} else if (str.startsWith("final")) {
+				result.final = true;
+				str = str.slice(5);
+			}
+			str = str.trim();
+			const namePart = str.search(/[=(, ;{}]/);
+			if (namePart !== -1) {
+				result.type = str.substr(0, namePart);
+				str = str.slice(namePart);
+			} else {
+				result.type = str.trim();
+				return result;
+			}
+			str = str.trim();
+			const nextPart = str.search(/[=(, ;{}]/);
+			if (nextPart !== -1) {
+				result.name = sanitize(str.substr(0, nextPart));
+				str = str.slice(nextPart);
+			} else {
+				result.name = sanitize(str.trim());
+				return result;
+			}
+			str = str.trim();
+			if (str.charAt(0) === "(") {
+				str = str.slice(1);
+				let nameMode = false;
+				let currentArg = { name: "", type: "" };
+				result.args.push(currentArg);
+				while (str) {
+					const char = str.charAt(0);
+					if (char === ")") {
+						str = str.slice(1);
+						break;
+					}
+					switch (char) {
+					case " ":
+						nameMode = true;
+						break;
+					case ",":
+						currentArg.name = sanitize(currentArg.name);
+						currentArg.type = sanitize(currentArg.type);
+						currentArg = { name: "", type: "" };
+						result.args.push(currentArg);
+						if (nameMode) {
+							nameMode = false;
+						}
+						break;
+					default:
+						if (nameMode) {
+							currentArg.name += char;
+						} else {
+							currentArg.type += char;
+						}
+						break;
+					}
+					str = str.slice(1);
+				}
+				currentArg.name = sanitize(currentArg.name);
+				currentArg.type = sanitize(currentArg.type);
+			}
+			str = str.trim();
+			if (str.charAt(0) === "=") {
+				str = str.slice(1).trim();
+				const nextPart = str.search(/[( ;{}]/);
+				if (nextPart !== -1) {
+					result.value = str.substr(0, nextPart);
+				} else {
+					result.value = str;
+				}
+			}
+			return result;
+		}
+
+		function formatStuff(parts) {
+			let result = "";
+			if (parts.static) {
+				result += "__";
+			}
+			result += parts.scope;
+			if (parts.name) {
+				result += parts.name;
+			}
+			if (parts.args.length) {
+				result += "(";
+				for (let i = 0; i < parts.args.length; i++) {
+					if (i > 0) {
+						result += ", ";
+					}
+					const argument = parts.args[i];
+					if (argument.name) {
+						result += argument.name;
+					}
+					if (argument.name && argument.type) {
+						result += ": ";
+					}
+					if (argument.type) {
+						result += argument.type;
+					}
+				}
+				result += ")";
+			}
+			if (parts.name && parts.type) {
+				result += ": ";
+			}
+			if (parts.type) {
+				result += parts.type;
+			}
+			if (parts.value) {
+				result += " = " + parts.value;
+			}
+			if (parts.final) {
+				result += " {read only}";
+			}
+			if (parts.static) {
+				result += "__";
+			}
+			result += "\n";
+			return result;
+		}
+
+		function formatFromJava(classes) {
+			let result = "";
+			for (let i = 0; i < classes.length; i++) {
+				const thisClass = classes[i];
+				result += thisClass.name + "\n--\n";
+				for (let j = 0; j < thisClass.parameters.length; j++) {
+					result += formatStuff(thisClass.parameters[j]);
+				}
+				if (thisClass.parameters.length && thisClass.methods.length) {
+					result += "--\n";
+				}
+				for (let k = 0; k < thisClass.methods.length; k++) {
+					result += formatStuff(thisClass.methods[k]);
+				}
+				result += "\n";
+			}
+			return result;
+		}
+
+		function updateJava() {
+			const lines = umlElem.value.split("\n");
+			const classes = [];
+			let currentClass
+			while (lines.length > 0) {
+				const line = lines.shift().trim();
+				if (!line) continue;
+				const parts = parseLineJava(line);
+				if (parts) {
+					if (parts.type === "class") {
+						currentClass = {
+							name: parts.name,
+							methods: [],
+							parameters: []
+						};
+						classes.push(currentClass);
+					} else if (currentClass) {
+						if (parts.args.length) {
+							currentClass.methods.push(parts);
+						} else {
+							currentClass.parameters.push(parts);
+						}
+					}
+				}
+			}
+			codeElem.textContent = formatFromJava(classes);
+		}
+
+		function update() {
+			if (javaMode) {
+				updateJava();
+			} else {
+				updateUML();
+			}
+			sideControlElem.style.display = (codeElem.textContent || javaMode) ? "block" : "none";
 			buttonElem.value = "Copy";
 		};
 
@@ -439,6 +677,7 @@
 			umlElem = document.getElementById("uml");
 			codeElem = document.getElementById("code");
 			buttonElem = document.getElementById("copy");
+			sameLineElem = document.getElementById("samelinebox");
 			sideControlElem = document.getElementById("sidecontrols");
 		}
 		</script>
@@ -449,10 +688,14 @@
 		</div>
 		<div id="sidecontrols">
 			<input type="button" id="copy" value="Copy" onclick="copyCode();">
-			<div>
+			<div id="samelinebox">
 				<input type="checkbox" id="sameline" onclick="toggleSameLine(this);">
 				<label for="sameline" id="samelinelabel">Same line brackets</label>
 			</div>
+			<!--<div>
+				<input type="checkbox" id="javamode" onclick="toggleJavaMode(this);">
+				<label for="javamode" id="javamodelabel">Java to UML</label>
+			</div>-->
 		</div>
 		<div id="code"></div>
 	</body>
