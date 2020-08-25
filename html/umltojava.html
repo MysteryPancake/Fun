@@ -154,22 +154,21 @@
 				commentOnly: false,
 				args: []
 			};
-			if (str.toLowerCase().indexOf("{read only}") !== -1) {
-				result.final = "final";
-				str = str.replace(/{read only}/gi, "");
-			}
-			str = str.trim();
 			const comment = str.indexOf("%%");
 			if (comment !== -1) {
 				result.comment = str.substr(comment + 2);
 				str = str.slice(0, comment);
 				if (str.length <= 0) {
-					// Hacky
-					result.type = undefined;
 					result.commentOnly = true;
 					return result;
 				}
 			}
+			str = str.trim();
+			if (str.toLowerCase().indexOf("{read only}") !== -1) {
+				result.final = "final";
+				str = str.replace(/{read only}/gi, "");
+			}
+			str = str.trim();
 			const last = str.lastIndexOf("_");
 			if (str.charAt(0) === "_" && last !== -1) {
 				result.static = "static";
@@ -273,6 +272,11 @@
 		}
 
 		function associateArgs(varParts, parameters, className) {
+			// Hack to allow early return
+			if (varParts.args.length === 1 && varParts.args[0].type === "" && varParts.args[0].name === "") {
+				varParts.method = "\n\t\t// Type stuff here";
+				return "";
+			}
 			varParts.method = "";
 			const classLowered = className.toLowerCase();
 			const lowered = varParts.name.toLowerCase();
@@ -376,7 +380,7 @@
 			joined += (varParts.scope + " " + (varParts.static + " " + varParts.final).trim()).trim();
 			if (varParts.type) {
 				joined += " " + varParts.type;
-			} else if (varParts.name !== className && !varParts.commentOnly) {
+			} else if (varParts.args.length && varParts.name !== className) {
 				// Add void return type to avoid errors
 				joined += " void";
 			}
