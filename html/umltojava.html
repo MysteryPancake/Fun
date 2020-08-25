@@ -164,6 +164,8 @@
 				result.comment = str.substr(comment + 2);
 				str = str.slice(0, comment);
 				if (str.length <= 0) {
+					// Hacky
+					result.type = undefined;
 					result.commentOnly = true;
 					return result;
 				}
