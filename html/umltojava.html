@@ -374,7 +374,7 @@
 			joined += (varParts.scope + " " + (varParts.static + " " + varParts.final).trim()).trim();
 			if (varParts.type) {
 				joined += " " + varParts.type;
-			} else if (varParts.name !== className) {
+			} else if (varParts.name !== className && !varParts.commentOnly) {
 				// Add void return type to avoid errors
 				joined += " void";
 			}
