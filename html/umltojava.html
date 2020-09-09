@@ -497,7 +497,12 @@
 								extra += extraPart + " ";
 							}
 						}
-						result += extra + "class " + classParts.name + (sameLine ? " {\n\n" : "\n{\n");
+						result += extra;
+						// Cheap hack since interfaces aren't classes
+						if (uniqueExtras.indexOf("interface") === -1) {
+							result += "class ";
+						}
+						result += classParts.name + (sameLine ? " {\n\n" : "\n{\n");
 					}
 				}
 			}
