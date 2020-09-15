@@ -293,7 +293,7 @@
 						varParts.method += "\n\t\treturn this." + parameters[i].name + ";";
 					}
 				}
-			} else if (setter || lowered.startsWith("change") && firstArg) {
+			} else if ((setter || lowered.startsWith("change")) && firstArg) {
 				// Setter method
 				const targetName = lowered.slice(setter ? 3 : 6);
 				for (let i = 0; i < parameters.length; i++) {
