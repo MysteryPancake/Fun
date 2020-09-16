@@ -142,14 +142,37 @@
 			return str.trim();
 		}
 
+		function checkStaticAbstract(str, result) {
+			switch (str.charAt(0)) {
+			case "/":
+				if (result.abstract) return str;
+				const lastSlash = str.lastIndexOf("/");
+				if (lastSlash !== -1) {
+					result.abstract = true;
+					return cleanMess(str, 0, lastSlash, "/", "/");
+				}
+				break;
+			case "_":
+				if (result.static) return str;
+				const lastLine = str.lastIndexOf("_");
+				if (lastLine !== -1) {
+					result.static = true;
+					return cleanMess(str, 0, lastLine, "_", "_");
+				}
+				break;
+			}
+			return str;
+		}
+
 		function parseLineUML(str) {
 			const result = {
 				name: "",
 				type: "",
 				value: "",
 				scope: "",
-				static: "",
-				final: "",
+				static: false,
+				abstract: false,
+				final: false,
 				comment: "",
 				commentOnly: false,
 				isMethod: false,
@@ -171,16 +194,19 @@
 				}
 			}
 			str = str.trim();
-			if (str.toLowerCase().indexOf("{read only}") !== -1) {
-				result.final = "final";
+			const lowered = str.toLowerCase();
+			if (lowered.indexOf("{read only}") !== -1) {
+				result.final = true;
 				str = str.replace(/{read only}/gi, "");
+			} else if (lowered.indexOf("<<read only>>") !== -1) {
+				result.final = true;
+				str = str.replace(/<<read only>>/gi, "");
 			}
 			str = str.trim();
-			const last = str.lastIndexOf("_");
-			if (str.charAt(0) === "_" && last !== -1) {
-				result.static = "static";
-				str = cleanMess(str, 0, last, "_", "_");
-			}
+			// Check twice in case order is /_ or _/ (this is dumb)
+			str = checkStaticAbstract(str, result);
+			str = checkStaticAbstract(str, result);
+			str = str.trim();
 			switch (str.charAt(0)) {
 			case "+":
 				result.scope = "public";
@@ -199,13 +225,10 @@
 				break;
 			}
 			str = str.trim();
-			if (!result.static) {
-				const lastLine = str.lastIndexOf("_");
-				if (str.charAt(0) === "_" && lastLine !== -1) {
-					result.static = "static";
-					str = cleanMess(str, 0, lastLine, "_", "_");
-				}
-			}
+			// Perform check again just in case (this is dumb)
+			str = checkStaticAbstract(str, result);
+			str = checkStaticAbstract(str, result);
+			str = str.trim();
 			const nextPart = str.search(/[:=(,]/);
 			if (nextPart !== -1) {
 				result.name = sanitize(str.slice(0, nextPart));
@@ -372,7 +395,7 @@
 			return joined;
 		}
 
-		function formatVar(varParts, parameters, className) {
+		function formatVar(varParts, parameters, classParts) {
 			let joined = "";
 			if (varParts.comment) {
 				joined += "//" + varParts.comment;
@@ -380,10 +403,21 @@
 					joined += "\n\t";
 				}
 			}
-			joined += (varParts.scope + " " + (varParts.static + " " + varParts.final).trim()).trim();
+			if (!classParts.enum) {
+				joined += varParts.scope;
+			}
+			if (varParts.abstract) {
+				joined += " abstract";
+			}
+			if (varParts.static) {
+				joined += " static";
+			}
+			if (varParts.final) {
+				joined += " final";
+			}
 			if (varParts.type) {
 				joined += " " + varParts.type;
-			} else if (varParts.isMethod && varParts.name !== className) {
+			} else if (varParts.isMethod && varParts.name !== classParts.name) {
 				// Add void return type to avoid errors
 				joined += " void";
 			}
@@ -392,33 +426,33 @@
 			}
 			if (varParts.isMethod) {
 				joined += "(";
-				joined += associateArgs(varParts, parameters, className);
+				joined += associateArgs(varParts, parameters, classParts.name);
 				joined += ")";
 			} else {
 				if (varParts.value) {
 					joined += " = " + varParts.value;
 				}
 			}
-			if (varParts.isMethod) {
+			if (varParts.isMethod && !classParts.interface) {
 				joined += sameLine ? " {" : "\n\t{";
 				joined += varParts.method;
 				joined += "\n\t}";
 			} else if (!varParts.commentOnly) {
-				joined += ";";
+				joined += classParts.enum ? "," : ";";
 			}
 			return joined;
 		}
 
-		function formatFromUML(parameters, methods, className) {
+		function formatFromUML(parameters, methods, classParts) {
 			let result = "";
 			for (let i = 0; i < parameters.length; i++) {
-				result += "\t" + formatVar(parameters[i]) + "\n";
+				result += "\t" + formatVar(parameters[i], parameters, classParts) + "\n";
 			}
 			for (let j = 0; j < methods.length; j++) {
 				if (result) {
 					result += "\n"
 				}
-				result += "\t" + formatVar(methods[j], parameters, className) + "\n";
+				result += "\t" + formatVar(methods[j], parameters, classParts) + "\n";
 			}
 			return result;
 		}
@@ -471,7 +505,11 @@
 			let result = "";
 			const parameters = [];
 			const methods = [];
-			let classParts = { extra: [] };
+			let classParts = {
+				extra: [],
+				interface: false,
+				enum: false
+			};
 			while (lines.length > 0) {
 				const line = lines.shift().trim();
 				if (!line || line === "--") continue;
@@ -491,15 +529,21 @@
 						let uniqueExtras = [];
 						// Prevent duplicates, e.g. <<abstract>> /classname/
 						for (let i = 0; i < classParts.extra.length; i++) {
-							const extraPart = classParts.extra[i].toLowerCase();
+							let extraPart = classParts.extra[i].toLowerCase();
 							if (uniqueExtras.indexOf(extraPart) === -1) {
+								if (extraPart === "enumerator") {
+									// Make sure it's an enum
+									extraPart = "enum";
+								}
 								uniqueExtras.push(extraPart);
 								extra += extraPart + " ";
 							}
 						}
 						result += extra;
-						// Cheap hack since interfaces aren't classes
-						if (uniqueExtras.indexOf("interface") === -1) {
+						classParts.interface = uniqueExtras.indexOf("interface") !== -1;
+						classParts.enum = uniqueExtras.indexOf("enum") !== -1;
+						// Cheap hack since interfaces and enums aren't classes
+						if (!classParts.interface && !classParts.enum) {
 							result += "class ";
 						}
 						result += classParts.name + (sameLine ? " {\n\n" : "\n{\n");
@@ -507,7 +551,7 @@
 				}
 			}
 			if (result) {
-				result += formatFromUML(parameters, methods, classParts.name);
+				result += formatFromUML(parameters, methods, classParts);
 				result += "}";
 			}
 			codeElem.textContent = result;
