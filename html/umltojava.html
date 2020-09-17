@@ -433,7 +433,7 @@
 					joined += " = " + varParts.value;
 				}
 			}
-			if (varParts.isMethod && !classParts.interface) {
+			if (varParts.isMethod && !varParts.abstract && !classParts.interface) {
 				joined += sameLine ? " {" : "\n\t{";
 				joined += varParts.method;
 				joined += "\n\t}";
