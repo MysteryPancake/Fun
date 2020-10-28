@@ -31,8 +31,9 @@
 		function setup() {
 			canvas = document.getElementById("canvasElem");
 			context = canvas.getContext("2d");
+			context.lineWidth = 4;
 			canvas.addEventListener("click", function(e) {
-				points.push({ x: e.offsetX, y: e.offsetY });
+				points.push({ x: e.offsetX, y: e.offsetY, color: triangleColor });
 				redo = [];
 				redraw();
 			});
@@ -41,10 +42,9 @@
 		function redraw() {
 			context.fillStyle = backgroundColor;
 			context.fillRect(0, 0, canvas.width, canvas.height);
-			context.fillStyle = triangleColor;
-			context.lineWidth = 4;
 			for (let i = 0; i < points.length; i += 3) {
 				const currentPoint = points[i];
+				context.fillStyle = currentPoint.color;
 				context.beginPath();
 				context.moveTo(currentPoint.x, currentPoint.y);
 				const nextPoint = points[i + 1];
@@ -81,7 +81,6 @@
 
 		function updateTriangleColor(elem) {
 			triangleColor = elem.value;
-			redraw();
 		}
 
 		function updateBackgroundColor(elem) {
@@ -97,7 +96,7 @@
 			<button onclick="undoPoint();">Undo point</button>
 			<button onclick="redoPoint();">Redo point</button>
 			<label for="triangleColorElem">Triangle color:</label>
-			<input id="triangleColorElem" type="color" value="#008000" oninput="updateTriangleColor(this);">
+			<input id="triangleColorElem" type="color" value="#008000" onchange="updateTriangleColor(this);">
 			<label for="backgroundColorElem">Background color:</label>
 			<input id="backgroundColorElem" type="color" value="#FFFFFF" oninput="updateBackgroundColor(this);">
 		</div>
