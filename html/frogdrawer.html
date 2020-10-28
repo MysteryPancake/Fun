@@ -17,7 +17,7 @@
 		}
 
 		canvas {
-			box-shadow: 0px 2px 8px gray;
+			box-shadow: 0px 2px 4px gray;
 		}
 		</style>
 		<script>
@@ -109,6 +109,12 @@
 			}
 		}
 
+		function undoAll() {
+			redo = redo.concat(points.reverse());
+			points = [];
+			redraw();
+		}
+
 		function undoPoint() {
 			const point = points.pop();
 			if (point) {
@@ -161,18 +167,21 @@
 	</head>
 	<body onload="setup();">
 		<h1>Frog Drawer</h1>
+		<div>
+			<label for="backgroundColorElem">Background color:</label>
+			<input id="backgroundColorElem" type="color" value="#FFFFFF" oninput="updateBackgroundColor(this);">
+			<label for="triangleColorElem">Triangle color:</label>
+			<input id="triangleColorElem" type="color" value="#00CC00" oninput="updateTriangleColor(this);">
+			<label for="strokeColorElem">Stroke color:</label>
+			<input id="strokeColorElem" type="color" value="#000000" oninput="updateStrokeColor(this);">
+			<label for="strokeWidthElem">Stroke width:</label>
+			<input id="strokeWidthElem" type="range" value="4" min="0" max="20" step="0.01" oninput="updateStrokeWidth(this);">
+		</div>
 		<canvas id="canvasElem" width="1024" height="512"></canvas>
 		<div>
 			<button onclick="undoPoint();">Undo point</button>
 			<button onclick="redoPoint();">Redo point</button>
-			<label for="triangleColorElem">Triangle color:</label>
-			<input id="triangleColorElem" type="color" value="#00CC00" oninput="updateTriangleColor(this);">
-			<label for="backgroundColorElem">Background color:</label>
-			<input id="backgroundColorElem" type="color" value="#FFFFFF" oninput="updateBackgroundColor(this);">
-			<label for="strokeWidthElem">Stroke width:</label>
-			<input id="strokeWidthElem" type="range" value="4" min="0" max="20" step="0.01" oninput="updateStrokeWidth(this);">
-			<label for="strokeColorElem">Stroke color:</label>
-			<input id="strokeColorElem" type="color" value="#000000" oninput="updateStrokeColor(this);">
+			<button onclick="undoAll();">Undo all</button>
 		</div>
 	</body>
 </html>
