@@ -12,43 +12,50 @@
 		<meta property="og:description" content="Frog drawing tool.">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<style>
+		* {
+			font-family: Verdana, Geneva, sans-serif;
+		}
+
 		canvas {
 			border: 1px solid black;
 		}
 		</style>
 		<script>
-		var points = [];
-		var redo = [];
-		var canvas;
-		var context;
-		var triangleColor = "#008000";
+		let points = [];
+		let redo = [];
+		let canvas;
+		let context;
+		let triangleColor = "#008000";
+		let backgroundColor = "#FFFFFF";
 
 		function setup() {
-			canvas = document.getElementById("bruh");
+			canvas = document.getElementById("canvasElem");
 			context = canvas.getContext("2d");
 			canvas.addEventListener("click", function(e) {
-				var x = e.offsetX;
-				var y = e.offsetY;
-				points.push({ x: x, y: y });
+				points.push({ x: e.offsetX, y: e.offsetY });
 				redo = [];
 				redraw();
 			});
 		}
 
 		function redraw() {
-			context.clearRect(0, 0, canvas.width, canvas.height);
+			context.fillStyle = backgroundColor;
+			context.fillRect(0, 0, canvas.width, canvas.height);
 			context.fillStyle = triangleColor;
 			context.lineWidth = 4;
-			for (var i = 0; i < points.length; i += 3) {
+			for (let i = 0; i < points.length; i += 3) {
+				const currentPoint = points[i];
 				context.beginPath();
-				context.moveTo(points[i].x, points[i].y);
-				if (points[i + 1]) {
-					context.lineTo(points[i + 1].x, points[i + 1].y);
+				context.moveTo(currentPoint.x, currentPoint.y);
+				const nextPoint = points[i + 1];
+				if (nextPoint) {
+					context.lineTo(nextPoint.x, nextPoint.y);
+					const nextPoint2 = points[i + 2];
+					if (nextPoint2) {
+						context.lineTo(nextPoint2.x, nextPoint2.y);
+					}
 				} else {
-					context.lineTo(points[i].x, points[i].y + 2);
-				}
-				if (points[i + 2]) {
-					context.lineTo(points[i + 2].x, points[i + 2].y);
+					context.lineTo(currentPoint.x, currentPoint.y + 2);
 				}
 				context.closePath();
 				context.stroke();
@@ -57,7 +64,7 @@
 		}
 
 		function undoPoint() {
-			var point = points.pop();
+			const point = points.pop();
 			if (point) {
 				redo.push(point);
 			}
@@ -65,28 +72,34 @@
 		}
 
 		function redoPoint() {
-			var point = redo.pop();
+			const point = redo.pop();
 			if (point) {
 				points.push(point);
 			}
 			redraw();
 		}
 
-		function updateColor(elem) {
+		function updateTriangleColor(elem) {
 			triangleColor = elem.value;
+			redraw();
+		}
+
+		function updateBackgroundColor(elem) {
+			backgroundColor = elem.value;
 			redraw();
 		}
 		</script>
 	</head>
 	<body onload="setup();">
 		<h1>Frog Drawer</h1>
-		<canvas id="bruh" width="512" height="256"></canvas>
+		<canvas id="canvasElem" width="512" height="256"></canvas>
 		<div>
 			<button onclick="undoPoint();">Undo point</button>
 			<button onclick="redoPoint();">Redo point</button>
-			<label for="colorInput">Triangle color:</label>
-			<input id="colorInput" type="color" value="#008000" oninput="updateColor(this);">
+			<label for="triangleColorElem">Triangle color:</label>
+			<input id="triangleColorElem" type="color" value="#008000" oninput="updateTriangleColor(this);">
+			<label for="backgroundColorElem">Background color:</label>
+			<input id="backgroundColorElem" type="color" value="#FFFFFF" oninput="updateBackgroundColor(this);">
 		</div>
 	</body>
 </html>
-
