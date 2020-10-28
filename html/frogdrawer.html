@@ -17,7 +17,7 @@
 		}
 
 		canvas {
-			border: 1px solid black;
+			box-shadow: 0px 2px 8px gray;
 		}
 		</style>
 		<script>
@@ -25,6 +25,7 @@
 		let redo = [];
 		let canvas;
 		let context;
+		let bounds;
 		let triangleColor;
 		let backgroundColor;
 		let strokeColor;
@@ -35,14 +36,15 @@
 		function setup() {
 			canvas = document.getElementById("canvasElem");
 			context = canvas.getContext("2d");
+			bounds = canvas.getBoundingClientRect();
 			triangleColor = document.getElementById("triangleColorElem").value;
 			backgroundColor = document.getElementById("backgroundColorElem").value;
 			strokeColor = document.getElementById("strokeColorElem").value;
 			strokeWidth = parseFloat(document.getElementById("strokeWidthElem").value);
 			canvas.addEventListener("mousedown", function(e) {
 				currentPoint = {
-					x: e.offsetX,
-					y: e.offsetY,
+					x: e.pageX  - bounds.left,
+					y: e.pageY  - bounds.top,
 					triangleColor: triangleColor,
 					strokeColor: strokeColor,
 					strokeWidth: strokeWidth
@@ -52,13 +54,13 @@
 				redraw();
 				clicking = true;
 			});
-			canvas.addEventListener("mouseup", function(e) {
+			document.addEventListener("mouseup", function(e) {
 				clicking = false;
 			});
-			canvas.addEventListener("mousemove", function(e) {
+			document.addEventListener("mousemove", function(e) {
 				if (clicking && currentPoint) {
-					currentPoint.x = e.offsetX;
-					currentPoint.y = e.offsetY;
+					currentPoint.x = e.pageX - bounds.left;
+					currentPoint.y = e.pageY - bounds.top;
 					redraw();
 				}
 			});
@@ -159,7 +161,7 @@
 	</head>
 	<body onload="setup();">
 		<h1>Frog Drawer</h1>
-		<canvas id="canvasElem" width="512" height="256"></canvas>
+		<canvas id="canvasElem" width="1024" height="512"></canvas>
 		<div>
 			<button onclick="undoPoint();">Undo point</button>
 			<button onclick="redoPoint();">Redo point</button>
@@ -167,8 +169,6 @@
 			<input id="triangleColorElem" type="color" value="#00CC00" oninput="updateTriangleColor(this);">
 			<label for="backgroundColorElem">Background color:</label>
 			<input id="backgroundColorElem" type="color" value="#FFFFFF" oninput="updateBackgroundColor(this);">
-		</div>
-		<div>
 			<label for="strokeWidthElem">Stroke width:</label>
 			<input id="strokeWidthElem" type="range" value="4" min="0" max="20" step="0.01" oninput="updateStrokeWidth(this);">
 			<label for="strokeColorElem">Stroke color:</label>
