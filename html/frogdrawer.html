@@ -91,7 +91,7 @@
 					context.lineTo(currentPoint.x, currentPoint.y + 2);
 				}
 				context.closePath();
-				if (lineWidth !=- 0) {
+				if (lineWidth !== 0) {
 					context.lineWidth = lineWidth;
 					context.stroke();
 				}
@@ -99,10 +99,20 @@
 			}
 		}
 
+		function setCurrentProperties(point) {
+			if (point) {
+				point.triangleColor = triangleColor;
+				point.strokeColor = strokeColor;
+				point.strokeWidth = strokeWidth;
+			}
+		}
+
 		function undoPoint() {
 			const point = points.pop();
 			if (point) {
 				redo.push(point);
+				currentPoint = points[points.length - 1];
+				setCurrentProperties(currentPoint);
 			}
 			redraw();
 		}
@@ -111,6 +121,8 @@
 			const point = redo.pop();
 			if (point) {
 				points.push(point);
+				currentPoint = point;
+				setCurrentProperties(currentPoint);
 			}
 			redraw();
 		}
