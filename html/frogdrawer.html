@@ -25,17 +25,28 @@
 		let redo = [];
 		let canvas;
 		let context;
-		let triangleColor = "#008000";
-		let backgroundColor = "#FFFFFF";
+		let triangleColor;
+		let backgroundColor;
+		let strokeColor;
+		let strokeWidth;
 		let clicking = false;
 		let currentPoint;
 
 		function setup() {
 			canvas = document.getElementById("canvasElem");
 			context = canvas.getContext("2d");
-			context.lineWidth = 4;
+			triangleColor = document.getElementById("triangleColorElem").value;
+			backgroundColor = document.getElementById("backgroundColorElem").value;
+			strokeColor = document.getElementById("strokeColorElem").value;
+			strokeWidth = parseFloat(document.getElementById("strokeWidthElem").value);
 			canvas.addEventListener("mousedown", function(e) {
-				currentPoint = { x: e.offsetX, y: e.offsetY, color: triangleColor };
+				currentPoint = {
+					x: e.offsetX,
+					y: e.offsetY,
+					triangleColor: triangleColor,
+					strokeColor: strokeColor,
+					strokeWidth: strokeWidth
+				};
 				points.push(currentPoint);
 				redo = [];
 				redraw();
@@ -53,28 +64,37 @@
 			});
 		}
 
+		function setParams(context, point) {
+			context.fillStyle = point.triangleColor;
+			context.strokeStyle = point.strokeColor;
+			return point.strokeWidth;
+		}
+
 		function redraw() {
 			context.fillStyle = backgroundColor;
 			context.fillRect(0, 0, canvas.width, canvas.height);
 			for (let i = 0; i < points.length; i += 3) {
 				const currentPoint = points[i];
-				context.fillStyle = currentPoint.color;
+				let lineWidth = setParams(context, currentPoint);
 				context.beginPath();
 				context.moveTo(currentPoint.x, currentPoint.y);
 				const nextPoint = points[i + 1];
 				if (nextPoint) {
-					context.fillStyle = nextPoint.color;
+					lineWidth = setParams(context, nextPoint);
 					context.lineTo(nextPoint.x, nextPoint.y);
 					const nextPoint2 = points[i + 2];
 					if (nextPoint2) {
-						context.fillStyle = nextPoint2.color;
+						lineWidth = setParams(context, nextPoint2);
 						context.lineTo(nextPoint2.x, nextPoint2.y);
 					}
 				} else {
 					context.lineTo(currentPoint.x, currentPoint.y + 2);
 				}
 				context.closePath();
-				context.stroke();
+				if (lineWidth !=- 0) {
+					context.lineWidth = lineWidth;
+					context.stroke();
+				}
 				context.fill();
 			}
 		}
@@ -98,13 +118,29 @@
 		function updateTriangleColor(elem) {
 			triangleColor = elem.value;
 			if (currentPoint) {
-				currentPoint.color = triangleColor;
+				currentPoint.triangleColor = triangleColor;
 			}
 			redraw();
 		}
 
 		function updateBackgroundColor(elem) {
 			backgroundColor = elem.value;
+			redraw();
+		}
+
+		function updateStrokeWidth(elem) {
+			strokeWidth = parseFloat(elem.value);
+			if (currentPoint) {
+				currentPoint.strokeWidth = strokeWidth;
+			}
+			redraw();
+		}
+
+		function updateStrokeColor(elem) {
+			strokeColor = elem.value;
+			if (currentPoint) {
+				currentPoint.strokeColor = strokeColor;
+			}
 			redraw();
 		}
 		</script>
@@ -116,9 +152,15 @@
 			<button onclick="undoPoint();">Undo point</button>
 			<button onclick="redoPoint();">Redo point</button>
 			<label for="triangleColorElem">Triangle color:</label>
-			<input id="triangleColorElem" type="color" value="#008000" oninput="updateTriangleColor(this);">
+			<input id="triangleColorElem" type="color" value="#00CC00" oninput="updateTriangleColor(this);">
 			<label for="backgroundColorElem">Background color:</label>
 			<input id="backgroundColorElem" type="color" value="#FFFFFF" oninput="updateBackgroundColor(this);">
+		</div>
+		<div>
+			<label for="strokeWidthElem">Stroke width:</label>
+			<input id="strokeWidthElem" type="range" value="4" min="0" max="20" step="0.01" oninput="updateStrokeWidth(this);">
+			<label for="strokeColorElem">Stroke color:</label>
+			<input id="strokeColorElem" type="color" value="#000000" oninput="updateStrokeColor(this);">
 		</div>
 	</body>
 </html>
