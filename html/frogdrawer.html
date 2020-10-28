@@ -115,6 +115,12 @@
 			redraw();
 		}
 
+		function redoAll() {
+			points = points.concat(redo.reverse());
+			redo = [];
+			redraw();
+		}
+
 		function undoPoint() {
 			const point = points.pop();
 			if (point) {
@@ -182,6 +188,7 @@
 			<button onclick="undoPoint();">Undo point</button>
 			<button onclick="redoPoint();">Redo point</button>
 			<button onclick="undoAll();">Undo all</button>
+			<button onclick="redoAll();">Redo all</button>
 		</div>
 	</body>
 </html>
