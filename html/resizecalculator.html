@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Megapixel Resize Calculator</title>
+		<meta name="description" content="Maximum width and height calculator for Google Docs.">
+		<meta name="keywords" content="Google Docs, Megapixel, Resize, Calculator">
+		<meta property="og:title" content="Megapixel Resize Calculator">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/resizecalculator">
+		<meta property="og:site_name" content="Megapixel Resize Calculator">
+		<meta property="og:description" content="Maximum width and height calculator for Google Docs.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: "Trebuchet MS", Helvetica, sans-serif;
+		}
+		
+		div {
+			padding: 3px 0;
+		}
+		</style>
+		<script>
+		let widthElem;
+		let heightElem;
+		let targetElem;
+		let roundUpElem;
+		let newWidthElem;
+		let newHeightElem;
+		let megapixelDisplay;
+		let megapixelDisplay2;
+
+		function setup() {
+			widthElem = document.getElementById("widthInput");
+			heightElem = document.getElementById("heightInput");
+			targetElem = document.getElementById("targetInput");
+			roundUpElem = document.getElementById("roundUpCheckbox");
+			newWidthElem = document.getElementById("newWidthOutput");
+			newHeightElem = document.getElementById("newHeightOutput");
+			megapixelDisplay = document.getElementById("megapixelLabel");
+			megapixelDisplay2 = document.getElementById("megapixelLabel2");	
+		}
+
+		function calculate() {
+			const originalWidth = parseInt(widthElem.value);
+			const originalHeight = parseInt(heightElem.value);
+			const targetSize = parseFloat(targetElem.value);
+			if (originalWidth && originalHeight && targetSize) {
+				const roundUp = roundUpElem.checked;
+				const megapixelCount = (originalWidth * originalHeight) / 1000000;
+				megapixelDisplay.textContent = " = " + megapixelCount + " megapixels";
+				const ratio = Math.sqrt(targetSize / megapixelCount);
+				const newWidth = (roundUp ? Math.ceil : Math.floor)(originalWidth * ratio);
+				const newHeight = (roundUp ? Math.ceil : Math.floor)(originalHeight * ratio);
+				megapixelDisplay2.textContent =  " = " + ((newWidth * newHeight) / 1000000) + " megapixels";
+				newWidthElem.value = newWidth;
+				newHeightElem.value = newHeight;
+			}
+		}
+
+		function uploadImage(elem) {
+			const image = elem.files[0];
+			if (image) {
+				const reader = new FileReader();
+				reader.readAsDataURL(image);
+				reader.onload = function(e) {
+					const image = new Image();
+					image.src = e.target.result;
+					image.onload = function() {
+						widthElem.value = this.width;
+						heightElem.value = this.height;
+						calculate();
+					}
+				}
+			}
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<h1>Megapixel Resize Calculator</h1>
+		<p>This was made because Google Docs requires images to be smaller than 25 megapixels.</p>
+		<div>
+			<label for="widthInput">Width and height (pixels) OR </label>
+			<input type="file" accept="image/*" onchange="uploadImage(this);">
+		</div>
+		<div>
+			<input type="number" id="widthInput" oninput="calculate();">
+			<input type="number" id="heightInput" oninput="calculate();">
+			<span id="megapixelLabel"></span>
+		</div>
+		<div>
+			<label for="targetInput">Target area (megapixels)</label>
+		</div>
+		<div>
+			<input type="number" id="targetInput" value="25" oninput="calculate();">
+		</div>
+		<div>
+			<label for="newWidthOutput">New width and height (pixels)</label>
+		</div>
+		<div>
+			<input type="number" id="newWidthOutput" readonly>
+			<input type="number" id="newHeightOutput" readonly>
+			<span id="megapixelLabel2"></span>
+		</div>
+		<div>
+			<input type="checkbox" id="roundUpCheckbox">
+			<label for="roundUpCheckbox" oninput="calculate();">Round up</label>
+		</div>
+	</body>
+</html>
