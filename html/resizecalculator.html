@@ -24,6 +24,7 @@
 		let widthElem;
 		let heightElem;
 		let targetElem;
+		let targetElem2;
 		let roundUpElem;
 		let newWidthElem;
 		let newHeightElem;
@@ -34,6 +35,7 @@
 			widthElem = document.getElementById("widthInput");
 			heightElem = document.getElementById("heightInput");
 			targetElem = document.getElementById("targetInput");
+			targetElem2 = document.getElementById("targetInput2");
 			roundUpElem = document.getElementById("roundUpCheckbox");
 			newWidthElem = document.getElementById("newWidthOutput");
 			newHeightElem = document.getElementById("newHeightOutput");
@@ -44,18 +46,28 @@
 		function calculate() {
 			const originalWidth = parseInt(widthElem.value);
 			const originalHeight = parseInt(heightElem.value);
-			const targetSize = parseFloat(targetElem.value);
+			const targetSize = parseInt(targetElem.value);
 			if (originalWidth && originalHeight && targetSize) {
 				const roundUp = roundUpElem.checked;
-				const megapixelCount = (originalWidth * originalHeight) / 1000000;
-				megapixelDisplay.textContent = " = " + megapixelCount + " megapixels";
-				const ratio = Math.sqrt(targetSize / megapixelCount);
+				const originalArea = originalWidth * originalHeight;
+				megapixelDisplay.textContent = " = " + (originalArea / 1000000) + " megapixels";
+				const ratio = Math.sqrt(targetSize / originalArea);
 				const newWidth = (roundUp ? Math.ceil : Math.floor)(originalWidth * ratio);
 				const newHeight = (roundUp ? Math.ceil : Math.floor)(originalHeight * ratio);
 				megapixelDisplay2.textContent =  " = " + ((newWidth * newHeight) / 1000000) + " megapixels";
 				newWidthElem.value = newWidth;
 				newHeightElem.value = newHeight;
 			}
+		}
+
+		function calculateMegapixels() {
+			targetElem2.value = parseInt(targetElem.value) / 1000000;
+			calculate();
+		}
+
+		function calculatePixels() {
+			targetElem.value = parseFloat(targetElem2.value) * 1000000;
+			calculate();
 		}
 
 		function uploadImage(elem) {
@@ -89,10 +101,11 @@
 			<span id="megapixelLabel"></span>
 		</div>
 		<div>
-			<label for="targetInput">Target area (megapixels)</label>
+			<label for="targetInput">Target area (pixels/megapixels)</label>
 		</div>
 		<div>
-			<input type="number" id="targetInput" value="25" oninput="calculate();">
+			<input type="number" id="targetInput" value="25000000" oninput="calculateMegapixels();">
+			<input type="number" id="targetInput2" value="25" oninput="calculatePixels();">
 		</div>
 		<div>
 			<label for="newWidthOutput">New width and height (pixels)</label>
