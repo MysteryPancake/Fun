@@ -1,4 +1,4 @@
-public class Lambda {
+class Lambda {
 
 	private static int i = 0;
 
