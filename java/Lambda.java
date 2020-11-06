@@ -11,7 +11,7 @@ class Lambda {
 	}
 
 	public String toString() {
-		StringBuilder e = (i) -> this + i;
+		StringBuilder e = i -> this + i;
 		if (i > 10) return "bruh";
 		return e.run(String.valueOf(i++));
 	}
