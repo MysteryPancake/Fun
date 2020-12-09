@@ -43,7 +43,7 @@ vec2 mainSound(float time) {
 		if (i == 0) {
 			repeat = mod(time, 0.125) * (2.0 - cos(time));
 		}
-        repeat = min(repeat, 0.7 + cos(time * 0.25) * 0.3);
+		repeat = min(repeat, 0.7 + cos(time * 0.25) * 0.3);
 		float offset = sin(float(i)) * phaseOffset;
 		left += sawtooth(repeat, (time + offset) * noteFreq(notes[i])) * amplitudes[i];
 		float offset2 = cos(float(i)) * phaseOffset;

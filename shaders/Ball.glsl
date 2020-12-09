@@ -6,7 +6,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	float radius = dot(cxy, cxy);
 	const vec3 ambient = vec3(0.5, 0.2, 0.1);
 	const vec3 diffuse = vec3(1, 0.5, 0.2);
-    vec3 direction = normalize(vec3(cos(iTime), sin(iTime), -0.5));
+	vec3 direction = normalize(vec3(cos(iTime), sin(iTime), -0.5));
 	vec3 normal = vec3(cxy, sqrt(1.0 - radius));
 	float color = max(dot(normal, direction), 0.0);
 	float delta = fwidth(radius);
