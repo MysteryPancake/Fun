@@ -1,7 +1,7 @@
 #include <iostream>
 
-int main(int argc, char** argv) {
-
+int main(int argc, char** argv)
+{
 	int tomjedi9 = 420;
 
 	int* pointer = &tomjedi9;
