@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Wave Pluck</title>
+		<meta name="description" content="Plucked oscilloscope test.">
+		<meta name="keywords" content="Audio, Oscilloscope, Reverse, Spring, Waveform">
+		<meta property="og:title" content="Wave Pluck">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/wavepluck">
+		<meta property="og:site_name" content="Wave Pluck">
+		<meta property="og:description" content="Plucked oscilloscope test.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		html, body {
+			margin: 0;
+			overflow: hidden;
+			padding: 0;
+		}
+
+		canvas {
+			display: block;
+		}
+		</style>
+		<script>
+		var canvas;
+		var player;
+		var context;
+		var frame = 0;
+		var pitch = 0;
+		var springs = [];
+		var requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(e) { return window.setTimeout(e, 1000 / 60); };
+		var cancelFrame = window.cancelAnimationFrame || window.webkitCancelAnimationFrame || window.mozCancelAnimationFrame || window.oCancelAnimationFrame || window.msCancelAnimationFrame || function(id) { window.clearTimeout(id); };
+
+		var variables = {
+			dampening: 0.1,
+			tension: 0.1,
+			passes: 32,
+			spread: 0.3
+		};
+
+		function spring(height) {
+			this.height = height;
+			this.target = height;
+			this.velocity = 0;
+			this.update = function(tension, dampening) {
+				this.velocity += tension * (this.target - this.height) - (this.velocity * dampening);
+				this.height += this.velocity;
+			};
+		}
+
+		function updateSprings(springs, tension, dampening, passes, spread) {
+			for (var i = 0; i < springs.length; i++) {
+				springs[i].update(tension, dampening);
+			}
+			var leftDeltas = [];
+			var rightDeltas = [];
+			for (var j = 0; j < passes; j++) {
+				for (var i = 0; i < springs.length; i++) {
+					if (i > 0) {
+						leftDeltas[i] = spread * (springs[i].height - springs[i - 1].height);
+						springs[i - 1].velocity += leftDeltas[i];
+					}
+					if (i < springs.length - 1) {
+						rightDeltas[i] = spread * (springs[i].height - springs[i + 1].height);
+						springs[i + 1].velocity += rightDeltas[i];
+					}
+				}
+				for (var i = 0; i < springs.length; i++) {
+					if (i > 0) {
+						springs[i - 1].height += leftDeltas[i];
+					}
+					if (i < springs.length - 1) {
+						springs[i + 1].height += rightDeltas[i];
+					}
+				}
+			}
+		}
+
+		function setup() {
+			for (var i = 0; i < 1024; i++) {
+				springs.push(new spring(0));
+			}
+			canvas = document.getElementById("canvas");
+			context = canvas.getContext("2d", { alpha: false });
+			window.addEventListener("resize", resize);
+			window.addEventListener("orientationchange", resize);
+			resize();
+			window.addEventListener("mousedown", clicked);
+			window.addEventListener("contextmenu", hide);
+		}
+
+		function hide(e) {
+			e.preventDefault();
+		}
+
+		function clicked(e) {
+			e.preventDefault();
+			if (!player) {
+				player = new (window.AudioContext || window.webkitAudioContext)();
+				var node = player.createScriptProcessor(springs.length, 1, 1);
+				node.onaudioprocess = function(e) {
+					updateSprings(springs, variables.tension, variables.dampening, variables.passes, variables.spread);
+					var output = e.outputBuffer.getChannelData(0);
+					for (var i = 0; i < springs.length; i++) {
+						output[i] = (springs[i * (pitch + 1) % springs.length].height) * 0.01;
+					}
+				};
+				node.connect(player.destination);
+			}
+			pitch = (pitch + 1) % 4;
+			if (e.button == 2) {
+				var nearest = Math.floor(e.pageX / canvas.width * (springs.length - 1));
+				springs[nearest].velocity += (e.pageY - (canvas.height * 0.5)) * 8;
+			} else {
+				for (var i = 64; i < springs.length - 64; i++) {
+					springs[i].velocity += (e.pageY - canvas.height * 0.5) * (Math.random() - 0.5) * 2;
+				}
+			}
+		}
+
+		function resize() {
+			cancelFrame(frame);
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+			frame = requestFrame(draw);
+		}
+
+		function draw() {
+			context.fillStyle = "black";
+			context.fillRect(0, 0, canvas.width, canvas.height);
+			context.strokeStyle = "white";
+			context.lineWidth = 2;
+			context.beginPath();
+			for (var i = 0; i < springs.length; i++) {
+				context.lineTo(canvas.width * i / (springs.length - 1), springs[i].height + (canvas.height * 0.5));
+			}
+			context.stroke();
+			frame = requestFrame(draw);
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<canvas id="canvas"></canvas>
+	</body>
+</html>
