@@ -32,13 +32,14 @@
 		var requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(e) { return window.setTimeout(e, 1000 / 60); };
 		var cancelFrame = window.cancelAnimationFrame || window.webkitCancelAnimationFrame || window.mozCancelAnimationFrame || window.oCancelAnimationFrame || window.msCancelAnimationFrame || function(id) { window.clearTimeout(id); };
 
-		var variables = {
+		var params = {
 			dampening: 0.1,
 			tension: 0.1,
 			passes: 32,
 			spread: 0.3
 		};
 
+		// From https://gamedevelopment.tutsplus.com/tutorials/make-a-splash-with-dynamic-2d-water-effects--gamedev-236
 		function spring(height) {
 			this.height = height;
 			this.target = height;
@@ -96,11 +97,14 @@
 
 		function clicked(e) {
 			e.preventDefault();
+			// AudioContext must be created after interaction with the website
 			if (!player) {
 				player = new (window.AudioContext || window.webkitAudioContext)();
+				// Buffer size is locked to spring size because I'm too lazy to make a circular buffer
+				// As a consequence, the pitch has to be a multiple to avoid artifacts near edges
 				var node = player.createScriptProcessor(springs.length, 1, 1);
 				node.onaudioprocess = function(e) {
-					updateSprings(springs, variables.tension, variables.dampening, variables.passes, variables.spread);
+					updateSprings(springs, params.tension, params.dampening, params.passes, params.spread);
 					var output = e.outputBuffer.getChannelData(0);
 					for (var i = 0; i < springs.length; i++) {
 						output[i] = (springs[i * (pitch + 1) % springs.length].height) * 0.01;
@@ -108,11 +112,15 @@
 				};
 				node.connect(player.destination);
 			}
+			// Fake changing the length of the string via resampling
 			pitch = (pitch + 1) % 4;
 			if (e.button == 2) {
+				// Right click plucks only one spring
 				var nearest = Math.floor(e.pageX / canvas.width * (springs.length - 1));
 				springs[nearest].velocity += (e.pageY - (canvas.height * 0.5)) * 8;
 			} else {
+				// Left click plucks all springs at once, except the first and last 64 to reduce artifacts near edges
+				// Artifacts could be reduced with a windowing function or adding extra springs past the edges to overlap-add
 				for (var i = 64; i < springs.length - 64; i++) {
 					springs[i].velocity += (e.pageY - canvas.height * 0.5) * (Math.random() - 0.5) * 2;
 				}
