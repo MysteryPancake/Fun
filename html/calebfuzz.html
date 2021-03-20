@@ -62,6 +62,7 @@
 		}
 
 		function drawGrid() {
+			canvasContext.beginPath();
 			for (var i = 0; i <= canvas.width; i += 32) {
 				canvasContext.moveTo(i, 0);
 				canvasContext.lineTo(i, canvas.height);
