@@ -62,13 +62,13 @@
 		}
 
 		function drawGrid() {
-			for (var x = 0; x <= canvas.width; x += 32) {
-				canvasContext.moveTo(x, 0);
-				canvasContext.lineTo(x, canvas.height);
+			for (var i = 0; i <= canvas.width; i += 32) {
+				canvasContext.moveTo(i, 0);
+				canvasContext.lineTo(i, canvas.height);
 			}
-			for (var x = 0; x <= canvas.height; x += 32) {
-				canvasContext.moveTo(0, x);
-				canvasContext.lineTo(canvas.width, x);
+			for (var j = 0; j <= canvas.height; j += 32) {
+				canvasContext.moveTo(0, j);
+				canvasContext.lineTo(canvas.width, j);
 			}
 			canvasContext.strokeStyle = "#325564";
 			canvasContext.lineWidth = 2;
