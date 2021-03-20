@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Caleb Fuzz</title>
+		<meta name="description" content="Rough remake of Caleb's Fuzz Pedal.">
+		<meta name="keywords" content="Audio, Fuzz, Distort, Amplify, Boost, Overdrive">
+		<meta property="og:title" content="Caleb Fuzz">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/calebfuzz">
+		<meta property="og:site_name" content="Caleb Fuzz">
+		<meta property="og:description" content="Rough remake of Caleb's Fuzz Pedal.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: "Trebuchet MS", Helvetica, sans-serif;
+		}
+		
+		div {
+			padding: 3px 0;
+		}
+
+		canvas {
+			display: block;
+			mix-blend-mode: multiply;
+		}
+
+		#shadowed {
+			display: inline-block;
+			border: 4px solid #14141E;
+			box-shadow: inset 0 0 32px #232832;
+			padding: 0;
+		}
+		</style>
+		<script>
+		var context;
+		var processor;
+		var player;
+		var analyser;
+		var canvas;
+		var canvasContext;
+		var mixRatio = 0;
+		var dataArray = new Uint8Array(1024);
+		var requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(e) { return window.setTimeout(e, 1000 / 60); };
+
+		function setup() {
+			player = document.getElementById("player");
+			canvas = document.getElementById("oscilloscope");
+			canvasContext = canvas.getContext("2d");
+			canvasContext.fillStyle = "#4B7382";
+			canvasContext.shadowColor = "#73DCDC";
+			drawBackground();
+			drawGrid();
+			canvasContext.beginPath();
+			canvasContext.moveTo(0, canvas.height / 2);
+			canvasContext.lineTo(canvas.width, canvas.height / 2);
+			strokeOscilloscope();
+		}
+
+		function drawBackground() {
+			canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+		}
+
+		function drawGrid() {
+			for (var x = 0; x <= canvas.width; x += 32) {
+				canvasContext.moveTo(x, 0);
+				canvasContext.lineTo(x, canvas.height);
+			}
+			for (var x = 0; x <= canvas.height; x += 32) {
+				canvasContext.moveTo(0, x);
+				canvasContext.lineTo(canvas.width, x);
+			}
+			canvasContext.strokeStyle = "#325564";
+			canvasContext.lineWidth = 2;
+			canvasContext.stroke();
+		}
+
+		function setupAudio() {
+			context = new (window.AudioContext || window.webkitAudioContext)();
+			var source = context.createMediaElementSource(player);
+			processor = context.createScriptProcessor(8192, 2, 2);
+			analyser = context.createAnalyser();
+			analyser.fftSize = dataArray.length;
+			processor.onaudioprocess = function(e) {
+				for (var channel = 0; channel < e.outputBuffer.numberOfChannels; channel++) {
+					var inputData = e.inputBuffer.getChannelData(channel);
+					var outputData = e.outputBuffer.getChannelData(channel);
+					for (var sample = 0; sample < outputData.length; sample++) {
+						var originalSample = inputData[sample];
+						// Round signal to 1 or -1, infinite amplification
+						var distorted = originalSample > 0 ? 1 : -1;
+						outputData[sample] = (distorted * mixRatio) + (originalSample * (1 - mixRatio));
+					}
+				}
+			}
+			source.connect(processor);
+			processor.connect(analyser);
+			analyser.connect(context.destination);
+			draw();
+		}
+
+		function uploadFile(elem) {
+			if (!context) {
+				setupAudio();
+			}
+			player.src = window.URL.createObjectURL(elem.files[0]);
+		}
+
+		function updateMixRatio(elem) {
+			mixRatio = parseFloat(elem.value);
+		}
+
+		function strokeOscilloscope() {
+			canvasContext.globalCompositeOperation = "screen";
+			canvasContext.shadowBlur = 16;
+			canvasContext.strokeStyle = "#64FAF0";
+			canvasContext.lineWidth = 6;
+			canvasContext.stroke();
+			canvasContext.globalCompositeOperation = "source-over";
+			canvasContext.shadowBlur = 0;
+		}
+
+		function draw() {
+			analyser.getByteTimeDomainData(dataArray);
+			drawBackground();
+			drawGrid();
+			canvasContext.beginPath();
+			for (var i = 0; i < dataArray.length; i++) {
+				// Samples are retrieved between 0 and 255, where 128 is the middle
+				canvasContext.lineTo(i, (canvas.height / 2) + (dataArray[i] - 128) * 0.75);
+			}
+			strokeOscilloscope();
+			requestFrame(draw);
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<h1>Caleb Fuzz</h1>
+		<div>
+			<input type="file" accept="audio/*,video/*" onchange="uploadFile(this);">
+		</div>
+		<div>
+			<audio controls autoplay id="player"></audio>
+		</div>
+		<div id="shadowed">
+			<canvas id="oscilloscope" width="1024" height="256"></canvas>
+		</div>
+		<div>
+			<label for="mixRatio">Dry/Wet Mix</label>
+			<input id="mixRatio" type="range" min="0" max="1" step="0.01" value="0" oninput="updateMixRatio(this);">
+		</div>
+	</body>
+</html>
