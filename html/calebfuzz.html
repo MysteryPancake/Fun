@@ -33,15 +33,15 @@
 		}
 		</style>
 		<script>
-		var context;
-		var processor;
-		var player;
-		var analyser;
-		var canvas;
-		var canvasContext;
-		var mixRatio = 0;
-		var dataArray = new Uint8Array(1024);
-		var requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(e) { return window.setTimeout(e, 1000 / 60); };
+		let context;
+		let processor;
+		let player;
+		let analyser;
+		let canvas;
+		let canvasContext;
+		let mixRatio = 0;
+		const dataArray = new Uint8Array(1024);
+		const requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(e) { return window.setTimeout(e, 1000 / 60); };
 
 		function setup() {
 			player = document.getElementById("player");
@@ -63,11 +63,11 @@
 
 		function drawGrid() {
 			canvasContext.beginPath();
-			for (var i = 0; i <= canvas.width; i += 32) {
+			for (let i = 0; i <= canvas.width; i += 32) {
 				canvasContext.moveTo(i, 0);
 				canvasContext.lineTo(i, canvas.height);
 			}
-			for (var j = 0; j <= canvas.height; j += 32) {
+			for (let j = 0; j <= canvas.height; j += 32) {
 				canvasContext.moveTo(0, j);
 				canvasContext.lineTo(canvas.width, j);
 			}
@@ -78,18 +78,18 @@
 
 		function setupAudio() {
 			context = new (window.AudioContext || window.webkitAudioContext)();
-			var source = context.createMediaElementSource(player);
+			const source = context.createMediaElementSource(player);
 			processor = context.createScriptProcessor(8192, 2, 2);
 			analyser = context.createAnalyser();
 			analyser.fftSize = dataArray.length;
 			processor.onaudioprocess = function(e) {
-				for (var channel = 0; channel < e.outputBuffer.numberOfChannels; channel++) {
-					var inputData = e.inputBuffer.getChannelData(channel);
-					var outputData = e.outputBuffer.getChannelData(channel);
-					for (var sample = 0; sample < outputData.length; sample++) {
-						var originalSample = inputData[sample];
+				for (let channel = 0; channel < e.outputBuffer.numberOfChannels; channel++) {
+					const inputData = e.inputBuffer.getChannelData(channel);
+					const outputData = e.outputBuffer.getChannelData(channel);
+					for (let sample = 0; sample < outputData.length; sample++) {
+						const originalSample = inputData[sample];
 						// Round signal to 1 or -1, infinite amplification
-						var distorted = originalSample === 0 ? 0 : (originalSample > 0 ? 1 : -1);
+						const distorted = originalSample === 0 ? 0 : (originalSample > 0 ? 1 : -1);
 						outputData[sample] = (distorted * mixRatio) + (originalSample * (1 - mixRatio));
 					}
 				}
@@ -126,7 +126,7 @@
 			drawBackground();
 			drawGrid();
 			canvasContext.beginPath();
-			for (var i = 0; i < dataArray.length; i++) {
+			for (let i = 0; i < dataArray.length; i++) {
 				// Samples are retrieved between 0 and 255, where 128 is the middle
 				canvasContext.lineTo(i, (canvas.height / 2) + (dataArray[i] - 128) * 0.75);
 			}
