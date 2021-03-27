@@ -2,7 +2,7 @@
 
 void pointerFunc(int* pointer)
 {
-	std::cout << &pointer << std::endl;
+	std::cout << &pointer << '\n';
 }
 
 int main(int argc, char** argv)

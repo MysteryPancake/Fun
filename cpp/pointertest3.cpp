@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 
 	int BRUH = *caleb* *tech* *tip* **moment* ** * really * ** *** **** *** ** * love* cpp;
 
-	std::cout << BRUH << std::endl;
+	std::cout << BRUH << '\n';
 
 	int **** **** *    **** ***  c = &love;
 	int *    *  * *    *    *  * a = &idk3;
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 
 	char BRUH2[] = {cpp-2,cpp-4,cpp+7,cpp,cpp-3,cpp-37,cpp+14,cpp,cpp+19,cpp-37,cpp+15,cpp+4,cpp+11,cpp+14};
 
-	std::cout << BRUH2 << std::endl;
+	std::cout << BRUH2 << '\n';
 
 	return 0;
 }

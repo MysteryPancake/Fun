@@ -15,5 +15,5 @@ int main(int argc, char** argv)
 
 	char test[] = {bruh4, bruh - 4, bruh + 7, bruh, bruh - 3, bruh - 37, bruh + 14, bruh, bruh + 19, bruh - 37, bruh + 15, bruh + 4, bruh + 11, bruh + 14};
 
-	cout << test << endl;
+	cout << test << '\n';
 }

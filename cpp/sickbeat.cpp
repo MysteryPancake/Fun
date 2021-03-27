@@ -90,7 +90,7 @@ int main()
 {
 	// Make sure this is 44
 	if (sizeof(wav_header) != 44) {
-		cout << "Header wrong size, got " << sizeof(wav_header) << endl;
+		cout << "Header wrong size, got " << sizeof(wav_header) << '\n';
 		return 1;
 	}
 
@@ -98,7 +98,7 @@ int main()
 	uint16_t bitDepth = 16;
 	uint16_t numChannels = 2;
 	uint32_t sampleRate = 44100;
-	uint32_t numSeconds = 60;
+	uint32_t numSeconds = 240;
 	uint32_t sampleCount = sampleRate * numSeconds;
 	uint32_t bytesPerSample = bitDepth / 8;
 	uint16_t blockAlign = numChannels * bytesPerSample;
@@ -116,7 +116,7 @@ int main()
 	ofstream wav("sickbeat.wav", ios::binary);
 	// Make sure it worked
 	if (!wav) {
-		cout << "File is fucked" << endl;
+		cout << "File is fucked" << '\n';
 		return 1;
 	}
 

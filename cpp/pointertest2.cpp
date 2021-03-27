@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 	int*********** pointer11 = &pointer10;
 	int************ pointer12 = &pointer11;
 
-	std::cout << ************pointer12 << std::endl;
+	std::cout << ************pointer12 << '\n';
 
 	return 0;
 }

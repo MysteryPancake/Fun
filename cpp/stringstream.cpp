@@ -11,13 +11,13 @@ int main()
 	
 	string greeting;
 	getline(splitter, greeting, ',');
-	cout << greeting << endl; // "hello"
+	cout << greeting << '\n'; // "hello"
 	
 	string place;
 	getline(splitter, place, ',');
-	cout << place << endl; // "world"
+	cout << place << '\n'; // "world"
 	
 	string number;
 	getline(splitter, number, ',');
-	cout << number << endl; // "123"
+	cout << number << '\n'; // "123"
 }
