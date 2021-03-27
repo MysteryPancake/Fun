@@ -116,7 +116,7 @@ int main()
 	ofstream wav("sickbeat.wav", ios::binary);
 	// Make sure it worked
 	if (!wav) {
-		cout << "File is fucked" << '\n';
+		cout << "File is fucked\n";
 		return 1;
 	}
 
