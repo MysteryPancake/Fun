@@ -9,14 +9,14 @@ using namespace std;
 typedef struct WAV_HEADER
 {
 	// RIFF header chunk
-	uint8_t riff[4] = { 'R', 'I', 'F', 'F' };
+	const uint8_t riff[4] = { 'R', 'I', 'F', 'F' };
 	uint32_t wavSize;
-	uint8_t wave[4] = { 'W', 'A', 'V', 'E' };
+	const uint8_t wave[4] = { 'W', 'A', 'V', 'E' };
 
 	// Format chunk
-	uint8_t fmt[4] = { 'f', 'm', 't', ' ' };
-	uint32_t fmtChunkSize = 16; // 16 for PCM audio
-	uint16_t audioFormat = 1; // 1 for PCM audio
+	const uint8_t fmt[4] = { 'f', 'm', 't', ' ' };
+	const uint32_t fmtChunkSize = 16; // 16 for PCM audio
+	const uint16_t audioFormat = 1; // 1 for PCM audio
 	uint16_t numChannels; // 1 = mono, 2 = stereo
 	uint32_t sampleRate; // usually 44100
 	uint32_t byteRate;
@@ -24,7 +24,7 @@ typedef struct WAV_HEADER
 	uint16_t bitDepth;
 
 	// Data chunk
-	uint8_t data[4] = { 'd', 'a', 't', 'a' };
+	const uint8_t data[4] = { 'd', 'a', 't', 'a' };
 	uint32_t dataChunkSize;
 
 } wav_header;
@@ -95,13 +95,13 @@ int main()
 	}
 
 	// 16-bit stereo wav file
-	uint16_t bitDepth = 16;
-	uint16_t numChannels = 2;
-	uint32_t sampleRate = 44100;
-	uint32_t numSeconds = 240;
-	uint32_t sampleCount = sampleRate * numSeconds;
-	uint32_t bytesPerSample = bitDepth / 8;
-	uint16_t blockAlign = numChannels * bytesPerSample;
+	const uint16_t bitDepth = 16;
+	const uint16_t numChannels = 2;
+	const uint32_t sampleRate = 44100;
+	const uint32_t numSeconds = 240;
+	const uint32_t sampleCount = sampleRate * numSeconds;
+	const uint32_t bytesPerSample = bitDepth / 8;
+	const uint16_t blockAlign = numChannels * bytesPerSample;
 
 	wav_header wavData;
 	wavData.wavSize = 36 + sampleCount * bytesPerSample;
