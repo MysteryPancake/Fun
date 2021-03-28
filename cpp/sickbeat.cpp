@@ -6,7 +6,7 @@ using namespace std;
 
 #define pi 3.14159265358979323846
 
-typedef struct WAV_HEADER
+struct WavHeader
 {
 	// RIFF header chunk
 	const uint8_t riff[4] = { 'R', 'I', 'F', 'F' };
@@ -26,8 +26,7 @@ typedef struct WAV_HEADER
 	// Data chunk
 	const uint8_t data[4] = { 'd', 'a', 't', 'a' };
 	uint32_t dataChunkSize;
-
-} wav_header;
+};
 
 float noteFreq(float n)
 {
@@ -89,8 +88,8 @@ uint16_t floatTo16Bit(float sample)
 int main()
 {
 	// Make sure this is 44
-	if (sizeof(wav_header) != 44) {
-		cout << "Header wrong size, got " << sizeof(wav_header) << '\n';
+	if (sizeof(WavHeader) != 44) {
+		cout << "Header wrong size, got " << sizeof(WavHeader) << '\n';
 		return 1;
 	}
 
@@ -103,14 +102,14 @@ int main()
 	const uint32_t bytesPerSample = bitDepth / 8;
 	const uint16_t blockAlign = numChannels * bytesPerSample;
 
-	wav_header wavData;
-	wavData.wavSize = 36 + sampleCount * bytesPerSample;
-	wavData.numChannels = numChannels;
-	wavData.sampleRate = sampleRate;
-	wavData.byteRate = sampleRate * blockAlign;
-	wavData.blockAlign = blockAlign;
-	wavData.bitDepth = bitDepth;
-	wavData.dataChunkSize = sampleCount * bytesPerSample;
+	WavHeader header;
+	header.wavSize = 36 + sampleCount * bytesPerSample;
+	header.numChannels = numChannels;
+	header.sampleRate = sampleRate;
+	header.byteRate = sampleRate * blockAlign;
+	header.blockAlign = blockAlign;
+	header.bitDepth = bitDepth;
+	header.dataChunkSize = sampleCount * bytesPerSample;
 
 	// Create new wav file
 	ofstream wav("sickbeat.wav", ios::binary);
@@ -121,7 +120,7 @@ int main()
 	}
 
 	// Write header info
-	wav.write(reinterpret_cast<const char*>(&wavData), sizeof(wavData));
+	wav.write(reinterpret_cast<const char*>(&header), sizeof(header));
 
 	// Write actual data
 	for (int i = 0; i < sampleCount; i++)
