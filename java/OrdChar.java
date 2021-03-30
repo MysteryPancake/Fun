@@ -2,10 +2,10 @@ class OrdChar {
 
 	public static void main(String[] args) {
 		
-		// ord() = cast char to int
+		// ord('h') = cast char to int
 		System.out.println((int)'h');
 
-		// chr() = cast int to char
+		// chr(104) = cast int to char
 		System.out.println((char)104);
 	}
 }
