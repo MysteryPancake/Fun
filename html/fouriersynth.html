@@ -53,6 +53,7 @@
 						yPos += Math.cos(angle) * circle.radius;
 					}
 					output[i] = yPos;
+					// Not sure if the modulo is correct, but it prevents overflow
 					phase = (phase + Math.PI / audioCtx.sampleRate) % PI2;
 				}
 			};
@@ -83,6 +84,7 @@
 				let yPos = canvas.height / 2;
 				for (let i = 0; i < circles.length; i++) {
 					const circle = circles[i];
+					// This angle is much slower than reality
 					const angle = degreesToRadians(audioCtx.currentTime * fundamental * circle.speed);
 					const radiusPixels = circle.radius * zoom;
 					// Draw circle
@@ -112,7 +114,7 @@
 					canvasCtx.lineTo(xCoord - (trail.length - j), trail[j]);
 				}
 				canvasCtx.stroke();
-				// Remove from the start trail and add to the end
+				// The trail acts as a lazy circular buffer
 				if (trail.length > canvas.width) {
 					trail.shift();
 				}
