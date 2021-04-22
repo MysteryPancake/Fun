@@ -127,7 +127,7 @@
 			const deleteCell = row.insertCell(-1);
 			const deleteButton = document.createElement("input");
 			deleteButton.type = "button";
-			deleteButton.value = "Delete";
+			deleteButton.value = "Remove";
 			deleteButton.addEventListener("click", function(e) {
 				// Remove displayed row
 				circleTable.deleteRow(row.rowIndex);
@@ -213,7 +213,7 @@
 		<h1>Fourier Synth</h1>
 		<div id="left">
 			<div>
-				<label for="frequency">Fundamental frequency (Hz)</label>
+				<label for="frequency">Fundamental Frequency (Hz)</label>
 				<input id="frequency" type="number" value="440" oninput="changeFundamental(this);">
 			</div>
 			<canvas id="canvas" width="400" height="400"></canvas>
@@ -232,7 +232,7 @@
 			<table id="circleTable">
 				<tr>
 					<th>Circle Radius (Volume)</th>
-					<th>Circle Speed (Frequency * Fundamental)</th>
+					<th>Relative Circle Speed (Frequency)</th>
 				</tr>
 			</table>
 		</div>
