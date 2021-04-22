@@ -41,7 +41,7 @@
 		function createContext() {
 			if (audioCtx) return;
 			audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-			const processor = audioCtx.createScriptProcessor(512, 1, 1);
+			const processor = audioCtx.createScriptProcessor(2048, 1, 1);
 			let phase = 0;
 			processor.onaudioprocess = function(e) {
 				const output = e.outputBuffer.getChannelData(0);
