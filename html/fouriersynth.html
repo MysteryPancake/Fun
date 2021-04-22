@@ -26,7 +26,7 @@
 		let audioCtx;
 		let fundamental = 440;
 		let lockView = false;
-		let zoom = 600;
+		let zoom = 400;
 		const circles = [];
 		const trail = [];
 		const PI2 = Math.PI * 2;
@@ -41,7 +41,7 @@
 		function createContext() {
 			if (audioCtx) return;
 			audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-			const processor = audioCtx.createScriptProcessor(1024, 1, 1);
+			const processor = audioCtx.createScriptProcessor(512, 1, 1);
 			let phase = 0;
 			processor.onaudioprocess = function(e) {
 				const output = e.outputBuffer.getChannelData(0);
@@ -138,7 +138,7 @@
 	</head>
 	<h1>Fourier Synth</h1>
 	<body onload="setup();">
-		<canvas id="canvas" width="384" height="384"></canvas>
+		<canvas id="canvas" width="400" height="400"></canvas>
 		<div>
 			<input type="button" value="Add circle" onclick="addCircle();">
 			<input type="button" value="Add 2 circles (1 harmonic)" onclick="addHarmonic();">
@@ -153,7 +153,7 @@
 		</div>
 		<div>
 			<label for="zoom">Zoom</label>
-			<input id="zoom" type="range" min="1" max="2000" value="600" oninput="changeZoom(this);">
+			<input id="zoom" type="range" min="1" max="2000" value="400" oninput="changeZoom(this);">
 		</div>
 	</body>
 </html>
