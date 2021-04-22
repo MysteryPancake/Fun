@@ -77,8 +77,8 @@
 						yPos += Math.cos(angle) * circle.radius;
 					}
 					output[i] = yPos;
-					// Not sure if the modulo is correct, but it prevents overflow
-					phase = (phase + Math.PI / audioCtx.sampleRate) % PI2;
+					// Not sure if PI is right for this modulo, but no clicks yet
+					phase = (phase + Math.PI / audioCtx.sampleRate) % Math.PI;
 				}
 			};
 			processor.connect(audioCtx.destination);
@@ -171,7 +171,7 @@
 					canvasCtx.lineWidth = 4;
 					canvasCtx.beginPath();
 					canvasCtx.moveTo(xPos, yPos);
-					// Based on the circle example from https://wiki.facepunch.com/gmod/surface.DrawPoly
+					// Based on the circle math from https://wiki.facepunch.com/gmod/surface.DrawPoly
 					xPos += Math.sin(angle) * radiusPixels;
 					// Subtracting because the coordinate system is different compared to audio
 					yPos -= Math.cos(angle) * radiusPixels;
