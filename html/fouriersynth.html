@@ -16,8 +16,30 @@
 			font-family: "Trebuchet MS", Helvetica, sans-serif;
 		}
 
-		canvas {
-			display: block;
+		#left {
+			float: left;
+			margin-right: 8px;
+		}
+
+		#circleTable {
+			display: none;
+		}
+
+		canvas, table {
+			margin-top: 8px;
+		}
+
+		table, th, td {
+			border: 1px solid black;
+			border-collapse: collapse;
+		}
+
+		table tr:first-child {
+			font-weight: bold;
+		}
+
+		th, td {
+			padding: 8px;
 		}
 		</style>
 		<script>
@@ -27,12 +49,14 @@
 		let fundamental = 440;
 		let lockView = false;
 		let zoom = 400;
+		let circleTable;
 		const circles = [];
 		const trail = [];
 		const PI2 = Math.PI * 2;
 		const requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(e) { return window.setTimeout(e, 1000 / 60); };
 
 		function setup() {
+			circleTable = document.getElementById("circleTable");
 			canvas = document.getElementById("canvas");
 			canvasCtx = canvas.getContext("2d");
 			requestFrame(draw);
@@ -60,14 +84,15 @@
 			processor.connect(audioCtx.destination);
 		}
 
-		function degreesToRadians(degrees) {
-			return degrees * Math.PI / 180;
-		}
-
 		function addCircle() {
 			createContext();
 			const speed = Math.floor(circles.length / 2) + 1;
-			circles.push({ radius: 0.1, speed: circles.length % 2 == 0 ? speed : -speed });
+			const circle = {
+				radius: 0.1,
+				speed: circles.length % 2 == 0 ? speed : -speed
+			};
+			circles.push(circle);
+			updateTable(circle);
 		}
 
 		function addHarmonic() {
@@ -75,10 +100,58 @@
 			addCircle();
 		}
 
+		function updateTable(circle) {
+			circleTable.style.display = "inline-table";
+			const row = circleTable.insertRow(-1);
+			// Add radius controller to table
+			const radiusCell = row.insertCell(-1);
+			const radiusInput = document.createElement("input");
+			radiusInput.type = "number";
+			radiusInput.step = "0.1";
+			radiusInput.value = circle.radius;
+			radiusInput.addEventListener("input", function(e) {
+				circle.radius = parseFloat(e.target.value);
+			});
+			radiusCell.appendChild(radiusInput);
+			// Add speed controller to table
+			const speedCell = row.insertCell(-1);
+			const speedInput = document.createElement("input");
+			speedInput.type = "number";
+			speedInput.step = "0.1";
+			speedInput.value = circle.speed;
+			speedInput.addEventListener("input", function(e) {
+				circle.speed = parseFloat(e.target.value);
+			});
+			speedCell.appendChild(speedInput);
+			// Add delete button
+			const deleteCell = row.insertCell(-1);
+			const deleteButton = document.createElement("input");
+			deleteButton.type = "button";
+			deleteButton.value = "Delete";
+			deleteButton.addEventListener("click", function(e) {
+				// Remove displayed row
+				circleTable.deleteRow(row.rowIndex);
+				// Remove from circles array
+				const index = circles.indexOf(circle);
+				if (index !== -1) {
+					circles.splice(index, 1);
+				}
+				// Hide table if required
+				if (circles.length <= 0) {
+					circleTable.style.display = "none";
+				}
+			});
+			deleteCell.appendChild(deleteButton);
+		}
+
+		function degreesToRadians(degrees) {
+			return degrees * Math.PI / 180;
+		}
+
 		function draw() {
 			canvasCtx.fillStyle = "black";
 			canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-			if (audioCtx) {
+			if (audioCtx && circles.length) {
 				// Draw circles and lines
 				let xPos = canvas.width / 2;
 				let yPos = canvas.height / 2;
@@ -138,22 +211,30 @@
 	</head>
 	<body onload="setup();">
 		<h1>Fourier Synth</h1>
-		<canvas id="canvas" width="400" height="400"></canvas>
-		<div>
-			<input type="button" value="Add circle" onclick="addCircle();">
-			<input type="button" value="Add 2 circles (1 harmonic)" onclick="addHarmonic();">
+		<div id="left">
+			<div>
+				<label for="frequency">Fundamental frequency (Hz)</label>
+				<input id="frequency" type="number" value="440" oninput="changeFundamental(this);">
+			</div>
+			<canvas id="canvas" width="400" height="400"></canvas>
+			<div>
+				<label for="zoom">Zoom</label>
+				<input id="zoom" type="range" min="1" max="2000" value="400" oninput="changeZoom(this);">
+				<input id="lockX" type="checkbox" onchange="lockX(this);">
+				<label for="lockX">Lock X axis</label>
+			</div>
 		</div>
 		<div>
-			<label for="frequency">Fundamental frequency (Hz)</label>
-			<input id="frequency" type="number" value="440" oninput="changeFundamental(this);">
-		</div>
-		<div>
-			<input id="lockX" type="checkbox" onchange="lockX(this);">
-			<label for="lockX">Lock X axis</label>
-		</div>
-		<div>
-			<label for="zoom">Zoom</label>
-			<input id="zoom" type="range" min="1" max="2000" value="400" oninput="changeZoom(this);">
+			<div>
+				<input type="button" value="Add circle" onclick="addCircle();">
+				<input type="button" value="Add 2 circles (1 harmonic)" onclick="addHarmonic();">
+			</div>
+			<table id="circleTable">
+				<tr>
+					<th>Circle Radius (Volume)</th>
+					<th>Circle Speed (Frequency * Fundamental)</th>
+				</tr>
+			</table>
 		</div>
 	</body>
 </html>
