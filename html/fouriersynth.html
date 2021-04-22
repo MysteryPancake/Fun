@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Fourier Synth</title>
+		<meta name="description" content="Synth using concepts from the Fourier Transform.">
+		<meta name="keywords" content="Fourier, Synthesizer, Synth">
+		<meta property="og:title" content="Fourier Synth">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/fouriersynth">
+		<meta property="og:site_name" content="Fourier Synth">
+		<meta property="og:description" content="Synth using concepts from the Fourier Transform.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: "Trebuchet MS", Helvetica, sans-serif;
+		}
+
+		canvas {
+			display: block;
+		}
+		</style>
+		<script>
+		let canvas;
+		let canvasCtx;
+		let audioCtx;
+		let fundamental = 440;
+		let lockView = false;
+		let zoom = 600;
+		const circles = [];
+		const trail = [];
+		const PI2 = Math.PI * 2;
+		const requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(e) { return window.setTimeout(e, 1000 / 60); };
+
+		function setup() {
+			canvas = document.getElementById("canvas");
+			canvasCtx = canvas.getContext("2d");
+			requestFrame(draw);
+		}
+
+		function createContext() {
+			if (audioCtx) return;
+			audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+			const processor = audioCtx.createScriptProcessor(1024, 1, 1);
+			let phase = 0;
+			processor.onaudioprocess = function(e) {
+				const output = e.outputBuffer.getChannelData(0);
+				for (let i = 0; i < output.length; i++) {
+					let yPos = 0;
+					for (let j = 0; j < circles.length; j++) {
+						const circle = circles[j];
+						const angle = phase * fundamental * circle.speed;
+						yPos += Math.cos(angle) * circle.radius;
+					}
+					output[i] = yPos;
+					phase = (phase + Math.PI / audioCtx.sampleRate) % PI2;
+				}
+			};
+			processor.connect(audioCtx.destination);
+		}
+
+		function degreesToRadians(degrees) {
+			return degrees * Math.PI / 180;
+		}
+
+		function addCircle() {
+			createContext();
+			const speed = Math.floor(circles.length / 2) + 1;
+			circles.push({ radius: 0.1, speed: circles.length % 2 == 0 ? speed : -speed });
+		}
+
+		function addHarmonic() {
+			addCircle();
+			addCircle();
+		}
+
+		function draw() {
+			canvasCtx.fillStyle = "black";
+			canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+			if (audioCtx) {
+				// Draw circles and lines
+				let xPos = canvas.width / 2;
+				let yPos = canvas.height / 2;
+				for (let i = 0; i < circles.length; i++) {
+					const circle = circles[i];
+					const angle = degreesToRadians(audioCtx.currentTime * fundamental * circle.speed);
+					const radiusPixels = circle.radius * zoom;
+					// Draw circle
+					canvasCtx.strokeStyle = "gray";
+					canvasCtx.lineWidth = 2;
+					canvasCtx.beginPath();
+					canvasCtx.arc(xPos, yPos, radiusPixels, 0, PI2);
+					canvasCtx.stroke();
+					// Draw line
+					canvasCtx.strokeStyle = "white";
+					canvasCtx.lineWidth = 4;
+					canvasCtx.beginPath();
+					canvasCtx.moveTo(xPos, yPos);
+					// Based on the circle example from https://wiki.facepunch.com/gmod/surface.DrawPoly
+					xPos += Math.sin(angle) * radiusPixels;
+					// Subtracting because the coordinate system is different compared to audio
+					yPos -= Math.cos(angle) * radiusPixels;
+					canvasCtx.lineTo(xPos, yPos);
+					canvasCtx.stroke();
+				}
+				// Draw trail (lazily)
+				canvasCtx.strokeStyle = "red";
+				canvasCtx.lineWidth = 4;
+				canvasCtx.beginPath();
+				const xCoord = lockView ? canvas.width / 2 : xPos;
+				for (let j = 0; j < trail.length; j++) {
+					canvasCtx.lineTo(xCoord - (trail.length - j), trail[j]);
+				}
+				canvasCtx.stroke();
+				// Remove from the start trail and add to the end
+				if (trail.length > canvas.width) {
+					trail.shift();
+				}
+				trail.push(yPos);
+			}
+			requestFrame(draw);
+		}
+
+		function changeFundamental(elem) {
+			fundamental = parseFloat(elem.value);
+		}
+
+		function lockX(elem) {
+			lockView = elem.checked;
+		}
+
+		function changeZoom(elem) {
+			zoom = parseFloat(elem.value);
+		}
+		</script>
+	</head>
+	<h1>Fourier Synth</h1>
+	<body onload="setup();">
+		<canvas id="canvas" width="384" height="384"></canvas>
+		<div>
+			<input type="button" value="Add circle" onclick="addCircle();">
+			<input type="button" value="Add 2 circles (1 harmonic)" onclick="addHarmonic();">
+		</div>
+		<div>
+			<label for="frequency">Fundamental frequency (Hz)</label>
+			<input id="frequency" type="number" value="440" oninput="changeFundamental(this);">
+		</div>
+		<div>
+			<input id="lockX" type="checkbox" onchange="lockX(this);">
+			<label for="lockX">Lock X axis</label>
+		</div>
+		<div>
+			<label for="zoom">Zoom</label>
+			<input id="zoom" type="range" min="1" max="2000" value="600" oninput="changeZoom(this);">
+		</div>
+	</body>
+</html>
