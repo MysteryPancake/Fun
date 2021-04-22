@@ -164,7 +164,7 @@
 					canvasCtx.strokeStyle = "gray";
 					canvasCtx.lineWidth = 2;
 					canvasCtx.beginPath();
-					canvasCtx.arc(xPos, yPos, radiusPixels, 0, PI2);
+					canvasCtx.arc(xPos, yPos, Math.abs(radiusPixels), 0, PI2);
 					canvasCtx.stroke();
 					// Draw line
 					canvasCtx.strokeStyle = "white";
