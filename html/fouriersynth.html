@@ -76,7 +76,7 @@
 						const actualSpeed = fundamental * circle.speed;
 						sample += Math.cos(circle.phase * actualSpeed) * circle.radius;
 						// Modulo 0 crashes JavaScript
-						circle.phase = (circle.phase + step) % Math.max(0.001, PI2 / actualSpeed);
+						circle.phase = (circle.phase + step) % Math.max(Number.EPSILON, PI2 / actualSpeed);
 					}
 					output[i] = sample;
 				}
