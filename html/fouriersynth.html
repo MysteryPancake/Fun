@@ -49,6 +49,7 @@
 		let fundamental = 440;
 		let lockView = false;
 		let zoom = 400;
+		let volume = 1;
 		let circleTable;
 		const circles = [];
 		const trail = [];
@@ -65,7 +66,7 @@
 		function createContext() {
 			if (audioCtx) return;
 			audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-			const processor = audioCtx.createScriptProcessor(2048, 1, 1);
+			const processor = audioCtx.createScriptProcessor(1024, 1, 1);
 			const step = Math.PI / audioCtx.sampleRate;
 			processor.onaudioprocess = function(e) {
 				const output = e.outputBuffer.getChannelData(0);
@@ -78,7 +79,7 @@
 						// Modulo 0 or NaN crashes JavaScript
 						circle.phase = (circle.phase + step) % ((PI2 / actualSpeed) || PI2);
 					}
-					output[i] = sample;
+					output[i] = sample * volume;
 				}
 			};
 			processor.connect(audioCtx.destination);
@@ -209,6 +210,10 @@
 		function changeZoom(elem) {
 			zoom = parseFloat(elem.value);
 		}
+
+		function changeVolume(elem) {
+			volume = parseFloat(elem.value);
+		}
 		</script>
 	</head>
 	<body onload="setup();">
@@ -230,6 +235,8 @@
 			<div>
 				<input type="button" value="Add Circle" onclick="addCircle();">
 				<input type="button" value="Add 2 Circles (1 Harmonic)" onclick="addHarmonic();">
+				<label for="volume">Volume</label>
+				<input id="volume" type="range" min="0" max="2" value="1" step="0.001" oninput="changeVolume(this);">
 			</div>
 			<table id="circleTable">
 				<tr>
