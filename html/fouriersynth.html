@@ -66,19 +66,19 @@
 			if (audioCtx) return;
 			audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 			const processor = audioCtx.createScriptProcessor(2048, 1, 1);
-			let phase = 0;
+			const step = Math.PI / audioCtx.sampleRate;
 			processor.onaudioprocess = function(e) {
 				const output = e.outputBuffer.getChannelData(0);
 				for (let i = 0; i < output.length; i++) {
-					let yPos = 0;
+					let sample = 0;
 					for (let j = 0; j < circles.length; j++) {
 						const circle = circles[j];
-						const angle = phase * fundamental * circle.speed;
-						yPos += Math.cos(angle) * circle.radius;
+						const actualSpeed = fundamental * circle.speed;
+						sample += Math.cos(circle.phase * actualSpeed) * circle.radius;
+						// Modulo 0 crashes JavaScript
+						circle.phase = (circle.phase + step) % Math.max(0.001, PI2 / actualSpeed);
 					}
-					output[i] = yPos;
-					// Not sure if PI is right for this modulo, but no clicks yet
-					phase = (phase + Math.PI / audioCtx.sampleRate) % Math.PI;
+					output[i] = sample;
 				}
 			};
 			processor.connect(audioCtx.destination);
@@ -89,7 +89,9 @@
 			const speed = Math.floor(circles.length / 2) + 1;
 			const circle = {
 				radius: 0.1,
-				speed: circles.length % 2 == 0 ? speed : -speed
+				speed: circles.length % 2 == 0 ? speed : -speed,
+				// Use phase of the first circle if it exists
+				phase: circles.length > 0 ? circles[0].phase : 0
 			};
 			circles.push(circle);
 			updateTable(circle);
