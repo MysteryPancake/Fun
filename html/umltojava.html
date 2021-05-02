@@ -313,7 +313,7 @@
 				const targetName = lowered.slice(3);
 				for (let i = 0; i < parameters.length; i++) {
 					if (roughlyMatches(parameters[i].name, targetName, classLowered) && parameters[i].type === varParts.type) {
-						varParts.method += "\n\t\treturn this." + parameters[i].name + ";";
+						varParts.method += "\n\t\treturn " + (parameters[i].static && varParts.static ? "" : "this.") + parameters[i].name + ";";
 					}
 				}
 			} else if ((setter || lowered.startsWith("change")) && firstArg) {
@@ -322,11 +322,12 @@
 				for (let i = 0; i < parameters.length; i++) {
 					if (roughlyMatches(parameters[i].name, targetName, classLowered) && parameters[i].type === firstArg.type) {
 						// Fill in placeholders
+						const staticVar = parameters[i].static && varParts.static;
 						if (firstArg.placeholder) {
-							firstArg.name = parameters[i].name;
+							firstArg.name = staticVar ? "_" + parameters[i].name : parameters[i].name;
 							firstArg.placeholder = false;
 						}
-						varParts.method += "\n\t\tthis." + parameters[i].name + " = " + firstArg.name + ";";
+						varParts.method += "\n\t\t" + (staticVar ? "" : "this.") + parameters[i].name + " = " + firstArg.name + ";";
 					}
 				}
 			} else if (varParts.name === className) {
