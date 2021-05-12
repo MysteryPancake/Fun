@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+	<style>
+	/* CSS is a programming language */
+	:root {
+		--hello: "Hello World";
+		--a: 1;
+		--b: 2;
+	}
+
+	html::before {
+		content: var(--hello);
+	}
+
+	html::after {
+		counter-reset: sumAB calc(var(--a) + var(--b));
+		content: "1 + 2 = " counter(sumAB);
+	}
+	</style>
+</html>
