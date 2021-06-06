@@ -209,6 +209,15 @@
 			for (let i = 0; i < interpolated.length; i++) {
 				const newIndex = i / (interpolated.length - 1) * (samples.length - 1);
 				switch (interpolation) {
+					case "rounddown":
+						interpolated[i] = samples[Math.floor(newIndex)];
+						break;
+					case "roundup":
+						interpolated[i] = samples[Math.ceil(newIndex)];
+						break;
+					case "customnearest":
+						interpolated[i] = samples[Math.round(newIndex)];
+						break;
 					case "customlinear":
 						interpolated[i] = linear(samples, newIndex);
 						break;
@@ -255,14 +264,25 @@
 		<div>
 			<label for="method">Method</label>
 			<select id="method" onchange="setInterpolation(this);">
-				<option value="nearest">Nearest / Zero-order hold</option>
-				<option value="linear">Linear</option>
-				<option value="customlinear">Linear (Remake)</option>
-				<option value="cubic">Cubic / Hermite</option>
-				<option value="customhermite">Cubic / Hermite (Remake)</option>
-				<option value="sincgaussian" selected>Sinc (Gaussian)</option>
-				<option value="sincrectangular">Sinc (Rectangular)</option>
-				<option value="lanczos">Lanczos</option>
+				<optgroup label="Zero-Order Hold">
+					<option value="rounddown">Round Down</option>
+					<option value="roundup">Round Up</option>
+					<option value="nearest">Nearest</option>
+					<option value="customnearest">Nearest (Remake)</option>
+				</optgroup>
+				<optgroup label="First-Order Hold">
+					<option value="linear">Linear</option>
+					<option value="customlinear">Linear (Remake)</option>
+				</optgroup>
+				<optgroup label="Third-Order Hold">
+					<option value="cubic">Cubic / Hermite</option>
+					<option value="customhermite">Cubic / Hermite (Remake)</option>
+				</optgroup>
+				<optgroup label="Sinc Based">
+					<option value="lanczos">Lanczos</option>
+					<option value="sincgaussian" selected>Sinc (Gaussian)</option>
+					<option value="sincrectangular">Sinc (Rectangular)</option>
+				</optgroup>
 			</select>
 			<label for="sampleSlider">Samples</label>
 			<input type="range" id="sampleSlider" oninput="setSamples(this);" min="2" max="100" value="20" step="1">
