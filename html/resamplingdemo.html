@@ -219,9 +219,9 @@
 						interpolated[i] = smoothed(newIndex);
 				}
 			}
+			bufferSource.playbackRate.value = interpolated.length / audioContext.sampleRate * frequency;
 			bufferSource.buffer = buffer;
 			bufferSource.loop = true;
-			bufferSource.playbackRate.value = interpolated.length / audioContext.sampleRate * frequency;
 			bufferSource.connect(volumeNode);
 			bufferSource.start();
 		}
