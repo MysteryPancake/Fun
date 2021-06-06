@@ -41,7 +41,7 @@
 		let frequency;
 		let volume;
 		let volumeNode;
-		let samplesInterpolated;
+		let buffer;
 
 		// 4-point, 3rd-order Hermite interpolation
 		// Based on https://www.musicdsp.org/en/latest/Other/93-hermite-interpollation.html
@@ -158,13 +158,14 @@
 		function redrawCanvas() {
 			canvasContext.fillStyle = "black";
 			canvasContext.fillRect(0, 0, canvasElem.width, canvasElem.height);
-			if (samplesInterpolated) {
+			if (buffer) {
+				const interpolated = buffer.getChannelData(0);
 				canvasContext.globalCompositeOperation = "screen";
 				// Draw interpolated samples
 				canvasContext.fillStyle = "green";
-				for (let i = 0; i < samplesInterpolated.length; i++) {
+				for (let i = 0; i < interpolated.length; i++) {
 					canvasContext.beginPath();
-					canvasContext.arc(i / (samplesInterpolated.length - 1) * canvasElem.width, (samplesInterpolated[i] + 1) * canvasElem.height * 0.5, 3, 0, 2 * Math.PI);
+					canvasContext.arc(i / (interpolated.length - 1) * canvasElem.width, (interpolated[i] + 1) * canvasElem.height * 0.5, 3, 0, 2 * Math.PI);
 					canvasContext.fill();
 				}
 				// Draw actual samples
@@ -203,24 +204,24 @@
 				bufferSource.stop();
 			}
 			bufferSource = audioContext.createBufferSource();
-			const buffer = audioContext.createBuffer(1, samples.length * detail, audioContext.sampleRate);
-			samplesInterpolated = buffer.getChannelData(0);
-			for (let i = 0; i < samplesInterpolated.length; i++) {
-				const newIndex = i / (samplesInterpolated.length - 1) * (samples.length - 1);
+			buffer = audioContext.createBuffer(1, samples.length * detail, audioContext.sampleRate);
+			const interpolated = buffer.getChannelData(0);
+			for (let i = 0; i < interpolated.length; i++) {
+				const newIndex = i / (interpolated.length - 1) * (samples.length - 1);
 				switch (interpolation) {
 					case "customlinear":
-						samplesInterpolated[i] = linear(samples, newIndex);
+						interpolated[i] = linear(samples, newIndex);
 						break;
 					case "customhermite":
-						samplesInterpolated[i] = hermite(samples, newIndex);
+						interpolated[i] = hermite(samples, newIndex);
 						break;
 					default:
-						samplesInterpolated[i] = smoothed(newIndex);
+						interpolated[i] = smoothed(newIndex);
 				}
 			}
 			bufferSource.buffer = buffer;
 			bufferSource.loop = true;
-			bufferSource.playbackRate.value = samplesInterpolated.length / audioContext.sampleRate * frequency;
+			bufferSource.playbackRate.value = interpolated.length / audioContext.sampleRate * frequency;
 			bufferSource.connect(volumeNode);
 			bufferSource.start();
 		}
