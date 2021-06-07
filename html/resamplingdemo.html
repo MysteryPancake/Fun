@@ -114,11 +114,10 @@
 
 		function repopulateArray() {
 			samples = new Float32Array(numSamples);
-			for (let i = 0; i < numSamples - 1; i++) {
+			// Keep first and last samples at 0 to prevent pops and remove DC offset
+			for (let i = 1; i < numSamples - 1; i++) {
 				samples[i] = Math.random() - 0.5;
 			}
-			// Make the end point match to prevent pops
-			samples[numSamples - 1] = samples[0];
 		}
 
 		function recalculateFilter() {
