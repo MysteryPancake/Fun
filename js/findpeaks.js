@@ -1,14 +1,14 @@
-// Dodgy O(n) peak finding algorithm written by me
+// My O(n) peak finding algorithm
 function findPeaks(arr) {
-	let last = arr[0];
-	let lastBigger = true;
+	let prev = arr[0];
+	let prevBigger = true;
 	let peaks = [];
 	for (let i = 1; i < arr.length; i++) {
-		if (arr[i] <= last && lastBigger) {
-			peaks.push(last); // Peak index is i - 1
+		if (arr[i] <= prev && prevBigger) {
+			peaks.push(prev); // Peak index is i - 1
 		}
-		lastBigger = arr[i] >= last;
-		last = arr[i];
+		prevBigger = arr[i] >= prev;
+		prev = arr[i];
 	}
 	return peaks;
 }
