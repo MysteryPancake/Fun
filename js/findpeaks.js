@@ -5,7 +5,7 @@ function findPeaks(arr) {
 	let peaks = [];
 	for (let i = 1; i < arr.length; i++) {
 		if (arr[i] <= last && lastBigger) {
-			peaks.push({ index: i - 1, value: last });
+			peaks.push(last); // Peak index is i - 1
 		}
 		lastBigger = arr[i] >= last;
 		last = arr[i];
@@ -13,4 +13,4 @@ function findPeaks(arr) {
 	return peaks;
 }
 
-console.log(findPeaks([7, 5, 4, 2, 5, 5, 2]));
+console.log(findPeaks([8, 6, 4, 9, 7, 7, 7, 3, 10, 5])); // Expected output: [8, 9, 7, 7, 10]
