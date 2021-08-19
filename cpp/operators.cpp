@@ -5,6 +5,8 @@
 
 int main()
 {
-    std::cout << lower('H') << lower('i') << lower('B') << lower('R') << lower('U') << lower('H');
-    std::cout << alpha('H') << alpha('a') << alpha('?');
+	std::cout << lower('H') << lower('i') << lower('B') << lower('R') << lower('U') << lower('H');
+	std::cout << alpha('H') << alpha('a') << alpha('?');
+
+	return 0;
 }
