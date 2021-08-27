@@ -36,6 +36,8 @@ float noteFreq(float n)
 // From https://www.shadertoy.com/view/llByWR
 float sawtooth(float d, float x)
 {
+	// Prevent sin divided by 0
+	if (d == 0.0f) return d;
 	// Smooth harsh attack
 	float smoothAttack = min(1.0f, d * 50.0f);
 	return (1.0f - 2.0f * acos((1.0f - d) * -cos(x / 2.0f)) / pi) * (2.0f * atan(sin(x / 2.0f) / d) / pi) * smoothAttack;
