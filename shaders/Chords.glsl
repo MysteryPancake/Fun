@@ -7,7 +7,9 @@ float noteFreq(float n) {
 
 // From https://www.shadertoy.com/view/llByWR
 float sawtooth(float d, float x) {
-	return (1.0 - 2.0 * acos((1.0 - d) * -cos(x / 2.0)) / pi) * (2.0 * atan(sin(x / 2.0) / d) / pi);
+	// Smooth harsh attack
+	float smoothAttack = smoothstep(0.0, 1.0, d * 50.0);
+	return (1.0 - 2.0 * acos((1.0 - d) * -cos(x / 2.0)) / pi) * (2.0 * atan(sin(x / 2.0) / d) / pi) * smoothAttack;
 }
 
 // Time, base note, range, notes per second, mod
