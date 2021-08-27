@@ -30,13 +30,15 @@ struct WavHeader
 
 float noteFreq(float n)
 {
-	return 440.0 * pow(2.0, floor(n) / 12.0);
+	return 440.0f * pow(2.0f, floor(n) / 12.0f);
 }
 
 // From https://www.shadertoy.com/view/llByWR
 float sawtooth(float d, float x)
 {
-	return (1.0 - 2.0 * acos((1.0 - d) * -cos(x / 2.0)) / pi) * (2.0 * atan(sin(x / 2.0) / d) / pi);
+	// Smooth harsh attack
+	float smoothAttack = min(1.0f, d * 50.0f);
+	return (1.0f - 2.0f * acos((1.0f - d) * -cos(x / 2.0f)) / pi) * (2.0f * atan(sin(x / 2.0f) / d) / pi) * smoothAttack;
 }
 
 // Time, base note, range, notes per second, mod
@@ -48,30 +50,30 @@ float arpeggiate(float t, float b, float r, float n, float m)
 // This code is from my shader https://www.shadertoy.com/view/WtByDR
 float generateAudioSample(float time, bool rightChannel)
 {
-	float phaseOffset = 0.01;
+	float phaseOffset = 0.01f;
 
 	int numNotes = 5;
 
-	bool section2 = fmod(floor(time / 16.0), 2.0) != 0.0;
-	float bass = section2 ? arpeggiate(time, 0.0, 2.0, 2.0, 2.0) : arpeggiate(time, 0.0, 3.0, 2.0, 2.0);
-	float low = section2 ? arpeggiate(time, 12.0, 2.0, 2.0, 2.0) : arpeggiate(time, 12.0, 3.0, 2.0, 2.0);
-	float mid = section2 ? arpeggiate(time, 12.0, 2.0, 2.0, 4.0) : arpeggiate(time, 16.0, 2.0, 1.0, 4.0);
-	float high = section2 ? arpeggiate(time, 24.0, 2.0, 2.0, 2.0) : arpeggiate(time, 24.0, 3.0, 2.0, 2.0);
-	float higher = section2 ? arpeggiate(time, 36.0, 2.4, 0.25, 4.0) : arpeggiate(time, 28.0, 2.0, 1.0, 4.0);
+	bool section2 = fmod(floor(time / 16.0f), 2.0f) != 0.0f;
+	float bass = section2 ? arpeggiate(time, 0.0f, 2.0f, 2.0f, 2.0f) : arpeggiate(time, 0.0f, 3.0f, 2.0f, 2.0f);
+	float low = section2 ? arpeggiate(time, 12.0f, 2.0f, 2.0f, 2.0f) : arpeggiate(time, 12.0f, 3.0f, 2.0f, 2.0f);
+	float mid = section2 ? arpeggiate(time, 12.0f, 2.0f, 2.0f, 4.0f) : arpeggiate(time, 16.0f, 2.0f, 1.0f, 4.0f);
+	float high = section2 ? arpeggiate(time, 24.0f, 2.0f, 2.0f, 2.0f) : arpeggiate(time, 24.0f, 3.0f, 2.0f, 2.0f);
+	float higher = section2 ? arpeggiate(time, 36.0f, 2.4f, 0.25f, 4.0f) : arpeggiate(time, 28.0f, 2.0f, 1.0f, 4.0f);
 	
 	float notes[] = { bass, low, mid, high, higher };
-	float amplitudes[] = { 1.2, 1.0, 1.2, 0.6, 0.3 };
+	float amplitudes[] = { 1.2f, 1.0f, 1.2f, 0.6f, 0.3f };
 	
-	float sample = 0.0;
+	float sample = 0.0f;
 	
 	for (int i = 0; i < numNotes; i++)
 	{
-		float repeat = fmod(time, 0.25) * (5.0 - cos(time) * 2.0);
+		float repeat = fmod(time, 0.25f) * (5.0f - cos(time) * 2.0f);
 		if (i == 0)
 		{
-			repeat = fmod(time, 0.125) * (2.0 - cos(time));
+			repeat = fmod(time, 0.125f) * (2.0f - cos(time));
 		}
-		repeat = min(repeat, (float)(0.7 + cos(time * 0.25) * 0.3));
+		repeat = min(repeat, (float)(0.7f + cos(time * 0.25f) * 0.3f));
 		float offset = rightChannel ? cos(i) * phaseOffset : sin(i) * phaseOffset;
 		sample += sawtooth(repeat, (time + offset) * noteFreq(notes[i])) * amplitudes[i];
 	}
@@ -80,8 +82,8 @@ float generateAudioSample(float time, bool rightChannel)
 
 uint16_t floatTo16Bit(float sample)
 {
-	float clamped = max((float)-1.0, min(sample, (float)1.0));
-	uint16_t scaled = clamped < 0.0 ? clamped * 0x8000 : clamped * 0x7FFF;
+	float clamped = max(-1.0f, min(sample, 1.0f));
+	uint16_t scaled = clamped < 0.0f ? clamped * 0x8000 : clamped * 0x7FFF;
 	return scaled;
 }
 
@@ -97,7 +99,7 @@ int main()
 	const uint16_t bitDepth = 16;
 	const uint16_t numChannels = 2;
 	const uint32_t sampleRate = 44100;
-	const uint32_t numSeconds = 240;
+	const uint32_t numSeconds = 60;
 	const uint32_t sampleCount = sampleRate * numSeconds;
 	const uint32_t bytesPerSample = bitDepth / 8;
 	const uint16_t blockAlign = numChannels * bytesPerSample;
@@ -115,7 +117,7 @@ int main()
 	ofstream wav("sickbeat.wav", ios::binary);
 	// Make sure it worked
 	if (!wav) {
-		cout << "File is fucked\n";
+		cout << "File is corrupted\n";
 		return 1;
 	}
 
