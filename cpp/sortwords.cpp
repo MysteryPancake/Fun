@@ -34,7 +34,7 @@ struct WordCountPair
 	}
 };
 
-// Represents a binary search tree, like std::map
+// Represents a binary search tree, like std::map but unbalanced
 class WordTree
 {
 private:
