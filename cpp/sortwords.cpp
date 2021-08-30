@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <cctype>
 
-// Represents a key-value pair, like std::pair or std::map
+// Represents a key-value pair, like std::pair
 struct WordCountPair
 {
 	char* word = NULL;
@@ -34,7 +34,7 @@ struct WordCountPair
 	}
 };
 
-// Represents a binary search tree
+// Represents a binary search tree, like std::map
 class WordTree
 {
 private:
@@ -74,6 +74,7 @@ private:
 
 	void quickSort(WordCountPair**& arr, int lo, int hi)
 	{
+		// Based on https://www.geeksforgeeks.org/cpp-program-for-quicksort
 		if (lo < hi)
 		{
 			// Partition into smaller arrays
