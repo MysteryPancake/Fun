@@ -76,7 +76,7 @@
 			row.insertCell(-1).textContent = val;
 		}
 
-		function calculateDelays() {
+		function calculateSimulation() {
 
 			delays = [];
 			let numServed = 0;
@@ -181,7 +181,7 @@
 			barSpacing = parseFloat(document.getElementById("barSpacing").value);
 			showIdeal = document.getElementById("displayIdeal").checked;
 			serverInfo = document.getElementById("serverInfo");
-			calculateDelays();
+			calculateSimulation();
 			redraw();
 		}
 
@@ -277,7 +277,7 @@
 
 		function updateServers(elem) {
 			numServers = parseInt(elem.value);
-			calculateDelays();
+			calculateSimulation();
 			redraw();
 		}
 

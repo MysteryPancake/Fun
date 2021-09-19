@@ -50,9 +50,10 @@
 		function setup() {
 			canvasElem = document.getElementById("canvas");
 			canvasCtx = canvasElem.getContext("2d");
-			changeServers(parseFloat(document.getElementById("numServers").value));
+			resetServers(parseFloat(document.getElementById("numServers").value));
 			speed = parseFloat(document.getElementById("numSpeed").value);
 			substeps = parseFloat(document.getElementById("numSteps").value);
+			draw();
 		}
 
 		function interruptPlayback(elem) {
@@ -67,6 +68,7 @@
 			} else {
 				if (done) {
 					resetSimulation();
+					resetServers(servers.length);
 					done = false;
 				}
 				interval = setInterval(update, delta * 1000);
@@ -196,19 +198,17 @@
 		}
 
 		function updateServers(elem) {
-			if (interval) {
-				interruptPlayback(document.getElementById("play"));
-				resetSimulation();
-			}
-			changeServers(parseInt(elem.value));
+			interruptPlayback(document.getElementById("play"));
+			resetSimulation();
+			resetServers(parseInt(elem.value));
+			draw();
 		}
 
-		function changeServers(count) {
+		function resetServers(count) {
 			servers = [];
 			for (let i = 0; i < count; i++) {
 				servers.push({ duration: 0, totalDuration: 0, idle: 0, used: 0 });
 			}
-			draw();
 		}
 		</script>
 	</head>
