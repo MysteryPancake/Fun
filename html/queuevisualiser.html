@@ -204,39 +204,25 @@
 			canvasCtx.fillStyle = "white";
 			canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-			// Draw number of servers
-			canvasCtx.fillStyle = "black";
-			canvasCtx.font = "32px Arial";
-			canvasCtx.textAlign = "right";
-			canvasCtx.textBaseline = "top";
-			canvasCtx.fillText(`${numServers} server simulation`, canvasElem.width - 64, 32);
-
-			// Draw color codes
-
-			canvasCtx.textAlign = "left";
-			canvasCtx.textBaseline = "middle";
-			canvasCtx.font = "24px Arial";
-			drawLabel("black", "Adjusted customer time", canvasElem.width - 328, 80);
-			drawLabel("red", "Customer queue time", canvasElem.width - 328, 128);
-			if (showIdeal) {
-				drawLabel("orange", "Ideal customer time", canvasElem.width - 328, 176);
-			}
-
 			// Draw queue size labels
 			canvasCtx.fillStyle = "black";
 			canvasCtx.font = "bold 10px Arial";
-
+			canvasCtx.textBaseline = "middle";
 			let maxDrawn = false;
 
 			for (let i = 0; i < delays.length; i++) {
+
 				const height = yOffset + i * (barHeight + barSpacing);
-				canvasCtx.textBaseline = "middle";
 				canvasCtx.lineWidth = barHeight;
+
+				// Draw customer queue time
 				canvasCtx.strokeStyle = "red";
 				canvasCtx.beginPath();
 				canvasCtx.moveTo(xOffset + delays[i][0] * zoom, height);
 				canvasCtx.lineTo(xOffset + delays[i][2] * zoom, height);
 				canvasCtx.stroke();
+
+				// Draw ideal customer time
 				if (showIdeal) {
 					canvasCtx.strokeStyle = "orange";
 					canvasCtx.beginPath();
@@ -244,34 +230,60 @@
 					canvasCtx.lineTo(xOffset + delays[i][1] * zoom, height);
 					canvasCtx.stroke();
 				}
+
+				// Draw adjusted customer time
 				canvasCtx.strokeStyle = "black";
 				canvasCtx.beginPath();
 				canvasCtx.moveTo(xOffset + delays[i][2] * zoom, height);
 				canvasCtx.lineTo(xOffset + delays[i][3] * zoom, height);
 				canvasCtx.stroke();
+
+				// Mark max queue length
 				if (!maxDrawn && delays[i][4] >= maxQueueLength) {
-					// Draw delay line
-					canvasCtx.fillStyle = "red";
-					canvasCtx.lineWidth = 0.5;
+					// Draw line
+					canvasCtx.lineWidth = 1;
 					canvasCtx.beginPath();
 					canvasCtx.moveTo(xOffset + delays[i][0] * zoom, 32);
 					canvasCtx.lineTo(xOffset + delays[i][0] * zoom, height);
 					canvasCtx.stroke();
-					// Draw text
-					canvasCtx.fillStyle = "black";
+					// Draw label
 					canvasCtx.textAlign = "center";
 					canvasCtx.fillText(`Max queue length: ${maxQueueLength}`, xOffset + delays[i][0] * zoom, 24);
-					// Don't redraw
+					// Only draw once
 					maxDrawn = true;
 				}
 				canvasCtx.textAlign = "right";
 				canvasCtx.fillText(delays[i][4], xOffset + delays[i][0] * zoom, height);
 			}
+
 			// Draw bottom scale
 			canvasCtx.textAlign = "left";
 			canvasCtx.textBaseline = "bottom";
-			for (let j = 0; j < canvas.width + 50; j += Math.floor(5 / zoom) * 10) {
-				canvasCtx.fillText(j, xOffset + j * zoom, canvas.height - yOffset * 0.5);
+			canvasCtx.strokeStyle = "#00000020";
+			canvasCtx.lineWidth = 1;
+			
+			for (let j = 0; j < canvas.width / zoom; j += Math.floor(5 / zoom) * 10) {
+				canvasCtx.fillText(j, xOffset + j * zoom, canvas.height - 3);
+				canvasCtx.beginPath();
+				canvasCtx.moveTo(xOffset + j * zoom, 0);
+				canvasCtx.lineTo(xOffset + j * zoom, canvas.height);
+				canvasCtx.stroke();
+			}
+
+			// Draw number of servers
+			canvasCtx.font = "32px Arial";
+			canvasCtx.textAlign = "right";
+			canvasCtx.textBaseline = "top";
+			canvasCtx.fillText(`${numServers} server simulation`, canvasElem.width - 64, 32);
+
+			// Draw color codes
+			canvasCtx.textAlign = "left";
+			canvasCtx.textBaseline = "middle";
+			canvasCtx.font = "24px Arial";
+			drawLabel("black", "Adjusted customer time", canvasElem.width - 328, 80);
+			drawLabel("red", "Customer queue time", canvasElem.width - 328, 128);
+			if (showIdeal) {
+				drawLabel("orange", "Ideal customer time", canvasElem.width - 328, 176);
 			}
 		}
 
