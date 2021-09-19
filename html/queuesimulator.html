@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Continuous Queue Simulator</title>
+		<meta name="description" content="Continuous simulation of a customer queue with multiple servers.">
+		<meta name="keywords" content="Continuous, Customer, Queue, Server, Simulation">
+		<meta property="og:title" content="Continuous Queue Simulator">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/queuesimulator">
+		<meta property="og:site_name" content="Continuous Queue Simulator">
+		<meta property="og:description" content="Continuous simulation of a customer queue with multiple servers.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: system-ui, Arial, Helvetica, sans-serif;
+		}
+
+		canvas {
+			border: 1px solid black;
+			display: block;
+			margin: auto;
+		}
+
+		button {
+			font-size: xx-large;
+		}
+
+		div {
+			text-align: center;
+		}
+		</style>
+		<script>
+		let canvasElem;
+		let canvasCtx;
+		let servers = [];
+		//let allCustomers = [[0.24,0.55],[0.59,0.16],[0.90,0.07],[1.87,0.69]];
+		let allCustomers = [[2.7388,2.4670],[3.6384,24.5927],[8.7844,10.6871],[11.2892,2.6507],[19.6054,16.8974],[25.8811,8.0084],[33.3780,3.4593],[43.3384,9.1784],[46.2163,19.0238],[47.3548,17.2323],[55.8328,2.4471],[60.0882,1.4956],[60.7434,11.2697],[68.4218,12.0182],[68.5855,8.1084],[70.4307,6.0102],[72.7153,1.3729],[75.1113,14.3431],[80.5883,19.4125],[90.3511,18.1102],[97.8430,7.1349],[101.0268,7.6361],[107.2454,6.2390],[116.3251,1.7595],[121.6605,21.4984],[126.9861,12.7225],[133.4377,10.0616],[141.4507,9.6894],[150.2640,21.5524],[154.1471,24.9565],[163.0784,23.9492],[172.2447,12.3279],[173.0574,22.8647],[173.6316,19.0945],[179.2535,5.5698],[184.7606,23.8030],[190.9555,6.2745],[200.4260,5.0256],[200.5650,22.2527],[205.7671,17.6058],[208.1635,21.0320],[210.4348,18.0509],[218.9224,15.3343],[227.9540,9.3745],[230.4761,11.9167],[232.1588,20.9174],[241.2872,24.4420],[249.2442,14.5648],[250.4246,4.0302],[252.8030,20.0261],[256.5938,15.5701],[263.5607,8.3969],[268.7178,5.0341],[278.0610,3.0989],[278.1877,2.9723],[281.4533,7.1109],[284.7317,22.8856],[285.6248,7.1387],[285.6866,18.9891],[293.7013,24.1526],[303.6481,24.1642],[307.3246,10.0625],[310.6378,20.1107],[311.4815,14.6697],[320.3446,18.6701],[326.7943,15.9900],[332.4731,24.3111],[336.6110,0.4531],[341.8605,6.2377],[350.6130,8.5424],[359.6167,21.0481],[367.7884,19.3669],[372.3824,16.6363],[375.0018,12.9653],[384.5417,2.4295],[386.5845,5.0650],[393.0889,6.6726],[394.1722,4.9903],[395.8895,16.6712],[399.0871,1.1224],[407.4454,24.7933],[408.4703,10.7673],[417.7299,10.7114],[424.6991,22.3767],[427.0056,10.1728],[431.4238,7.1673],[436.2789,22.6560],[439.6380,3.2466],[447.9529,20.6608],[453.6868,14.3944],[459.1031,23.4539],[468.6316,8.6101],[476.2365,7.6477],[483.2087,0.7634],[485.3300,9.0151],[486.1855,14.9351],[492.0770,16.8469],[493.8769,4.1308],[502.0673,9.7773],[509.4797,21.6816]];
+		//let allCustomers = [[0,4],[2,1.5],[3,2],[5,2],[8,3]];
+		let queue = [];
+		let currentCustomer = 0;
+		let numProcessed = 0;
+		let queueMax = 0;
+
+		let currentTime = 0;
+		const delta = 0.001;
+		let interval, speed, substeps;
+
+		function setup() {
+			canvasElem = document.getElementById("canvas");
+			canvasCtx = canvasElem.getContext("2d");
+			changeServers(parseFloat(document.getElementById("numServers").value));
+			speed = parseFloat(document.getElementById("numSpeed").value);
+			substeps = parseFloat(document.getElementById("numSteps").value);
+		}
+
+		function playSimulation() {
+			if (!interval) {
+				interval = setInterval(update, delta * 1000);
+			}
+		}
+
+		function pauseSimulation() {
+			if (interval) {
+				clearInterval(interval);
+				interval = undefined;
+			}
+		}
+
+		function simulationStep(step) {
+			currentTime += step;
+			if (currentCustomer < allCustomers.length && currentTime >= allCustomers[currentCustomer][0]) {
+				queue.push(allCustomers[currentCustomer++]);
+			}
+			let numDone = 0;
+			for (let j = 0; j < servers.length; j++) {
+				const server = servers[j];
+				if (server.duration <= 0) {
+					if (queue.length > 0) {
+						const customer = queue.shift();
+						server.duration = customer[1] - step;
+						server.totalDuration = customer[1];
+						server.used++;
+						numProcessed++;
+					} else {
+						server.idle += step;
+						numDone++;
+					}
+				} else {
+					server.duration -= step;
+				}
+			}
+			queueMax = Math.max(queueMax, queue.length);
+			if (numDone === servers.length && currentCustomer >= allCustomers.length) {
+				clearTimeout(interval);
+				interval = undefined;
+				return true;
+			}
+		}
+
+		function update() {
+			for (let i = 0; i < substeps * speed; i++) {
+				if (simulationStep(delta / substeps)) break;
+			}
+			draw();
+		}
+
+		function updateSpeed(elem) {
+			speed = parseFloat(elem.value);
+		}
+
+		function updateSubsteps(elem) {
+			substeps = parseFloat(elem.value);
+		}
+
+		function draw() {
+
+			// Clear canvas
+			canvasCtx.clearRect(0, 0, canvasElem.width, canvasElem.height);
+
+			// Draw stats
+			canvasCtx.fillStyle = "black";
+			canvasCtx.textAlign = "left";
+			canvasCtx.textBaseline = "top";
+			canvasCtx.font = "16px Arial";
+			canvasCtx.fillText(`Served: ${numProcessed}`, 16, 16);
+			canvasCtx.fillText(`Queue max: ${queueMax}`, 16, 40);
+
+			// Draw timer
+			const halfCanvas = canvas.width * 0.5;
+			canvasCtx.font = "32px Arial";
+			canvasCtx.textAlign = "center";
+			canvasCtx.textBaseline = "middle";
+			canvasCtx.fillText(currentTime.toFixed(3), halfCanvas, 64);
+
+			// Draw number remaining
+			canvasCtx.fillText(`Remaining: ${allCustomers.length}`, halfCanvas, canvas.height - 64);
+
+			// Reset font for servers
+			canvasCtx.font = "12px Arial";
+
+			const serverSize = canvasElem.width / 8;
+			const custSize = serverSize * 0.5;
+
+			// Draw servers
+			const yPos = 128;
+			//const offset = serverSize * (0.25 - 0.5 * servers.length) + halfCanvas;
+			const offset = serverSize * (0.5 - 0.75 * servers.length) + halfCanvas;
+			for (let i = 0; i < servers.length; i++) {
+				const server = servers[i];
+				//const xPos = i * serverSize + offset;
+				const xPos = i * serverSize * 1.5 + offset;
+				// Draw idle time
+				canvasCtx.fillStyle = "black";
+				const xServ = xPos + custSize * 0.5;
+				canvasCtx.fillText(`Idle: ${server.idle.toFixed(3)}`, xServ, yPos - custSize * 0.5);
+				canvasCtx.fillText(`Used: ${server.used}`, xServ, yPos - custSize);
+				// Draw server
+				canvasCtx.fillRect(xPos, yPos, serverSize * 0.5, serverSize * 0.5);
+				// Draw customer
+				if (server.duration > 0) {
+					// Draw inner circle
+					const percent = server.duration / server.totalDuration;
+					canvasCtx.beginPath();
+					const yCust = yPos + serverSize;
+					canvasCtx.moveTo(xServ, yCust);
+					canvasCtx.arc(xServ, yPos + serverSize, custSize * 0.5, 0, Math.PI * 2 * percent);
+					canvasCtx.closePath();
+					canvasCtx.fillStyle = "red";
+					canvasCtx.fill();
+				}
+			}
+
+			// Draw customers
+			canvasCtx.fillStyle = "red";
+			for (let j = 0; j < queue.length; j++) {
+				canvasCtx.beginPath();
+				canvasCtx.arc(halfCanvas, yPos + serverSize * 2 + (custSize * j * 1.5), custSize * 0.5, 0, Math.PI * 2);
+				canvasCtx.fill();
+			}
+		}
+
+		function updateServers(elem) {
+			if (interval) {
+				clearInterval(interval);
+				interval = undefined;
+				currentCustomer = 0;
+				numProcessed = 0;
+				queueMax = 0;
+				currentTime = 0;
+				queue = [];
+			}
+			changeServers(parseInt(elem.value));
+		}
+
+		function changeServers(count) {
+			servers = [];
+			for (let i = 0; i < count; i++) {
+				servers.push({ duration: 0, totalDuration: 0, idle: 0, used: 0 });
+			}
+			draw();
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<div>
+			<h1>Continuous Queue Simulator</h1>
+			<button onclick="playSimulation();">Play</button>
+			<button onclick="pauseSimulation();">Pause</button>
+			<canvas id="canvas" width="512" height="768"></canvas>
+			<label for="numServers">Number of servers</label>
+			<input id="numServers" type="range" min="1" max="4" value="2" oninput="updateServers(this);">
+			<label for="numSpeed">Speed</label>
+			<input id="numSpeed" type="range" min="1" max="1000" value="200" oninput="updateSpeed(this);">
+			<label for="numSteps">Substeps</label>
+			<input id="numSteps" type="range" min="1" max="500" value="50" oninput="updateSubsteps(this);">
+		</div>
+	</body>
+</html>

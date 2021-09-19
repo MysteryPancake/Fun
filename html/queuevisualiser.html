@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Discrete Queue Visualiser</title>
+		<meta name="description" content="Discrete simulation of a customer queue with multiple servers.">
+		<meta name="keywords" content="Customer, Discrete, Queue, Server, Simulation">
+		<meta property="og:title" content="Discrete Queue Visualiser">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/queuevisualiser">
+		<meta property="og:site_name" content="Discrete Queue Visualiser">
+		<meta property="og:description" content="Discrete simulation of a customer queue with multiple servers.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: system-ui, Arial, Helvetica, sans-serif;
+		}
+
+		canvas {
+			border: 1px solid black;
+			display: inline-block;
+			float: left;
+		}
+
+		table {
+			border-collapse: collapse;
+			margin: 0 0 8px 0;
+		}
+
+		th, td {
+			border: 1px solid black;
+			padding: 8px;
+		}
+
+		th {
+			background-color: #FFCCCC;
+			text-align: left;
+		}
+
+		th[colspan="2"] {
+			text-align: center;
+		}
+
+		#infoDiv {
+			display: inline-block;
+			margin-left: 8px;
+		}
+		</style>
+		<script>
+		//let allCustomers = [[0.24,0.55],[0.59,0.16],[0.90,0.07],[1.87,0.69]];
+		let allCustomers = [[2.7388,2.4670],[3.6384,24.5927],[8.7844,10.6871],[11.2892,2.6507],[19.6054,16.8974],[25.8811,8.0084],[33.3780,3.4593],[43.3384,9.1784],[46.2163,19.0238],[47.3548,17.2323],[55.8328,2.4471],[60.0882,1.4956],[60.7434,11.2697],[68.4218,12.0182],[68.5855,8.1084],[70.4307,6.0102],[72.7153,1.3729],[75.1113,14.3431],[80.5883,19.4125],[90.3511,18.1102],[97.8430,7.1349],[101.0268,7.6361],[107.2454,6.2390],[116.3251,1.7595],[121.6605,21.4984],[126.9861,12.7225],[133.4377,10.0616],[141.4507,9.6894],[150.2640,21.5524],[154.1471,24.9565],[163.0784,23.9492],[172.2447,12.3279],[173.0574,22.8647],[173.6316,19.0945],[179.2535,5.5698],[184.7606,23.8030],[190.9555,6.2745],[200.4260,5.0256],[200.5650,22.2527],[205.7671,17.6058],[208.1635,21.0320],[210.4348,18.0509],[218.9224,15.3343],[227.9540,9.3745],[230.4761,11.9167],[232.1588,20.9174],[241.2872,24.4420],[249.2442,14.5648],[250.4246,4.0302],[252.8030,20.0261],[256.5938,15.5701],[263.5607,8.3969],[268.7178,5.0341],[278.0610,3.0989],[278.1877,2.9723],[281.4533,7.1109],[284.7317,22.8856],[285.6248,7.1387],[285.6866,18.9891],[293.7013,24.1526],[303.6481,24.1642],[307.3246,10.0625],[310.6378,20.1107],[311.4815,14.6697],[320.3446,18.6701],[326.7943,15.9900],[332.4731,24.3111],[336.6110,0.4531],[341.8605,6.2377],[350.6130,8.5424],[359.6167,21.0481],[367.7884,19.3669],[372.3824,16.6363],[375.0018,12.9653],[384.5417,2.4295],[386.5845,5.0650],[393.0889,6.6726],[394.1722,4.9903],[395.8895,16.6712],[399.0871,1.1224],[407.4454,24.7933],[408.4703,10.7673],[417.7299,10.7114],[424.6991,22.3767],[427.0056,10.1728],[431.4238,7.1673],[436.2789,22.6560],[439.6380,3.2466],[447.9529,20.6608],[453.6868,14.3944],[459.1031,23.4539],[468.6316,8.6101],[476.2365,7.6477],[483.2087,0.7634],[485.3300,9.0151],[486.1855,14.9351],[492.0770,16.8469],[493.8769,4.1308],[502.0673,9.7773],[509.4797,21.6816]];
+		//let allCustomers = [[0,10],[50,1000]];
+		//let allCustomers = [[0,1],[0.4,2.1],[0.5,2],[0.7,1.5],[1.5,2],[2,2]];
+		
+		let numServers;
+		let barHeight;
+		let barSpacing;
+		let xOffset;
+		let yOffset;
+		let serverInfo;
+		let showIdeal;
+		let zoom;
+
+		let delays = [];
+		let finalTime = 0;
+		let maxQueueLength = 0;
+
+		function addRow(table, key, val) {
+			// Append row
+			const row = table.insertRow(-1);
+			// Append key
+			const head = document.createElement("th");
+			head.textContent = key;
+			row.appendChild(head);
+			// Append value
+			row.insertCell(-1).textContent = val;
+		}
+
+		function calculateDelays() {
+
+			delays = [];
+			let numServed = 0;
+			let totalService = 0;
+			let totalDuration = 0;
+			let totalDelay = 0;
+			maxQueueLength = 0;
+			finalTime = 0;
+
+			let servers = [];
+			for (let i = 0; i < numServers; i++) {
+				servers.push({ endTime: 0, workTime: 0, used: 0 });
+			}
+			
+			let delayEnds = [];
+
+			for (let j = 0; j < allCustomers.length; j++) {
+
+				const customer = allCustomers[j];
+				const start = customer[0];
+				const duration = customer[1];
+
+				// Get the best server for the customer
+				let bestServer;
+				let lastTime;
+
+				// Perform linear search, sped up by breaking
+				for (var k = 0; k < numServers; k++) {
+					var time = servers[k].endTime - start;
+					if (time <= 0) {
+						// Break loop early when a free server is found
+						bestServer = servers[k];
+						break;
+					} else if (bestServer == undefined || time < lastTime) {
+						// Otherwise continue to find the smallest
+						bestServer = servers[k];
+						lastTime = time;
+					}
+				}
+
+				// Remove customers who already left the queue
+				while (delayEnds.length && start > delayEnds[0]) {
+					delayEnds.shift();
+				}
+
+				const delay = Math.max(0, bestServer.endTime - start);
+				if (delay > 0) {
+					// Calculate when customer will leave the queue in the future
+					delayEnds.push(start + delay);
+					maxQueueLength = Math.max(maxQueueLength, delayEnds.length);
+				}
+
+				const serviceTime = duration + delay;
+				totalDelay += delay;
+				totalDuration += duration;
+				totalService += serviceTime;
+
+				bestServer.endTime = start + serviceTime;
+				bestServer.workTime += duration;
+				bestServer.used++;
+				finalTime = bestServer.endTime;
+				numServed++;
+
+				// Add to graph
+				delays.push([start, start + duration, start + delay, bestServer.endTime, delayEnds.length]);
+			}
+			document.getElementById("numServed").textContent = numServed;
+			document.getElementById("lastTime").textContent = finalTime;
+			document.getElementById("timeQueued").textContent = totalService / numServed;
+			document.getElementById("timeWaiting").textContent = totalDuration / numServed;
+			document.getElementById("queueLength").textContent = totalDelay / finalTime;
+			document.getElementById("maxLength").textContent = maxQueueLength;
+
+			// Populate information
+			serverInfo.innerHTML = "";
+			for (let k = 0; k < servers.length; k++) {
+				const server = servers[k];
+				// Create new table
+				const tbl = document.createElement("table");
+				// Add server title
+				const title = document.createElement("th");
+				tbl.insertRow(-1).appendChild(title);
+				title.textContent = `Server ${k + 1}`;
+				title.colSpan = "2";
+				// Add available info
+				addRow(tbl, "Work time", server.workTime);
+				addRow(tbl, "Idle time", finalTime - server.workTime);
+				addRow(tbl, "Times used", server.used);
+				serverInfo.appendChild(tbl);
+			}
+		}
+
+		let canvasElem;
+		let canvasCtx;
+
+		function setup() {
+			canvasElem = document.getElementById("canvas");
+			canvasCtx = canvasElem.getContext("2d", { alpha: false });
+			numServers = parseInt(document.getElementById("serverCount").value);
+			zoom = parseFloat(document.getElementById("zoomFactor").value);
+			barHeight = parseFloat(document.getElementById("barHeight").value);
+			barSpacing = parseFloat(document.getElementById("barSpacing").value);
+			showIdeal = document.getElementById("displayIdeal").checked;
+			serverInfo = document.getElementById("serverInfo");
+			calculateDelays();
+			redraw();
+		}
+
+		function drawLabel(color, label, x, y) {
+			canvasCtx.fillStyle = color;
+			canvasCtx.fillRect(x, y, 32, 32);
+			canvasCtx.fillStyle = "black";
+			canvasCtx.fillText(label, x + 48, y + 16);
+		}
+
+		function redraw() {
+
+			const xOffset = 6;
+			const yOffset = 6;
+
+			canvas.width = xOffset * 2 + Math.max(zoom * finalTime, 1280);
+			canvas.height = yOffset * 3 + delays.length * (barHeight + barSpacing);
+
+			// Draw white canvas
+			canvasCtx.fillStyle = "white";
+			canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+			// Draw number of servers
+			canvasCtx.fillStyle = "black";
+			canvasCtx.font = "32px Arial";
+			canvasCtx.textAlign = "right";
+			canvasCtx.textBaseline = "top";
+			canvasCtx.fillText(`${numServers} server simulation`, canvasElem.width - 64, 32);
+
+			// Draw color codes
+
+			canvasCtx.textAlign = "left";
+			canvasCtx.textBaseline = "middle";
+			canvasCtx.font = "24px Arial";
+			drawLabel("black", "Adjusted customer time", canvasElem.width - 328, 80);
+			drawLabel("red", "Customer queue time", canvasElem.width - 328, 128);
+			if (showIdeal) {
+				drawLabel("orange", "Ideal customer time", canvasElem.width - 328, 176);
+			}
+
+			// Draw queue size labels
+			canvasCtx.fillStyle = "black";
+			canvasCtx.font = "bold 10px Arial";
+
+			let maxDrawn = false;
+
+			for (let i = 0; i < delays.length; i++) {
+				const height = yOffset + i * (barHeight + barSpacing);
+				canvasCtx.textBaseline = "middle";
+				canvasCtx.lineWidth = barHeight;
+				canvasCtx.strokeStyle = "red";
+				canvasCtx.beginPath();
+				canvasCtx.moveTo(xOffset + delays[i][0] * zoom, height);
+				canvasCtx.lineTo(xOffset + delays[i][2] * zoom, height);
+				canvasCtx.stroke();
+				if (showIdeal) {
+					canvasCtx.strokeStyle = "orange";
+					canvasCtx.beginPath();
+					canvasCtx.moveTo(xOffset + delays[i][0] * zoom, height);
+					canvasCtx.lineTo(xOffset + delays[i][1] * zoom, height);
+					canvasCtx.stroke();
+				}
+				canvasCtx.strokeStyle = "black";
+				canvasCtx.beginPath();
+				canvasCtx.moveTo(xOffset + delays[i][2] * zoom, height);
+				canvasCtx.lineTo(xOffset + delays[i][3] * zoom, height);
+				canvasCtx.stroke();
+				if (!maxDrawn && delays[i][4] >= maxQueueLength) {
+					// Draw delay line
+					canvasCtx.fillStyle = "red";
+					canvasCtx.lineWidth = 0.5;
+					canvasCtx.beginPath();
+					canvasCtx.moveTo(xOffset + delays[i][0] * zoom, 32);
+					canvasCtx.lineTo(xOffset + delays[i][0] * zoom, height);
+					canvasCtx.stroke();
+					// Draw text
+					canvasCtx.fillStyle = "black";
+					canvasCtx.textAlign = "center";
+					canvasCtx.fillText(`Max queue length: ${maxQueueLength}`, xOffset + delays[i][0] * zoom, 24);
+					// Don't redraw
+					maxDrawn = true;
+				}
+				canvasCtx.textAlign = "right";
+				canvasCtx.fillText(delays[i][4], xOffset + delays[i][0] * zoom, height);
+			}
+			// Draw bottom scale
+			canvasCtx.textAlign = "left";
+			canvasCtx.textBaseline = "bottom";
+			for (let j = 0; j < canvas.width + 50; j += Math.floor(5 / zoom) * 10) {
+				canvasCtx.fillText(j, xOffset + j * zoom, canvas.height - yOffset * 0.5);
+			}
+		}
+
+		function updateServers(elem) {
+			numServers = parseInt(elem.value);
+			calculateDelays();
+			redraw();
+		}
+
+		function updateZoom(elem) {
+			zoom = parseFloat(elem.value);
+			redraw();
+		}
+
+		function updateBars(elem) {
+			barHeight = parseFloat(elem.value);
+			redraw();
+		}
+
+		function updateSpacing(elem) {
+			barSpacing = parseFloat(elem.value);
+			redraw();
+		}
+
+		function updateIdeal(elem) {
+			showIdeal = elem.checked;
+			redraw();
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<h1>Discrete Queue Visualiser</h1>
+		<div>
+			<label for="serverCount">Number of servers</label>
+			<input id="serverCount" type="range" min="1" max="4" step="1" oninput="updateServers(this);" value="1">
+			<label for="zoomFactor">X scale</label>
+			<input id="zoomFactor" type="range" min="0.5" max="3" step="0.001" oninput="updateZoom(this);" value="1">
+			<label for="barHeight">Y scale</label>
+			<input id="barHeight" type="range" min="0" max="20" step="0.001" oninput="updateBars(this);" value="6">
+			<label for="barSpacing">Bar spacing</label>
+			<input id="barSpacing" type="range" min="0" max="20" step="0.001" oninput="updateSpacing(this);" value="2">
+			<label for="displayIdeal">Display ideal times</label>
+			<input id="displayIdeal" type="checkbox" checked onchange="updateIdeal(this);">
+		</div>
+		<canvas id="canvas" height="820"></canvas>
+		<div id="infoDiv">
+			<table>
+				<tr>
+					<th>Number served</th>
+					<td id="numServed">0</td>
+				</tr>
+				<tr>
+					<th>Last request completion time</th>
+					<td id="lastTime">0</td>
+				</tr>
+				<tr>
+					<th>Average time per customer (including queue)</th>
+					<td id="timeQueued">0</td>
+				</tr>
+				<tr>
+					<th>Average time per customer (excluding queue)</th>
+					<td id="timeWaiting">0</td>
+				</tr>
+				<tr>
+					<th>Average queue length</th>
+					<td id="queueLength">0</td>
+				</tr>
+				<tr>
+					<th>Maximum queue length</th>
+					<td id="maxLength">0</td>
+				</tr>
+			</table>
+			<div id="serverInfo"></div>
+		</div>
+	</body>
+</html>
