@@ -151,7 +151,7 @@
 			canvasCtx.fillText(currentTime.toFixed(3), halfCanvas, 64);
 
 			// Draw number remaining
-			canvasCtx.fillText(`Remaining: ${allCustomers.length}`, halfCanvas, canvas.height - 64);
+			canvasCtx.fillText(`Remaining: ${allCustomers.length - currentCustomer}`, halfCanvas, canvas.height - 64);
 
 			// Reset font for servers
 			canvasCtx.font = "12px Arial";
