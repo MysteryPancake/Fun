@@ -11,7 +11,7 @@ public:
 
 int main()
 {
-	vector<Object> thing;
+	vector<Object> objects;
 
 	for (int i = 0; i < 3; i++)
 	{
@@ -19,12 +19,14 @@ int main()
 		Object obj;
 		// Store some random data in an object
 		obj.value = i;
-		thing.push_back(obj);
+		objects.push_back(obj);
 	}
 
 	// Print object values
-	for (auto object: thing)
+	for (auto object: objects)
 	{
 		cout << object.value << '\n';
 	}
+
+	return 0;
 }

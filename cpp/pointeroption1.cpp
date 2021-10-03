@@ -27,4 +27,6 @@ int main()
 	{
 		cout << object->value << '\n';
 	}
+
+	return 0;
 }
