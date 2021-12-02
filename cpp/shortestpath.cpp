@@ -1,7 +1,7 @@
 // This code finds the shortest and second shortest paths in a directed or undirected graph
 // It represents the graph as an adjacency list, and uses the A* algorithm to find the shortest path
 // It works with any number of parallel edges since it uses an adjacency list instead of an adjacency matrix
-// Vertexes are labelled by integer IDs, which can be any integer as long as it's unique to each vertex
+// Vertices are labelled by integer IDs, which can be any integer as long as it's unique to each vertex
 // IDs are converted to indexes using a hashmap, and hashmap collisions are resolved using a linked list
 
 #define UNDIRECTED // Comment this line if the graph is directed
