@@ -1,6 +1,6 @@
-// This code simulates a queue of customers, with a number of servers
-// Each customer has a duration which is processed by a server, like multithreaded processing
-// See queuesimulator.html and queuevisualiser.html for more detail
+// This simulates a queue of customers and a number of servers, like multithreaded processing
+// Each customer is associated with a duration which represents how long the server takes to process them
+// See queuesimulator.html and queuevisualiser.html for cool visualisations
 
 #include <cstdio>
 
