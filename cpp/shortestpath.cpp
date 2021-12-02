@@ -3,7 +3,6 @@
 // It works with any number of parallel edges because I used an adjacency list instead of an adjacency matrix
 // Vertexes are labelled by integer IDs, which can be any integer as long as it's unique to each vertex
 // IDs are converted to indexes using a hashmap, and hashmap collisions are resolved using a linked list
-// Written for CSCI203 Assignment 3
 
 #define UNDIRECTED // Comment this line if the graph is directed
 
