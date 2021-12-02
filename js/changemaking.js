@@ -30,8 +30,8 @@ function ChangeMaking(D, n) {
 		}
 
 		F[i] = temp + 1;
-		console.log(str + `) + 1 = ${F[i]}`);
-		console.log(header + "\n" + F.join("\t"));
+		console.log(`${str}) + 1 = ${F[i]}`);
+		console.log(`${header}\n${F.join("\t")}`);
 	}
 
 	console.log(`The solution is ${F[n]} coins`);
