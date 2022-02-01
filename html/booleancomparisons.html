@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Boolean Comparisons</title>
+		<meta name="description" content="Comparisons and their boolean logic equivalents.">
+		<meta name="keywords" content="Boolean, Comparison, Compare, Gate, Logic">
+		<meta property="og:title" content="Boolean Comparisons">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/booleancomparisons">
+		<meta property="og:site_name" content="Boolean Comparisons">
+		<meta property="og:description" content="Comparisons and their boolean logic equivalents.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			color: white;
+			font-family: system-ui, Arial, Helvetica, sans-serif;
+			font-size: xx-large;
+		}
+
+		html, body {
+			background-color: #272727;
+			margin: 32px;
+		}
+
+		table {
+			border-collapse: collapse;
+			display: inline-block;
+			padding: 16px;
+		}
+
+		th, td {
+			border: 1px solid gray;
+			padding: 8px;
+		}
+
+		td:nth-child(3) {
+			width: 128px;
+		}
+		</style>
+		<script>
+		const states = [
+			[0, 0],
+			[0, 1],
+			[1, 0],
+			[1, 1]
+		];
+
+		const trueSpan = "<span style='color: #00FF00;'>1</span>";
+		const falseSpan = "<span style='color: #FF0000;'>0</span>";
+
+		function addOperation(symbol, func) {
+
+			const table = document.createElement("table");
+
+			const row1 = table.insertRow(-1);
+			row1.insertCell(-1).textContent = "A";
+			row1.insertCell(-1).textContent = "B";
+			row1.insertCell(-1).textContent = symbol;
+
+			for (let i = 0; i < states.length; i++) {
+				const row2 = table.insertRow(-1);
+				row2.insertCell(-1).innerHTML = states[i][0] ? trueSpan : falseSpan;
+				row2.insertCell(-1).innerHTML = states[i][1] ? trueSpan : falseSpan;
+				row2.insertCell(-1).innerHTML = func(states[i][0], states[i][1]) ? trueSpan : falseSpan;
+			}
+
+			document.body.appendChild(table);
+		}
+
+		function setup() {
+
+			addOperation("A < B", (a, b) => (a < b));
+			addOperation("A <= B", (a, b) => (a <= b));
+			addOperation("A > B", (a, b) => (a >= b));
+			addOperation("A >= B", (a, b) => (a > b));
+
+			document.body.innerHTML += "<br>";
+
+			addOperation("!A && B", (a, b) => (!a && b));
+			addOperation("!A || B", (a, b) => (!a || b));
+			addOperation("A || !B", (a, b) => (a || !b));
+			addOperation("A && !B", (a, b) => (a && !b));
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<h1>Boolean Comparisons</h1>
+	</body>
+</html>
