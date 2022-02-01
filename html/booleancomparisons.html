@@ -54,8 +54,8 @@
 			const table = document.createElement("table");
 
 			const row1 = table.insertRow(-1);
-			row1.insertCell(-1).textContent = "A";
-			row1.insertCell(-1).textContent = "B";
+			row1.insertCell(-1).textContent = "a";
+			row1.insertCell(-1).textContent = "b";
 			row1.insertCell(-1).textContent = symbol;
 
 			for (let i = 0; i < states.length; i++) {
@@ -70,17 +70,17 @@
 
 		function setup() {
 
-			addOperation("A < B", (a, b) => (a < b));
-			addOperation("A <= B", (a, b) => (a <= b));
-			addOperation("A > B", (a, b) => (a >= b));
-			addOperation("A >= B", (a, b) => (a > b));
+			addOperation("a < b", (a, b) => (a < b));
+			addOperation("a <= b", (a, b) => (a <= b));
+			addOperation("a > b", (a, b) => (a > b));
+			addOperation("a >= b", (a, b) => (a >= b));
 
 			document.body.innerHTML += "<br>";
 
-			addOperation("!A && B", (a, b) => (!a && b));
-			addOperation("!A || B", (a, b) => (!a || b));
-			addOperation("A || !B", (a, b) => (a || !b));
-			addOperation("A && !B", (a, b) => (a && !b));
+			addOperation("!a && b", (a, b) => (!a && b));
+			addOperation("!a || b", (a, b) => (!a || b));
+			addOperation("a && !b", (a, b) => (a && !b));
+			addOperation("a || !b", (a, b) => (a || !b));
 		}
 		</script>
 	</head>
