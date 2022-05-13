@@ -82,14 +82,14 @@
 			return lerpIntensity ? (1 - fraction) * value1 + fraction * value2 : value1;
 		}
 
-		function calculatePulses(offset, phase, prevIntensity, intensity, timeTotal) {
+		function calculatePulses(offset, phase, prevIntensity, intensity, timestepMs) {
 
 			const pulses = [];
 			const period = 1 / frequency;
 
-			while (phase < timeTotal) {
+			while (phase < timestepMs) {
 				// Lerp intensity
-				const lerpedIntensity = lerp(phase / timeTotal, prevIntensity, intensity);
+				const lerpedIntensity = lerp(phase / timestepMs, prevIntensity, intensity);
 				const delay = period * (1 - lerpedIntensity);
 
 				pulses.push({
@@ -110,7 +110,7 @@
 			});
 
 			// Keep phase continuous between pulses
-			return phase - timeTotal;
+			return phase - timestepMs;
 		}
 
 		function updateFrequency(elem) {
