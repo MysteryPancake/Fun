@@ -29,15 +29,8 @@
 		let lerpIntensity = true;
 
 		function setup() {
-
 			canvasElem = document.getElementById("canvas");
 			canvasCtx = canvasElem.getContext("2d");
-			canvasCtx.lineWidth = 2;
-			canvasCtx.fillStyle = "red";
-			canvasCtx.font = "16px Arial";
-			canvasCtx.textAlign = "left";
-			canvasCtx.textBaseline = "top";
-
 			window.addEventListener("resize", resize);
 			window.addEventListener("orientationchange", resize);
 			resize();
@@ -51,6 +44,12 @@
 		function draw() {
 			// Clear canvas
 			canvasCtx.clearRect(0, 0, canvasElem.width, canvasElem.height);
+
+			canvasCtx.lineWidth = 2;
+			canvasCtx.fillStyle = "red";
+			canvasCtx.font = "16px Arial";
+			canvasCtx.textAlign = "left";
+			canvasCtx.textBaseline = "top";
 
 			// For lerping between previous and current intensity
 			let prevIntensity = 0;
@@ -105,8 +104,8 @@
 
 			pulses.forEach(pulse => {
 				canvasCtx.beginPath();
-				canvasCtx.moveTo(pulse.start, 160 - pulse.intensity * 128)
-				canvasCtx.lineTo(pulse.start + pulse.duration, 160 - pulse.intensity * 128);
+				canvasCtx.moveTo(pulse.start, 192 - pulse.intensity * 128)
+				canvasCtx.lineTo(pulse.start + pulse.duration, 192 - pulse.intensity * 128);
 				canvasCtx.stroke();
 			});
 
@@ -137,7 +136,7 @@
 	</head>
 	<body onload="setup();">
 		<h1>Pulse Width Modulation</h1>
-		<canvas id="canvas" height="200"></canvas>
+		<canvas id="canvas" height="256"></canvas>
 		<div>
 			<label for="timestep">Timestep (ms)</label>
 			<input id="timestep" type="range" min="1" max="256" value="41" step="0.0001" oninput="updateTimestep(this);"/>
