@@ -118,7 +118,7 @@
 			const pulses = [];
 			const period = 1 / frequency;
 
-			while (phase < timestepMs) {
+			for (; phase < timestepMs; phase += period) {
 				// Lerp intensity
 				const lerpedIntensity = lerpIntensity
 					? prevIntensity + (phase / timestepMs) * (intensity - prevIntensity)
@@ -129,9 +129,6 @@
 					duration: period * lerpedIntensity,
 					intensity: lerpedIntensity // For visual display purposes only
 				});
-
-				// increment phase
-				phase += period;
 			}
 
 			pulses.forEach(pulse => {
