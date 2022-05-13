@@ -27,6 +27,7 @@
 		let timestepMs = 41; // 41ms per event
 		let correctPhase = true;
 		let lerpIntensity = true;
+		let oldVersion = false;
 
 		function setup() {
 			canvasElem = document.getElementById("canvas");
@@ -68,28 +69,27 @@
 				canvasCtx.fillText(intensity.toFixed(2), 4 + i * timestepMs, 4);
 
 				canvasCtx.strokeStyle = "black";
+				const calculateFn = oldVersion ? calculatePulsesOld : calculatePulses;
 				if (correctPhase) {
-					phaseRemaining = calculatePulses(i * timestepMs, phaseRemaining, prevIntensity, intensity, timestepMs);
+					phaseRemaining = calculateFn(i * timestepMs, phaseRemaining, prevIntensity, intensity, timestepMs);
 				} else {
-					calculatePulses(i * timestepMs, 0, prevIntensity, intensity, timestepMs);
+					calculateFn(i * timestepMs, 0, prevIntensity, intensity, timestepMs);
 				}
 
 				prevIntensity = intensity;
 			}
 		}
 
-		function lerp(fraction, value1, value2) {
-			return lerpIntensity ? (1 - fraction) * value1 + fraction * value2 : value1;
-		}
-
-		function calculatePulses(offset, phase, prevIntensity, intensity, timestepMs) {
+		function calculatePulsesOld(offset, phase, prevIntensity, intensity, timestepMs) {
 
 			const pulses = [];
 			const period = 1 / frequency;
 
 			while (phase < timestepMs) {
 				// Lerp intensity
-				const lerpedIntensity = lerp(phase / timestepMs, prevIntensity, intensity);
+				const lerpedIntensity = lerpIntensity
+					? prevIntensity + (phase / timestepMs) * (intensity - prevIntensity)
+					: intensity;
 				
 				pulses.push({
 					start: offset + phase, // Offset would not be included in final timer
@@ -100,6 +100,38 @@
 				// increment phase
 				const delay = period * (1 - lerpedIntensity);
 				phase += period + delay;
+			}
+
+			pulses.forEach(pulse => {
+				canvasCtx.beginPath();
+				canvasCtx.moveTo(pulse.start, 192 - pulse.intensity * 128)
+				canvasCtx.lineTo(pulse.start + pulse.duration, 192 - pulse.intensity * 128);
+				canvasCtx.stroke();
+			});
+
+			// Keep phase continuous between pulses
+			return phase - timestepMs;
+		}
+
+		function calculatePulses(offset, phase, prevIntensity, intensity, timestepMs) {
+
+			const pulses = [];
+			const period = 1 / frequency;
+
+			while (phase < timestepMs) {
+				// Lerp intensity
+				const lerpedIntensity = lerpIntensity
+					? prevIntensity + (phase / timestepMs) * (intensity - prevIntensity)
+					: intensity;
+				
+				pulses.push({
+					start: offset + phase, // Offset would not be included in final timer
+					duration: period * lerpedIntensity,
+					intensity: lerpedIntensity // For visual display purposes only
+				});
+
+				// increment phase
+				phase += period;
 			}
 
 			pulses.forEach(pulse => {
@@ -132,6 +164,11 @@
 			lerpIntensity = elem.checked;
 			draw();
 		}
+
+		function updateVersion(elem) {
+			oldVersion = elem.checked;
+			draw();
+		}
 		</script>
 	</head>
 	<body onload="setup();">
@@ -144,11 +181,14 @@
 			<label for="frequency">Frequency</label>
 			<input id="frequency" type="range" min="0.01" max="0.5" value="0.1" step="0.0001" oninput="updateFrequency(this);">
 
-			<label for="lerp">Lerp Intensity</label>
 			<input id="lerp" type="checkbox" oninput="updateLerp(this);" checked>
-
-			<label for="phase">Correct Phase</label>
+			<label for="lerp">Lerp Intensity</label>
+			
 			<input id="phase" type="checkbox" oninput="updatePhase(this);" checked>
+			<label for="phase">Correct Phase</label>
+			
+			<input id="legacy" type="checkbox" oninput="updateVersion(this);">
+			<label for="legacy">Old Version</label>
 		</div>
 	</body>
 </html>
