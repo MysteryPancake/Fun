@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Pulse Width Modulation</title>
+		<meta name="description" content="Early experiment for vibration.">
+		<meta name="keywords" content="PWM, Pulse, Width, Modulation, Vibration">
+		<meta property="og:title" content="Pulse Width Modulation">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/pwm">
+		<meta property="og:site_name" content="Pulse Width Modulation">
+		<meta property="og:description" content="Early experiment for vibration.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: system-ui, Arial, Helvetica, sans-serif;
+		}
+
+		canvas {
+			border: 1px solid black;
+		}
+		</style>
+		<script>
+		let canvasElem;
+		let canvasCtx;
+		let frequency = 0.1; // No idea what unit this is
+		let timestepMs = 41; // 41ms per event
+		let correctPhase = true;
+		let lerpIntensity = true;
+
+		function setup() {
+
+			canvasElem = document.getElementById("canvas");
+			canvasCtx = canvasElem.getContext("2d");
+			canvasCtx.lineWidth = 2;
+			canvasCtx.fillStyle = "red";
+			canvasCtx.font = "16px Arial";
+			canvasCtx.textAlign = "left";
+			canvasCtx.textBaseline = "top";
+
+			window.addEventListener("resize", resize);
+			window.addEventListener("orientationchange", resize);
+			resize();
+		}
+
+		function resize() {
+			canvas.width = window.innerWidth - 16;
+			draw();
+		}
+
+		function draw() {
+			// Clear canvas
+			canvasCtx.clearRect(0, 0, canvasElem.width, canvasElem.height);
+
+			// For lerping between previous and current intensity
+			let prevIntensity = 0;
+			// Phase remaining resets as close to 0 as possible
+			let phaseRemaining = 0;
+
+			for (let i = 0; i < canvasElem.width / timestepMs; i++) {
+
+				canvasCtx.strokeStyle = "red";
+				canvasCtx.beginPath();
+				canvasCtx.moveTo(i * timestepMs, 0)
+				canvasCtx.lineTo(i * timestepMs, canvasElem.height);
+				canvasCtx.stroke();
+
+				const intensity = Math.sin(i) * 0.5 + 0.5;
+				canvasCtx.fillText(intensity.toFixed(2), 4 + i * timestepMs, 4);
+
+				canvasCtx.strokeStyle = "black";
+				if (correctPhase) {
+					phaseRemaining = calculatePulses(i * timestepMs, phaseRemaining, prevIntensity, intensity, timestepMs);
+				} else {
+					calculatePulses(i * timestepMs, 0, prevIntensity, intensity, timestepMs);
+				}
+
+				prevIntensity = intensity;
+			}
+		}
+
+		function lerp(fraction, value1, value2) {
+			return lerpIntensity ? (1 - fraction) * value1 + fraction * value2 : value1;
+		}
+
+		function calculatePulses(offset, phase, prevIntensity, intensity, timeTotal) {
+
+			const pulses = [];
+			const period = 1 / frequency;
+
+			while (phase < timeTotal) {
+				// Lerp intensity
+				const lerpedIntensity = lerp(phase / timeTotal, prevIntensity, intensity);
+				const delay = period * (1 - lerpedIntensity);
+
+				pulses.push({
+					start: offset + phase, // Offset would not be included in final timer
+					duration: period,
+					intensity: lerpedIntensity // For visual display purposes only
+				});
+
+				// increment phase
+				phase += period + delay;
+			}
+
+			pulses.forEach(pulse => {
+				canvasCtx.beginPath();
+				canvasCtx.moveTo(pulse.start, 160 - pulse.intensity * 128)
+				canvasCtx.lineTo(pulse.start + pulse.duration, 160 - pulse.intensity * 128);
+				canvasCtx.stroke();
+			});
+
+			// Keep phase continuous between pulses
+			return phase - timeTotal;
+		}
+
+		function updateFrequency(elem) {
+			frequency = parseFloat(elem.value);
+			draw();
+		}
+
+		function updatePhase(elem) {
+			correctPhase = elem.checked;
+			draw();
+		}
+
+		function updateTimestep(elem) {
+			timestepMs = parseFloat(elem.value);
+			draw();
+		}
+
+		function updateLerp(elem) {
+			lerpIntensity = elem.checked;
+			draw();
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<h1>Pulse Width Modulation</h1>
+		<canvas id="canvas" height="200"></canvas>
+		<div>
+			<label for="timestep">Timestep (ms)</label>
+			<input id="timestep" type="range" min="1" max="256" value="41" step="0.0001" oninput="updateTimestep(this);"/>
+
+			<label for="frequency">Frequency</label>
+			<input id="frequency" type="range" min="0.01" max="0.5" value="0.1" step="0.0001" oninput="updateFrequency(this);">
+
+			<label for="lerp">Lerp Intensity</label>
+			<input id="lerp" type="checkbox" oninput="updateLerp(this);" checked>
+
+			<label for="phase">Correct Phase</label>
+			<input id="phase" type="checkbox" oninput="updatePhase(this);" checked>
+		</div>
+	</body>
+</html>
