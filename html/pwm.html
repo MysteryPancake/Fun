@@ -90,8 +90,7 @@
 			while (phase < timestepMs) {
 				// Lerp intensity
 				const lerpedIntensity = lerp(phase / timestepMs, prevIntensity, intensity);
-				const delay = period * (1 - lerpedIntensity);
-
+				
 				pulses.push({
 					start: offset + phase, // Offset would not be included in final timer
 					duration: period,
@@ -99,6 +98,7 @@
 				});
 
 				// increment phase
+				const delay = period * (1 - lerpedIntensity);
 				phase += period + delay;
 			}
 
