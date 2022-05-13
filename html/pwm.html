@@ -92,7 +92,7 @@
 					: intensity;
 				
 				pulses.push({
-					start: offset + phase, // Offset would not be included in final timer
+					start: phase,
 					duration: period,
 					intensity: lerpedIntensity // For visual display purposes only
 				});
@@ -104,8 +104,8 @@
 
 			pulses.forEach(pulse => {
 				canvasCtx.beginPath();
-				canvasCtx.moveTo(pulse.start, 192 - pulse.intensity * 128)
-				canvasCtx.lineTo(pulse.start + pulse.duration, 192 - pulse.intensity * 128);
+				canvasCtx.moveTo(offset + pulse.start, 192 - pulse.intensity * 128)
+				canvasCtx.lineTo(offset + pulse.start + pulse.duration, 192 - pulse.intensity * 128);
 				canvasCtx.stroke();
 			});
 
@@ -117,25 +117,31 @@
 
 			const pulses = [];
 			const period = 1 / frequency;
+			let waitTime = phase;
 
 			for (; phase < timestepMs; phase += period) {
 				// Lerp intensity
 				const lerpedIntensity = lerpIntensity
 					? prevIntensity + (phase / timestepMs) * (intensity - prevIntensity)
 					: intensity;
-				
+
+				const onTime = period * lerpedIntensity;
 				pulses.push({
-					start: offset + phase, // Offset would not be included in final timer
-					duration: period * lerpedIntensity,
+					wait: waitTime,
+					duration: onTime,
 					intensity: lerpedIntensity // For visual display purposes only
 				});
+				// Push the next entry later
+				waitTime = period - onTime;
 			}
 
+			let lastEnd = 0;
 			pulses.forEach(pulse => {
 				canvasCtx.beginPath();
-				canvasCtx.moveTo(pulse.start, 192 - pulse.intensity * 128)
-				canvasCtx.lineTo(pulse.start + pulse.duration, 192 - pulse.intensity * 128);
+				canvasCtx.moveTo(offset + lastEnd + pulse.wait, 192 - pulse.intensity * 128)
+				canvasCtx.lineTo(offset + lastEnd + pulse.wait + pulse.duration, 192 - pulse.intensity * 128);
 				canvasCtx.stroke();
+				lastEnd += pulse.wait + pulse.duration;
 			});
 
 			// Keep phase continuous between pulses
