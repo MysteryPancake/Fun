@@ -41,7 +41,7 @@
 			return Math.min(Math.max(Math.round(Math.pow(1.106, note)), 0), 255);
 		}
 
-		function parseMidi(midi) {
+		function parseMidi(midi, fileName) {
 			let endTime = 0;
 			const allNotes = [];
 
@@ -100,7 +100,7 @@
 
 			const linkElem = document.getElementById("downloadLink");
 			linkElem.style.display = "block";
-			linkElem.download = "vibration.vib";
+			linkElem.download = `${fileName}.vib`;
 			linkElem.href = URL.createObjectURL(new Blob([result]));
 		}
 
@@ -109,7 +109,7 @@
 			if (!midiFile) return;
 			const reader = new FileReader();
 			reader.onload = function(e) {
-				parseMidi(new Midi(e.target.result));
+				parseMidi(new Midi(e.target.result), midiFile.name.split(".")[0]);
 			}
 			reader.readAsArrayBuffer(midiFile);
 		}
