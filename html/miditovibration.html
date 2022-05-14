@@ -45,12 +45,17 @@
 			let endTime = 0;
 			const allNotes = [];
 
+			let warnings = "";
 			midi.tracks.forEach(track => {
 				const notes = track.notes;
 				if (notes.length) {
 					notes.forEach(note => {
 						const start = note.time * 1000;
 						const end = start + note.duration * 1000;
+						if (note.midi > 55 || note.midi < 45) {
+							warnings +=
+							`<b>Warning: MIDI ${note.midi} (${note.name}) is outside range 45 to 55 and may not sound right!</b><br>`;
+						}
 						allNotes.push({
 							start: start,
 							end: end,
@@ -68,7 +73,8 @@
 			const dataCount = Math.ceil(adjustedEnd / timestepMillis);
 
 			document.getElementById("outputInfo").innerHTML +=
-			`Detected ${midi.tracks.length} tracks!<br>
+			`${warnings}
+			Detected ${midi.tracks.length} tracks!<br>
 			Detected ${allNotes.length} notes!<br>
 			End time in milliseconds: ${endTime}<br>
 			End time after padding: ${adjustedEnd}<br>
@@ -100,6 +106,7 @@
 
 		function uploadMidi(elem) {
 			const midiFile = elem.files[0];
+			if (!midiFile) return;
 			const reader = new FileReader();
 			reader.onload = function(e) {
 				parseMidi(new Midi(e.target.result));
@@ -110,6 +117,8 @@
 	</head>
 	<body>
 		<h1>MIDI to vibration file</h1>
+		<p>Generates a vibration file based on note pitches.</p>
+		<p>Only tested between MIDI 55 (G3, full blast) and MIDI 45 (A2, very quiet).</p>
 		<p>Please upload a MIDI file below:</p>
 		<input type="file" accept="audio/midi,audio/x-midi" onChange="uploadMidi(this);">
 		<p id="outputInfo"></p>
