@@ -113,7 +113,7 @@ int main()
 	header.byteRate = sampleRate * blockAlign;
 	header.blockAlign = blockAlign;
 	header.bitDepth = bitDepth;
-	header.dataChunkSize = sampleCount * bytesPerSample;
+	header.dataChunkSize = sampleCount * blockAlign;
 
 	// Create new wav file
 	ofstream wav("sickbeat.wav", ios::binary);
