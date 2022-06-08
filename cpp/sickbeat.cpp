@@ -17,15 +17,15 @@ struct WavHeader
 	const uint8_t fmt[4] = { 'f', 'm', 't', ' ' };
 	const uint32_t fmtChunkSize = 16; // 16 for PCM audio
 	const uint16_t audioFormat = 1; // 1 for PCM audio
-	uint16_t numChannels; // 1 = mono, 2 = stereo
-	uint32_t sampleRate; // usually 44100
+	uint16_t numChannels = 1; // 1 = mono, 2 = stereo
+	uint32_t sampleRate = 44100; // usually 44100
 	uint32_t byteRate;
 	uint16_t blockAlign;
 	uint16_t bitDepth;
 
 	// Data chunk
 	const uint8_t data[4] = { 'd', 'a', 't', 'a' };
-	uint32_t dataChunkSize;
+	uint32_t dataChunkSize = 0;
 };
 
 float noteFreq(float n)
@@ -82,20 +82,17 @@ float generateAudioSample(float time, bool rightChannel)
 	return sample / numNotes;
 }
 
-uint16_t floatTo16Bit(float sample)
+int16_t floatTo16Bit(float sample)
 {
 	float clamped = max(-1.0f, min(sample, 1.0f));
-	uint16_t scaled = clamped < 0.0f ? clamped * 0x8000 : clamped * 0x7FFF;
+	int16_t scaled = clamped < 0.0f ? clamped * 0x8000 : clamped * 0x7FFF;
 	return scaled;
 }
 
 int main()
 {
 	// Make sure this is 44
-	if (sizeof(WavHeader) != 44) {
-		cout << "Header wrong size, got " << sizeof(WavHeader) << '\n';
-		return 1;
-	}
+	static_assert(sizeof(WavHeader) == 44, "Header wrong size");
 
 	// 16-bit stereo wav file
 	const uint16_t bitDepth = 16;
@@ -127,12 +124,12 @@ int main()
 	wav.write(reinterpret_cast<const char*>(&header), sizeof(header));
 
 	// Write actual data
-	for (int i = 0; i < sampleCount; i++)
+	for (uint32_t i = 0; i < sampleCount; i++)
 	{
 		float time = (float)i / (float)sampleRate;
 		// Calculate left and right samples
-		uint16_t leftSample = floatTo16Bit(generateAudioSample(time, false));
-		uint16_t rightSample = floatTo16Bit(generateAudioSample(time, true));
+		int16_t leftSample = floatTo16Bit(generateAudioSample(time, false));
+		int16_t rightSample = floatTo16Bit(generateAudioSample(time, true));
 		// Interleave left and right samples
 		wav.write(reinterpret_cast<const char*>(&leftSample), sizeof(leftSample));
 		wav.write(reinterpret_cast<const char*>(&rightSample), sizeof(rightSample));
