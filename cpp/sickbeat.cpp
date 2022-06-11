@@ -99,7 +99,7 @@ int main()
 	const uint16_t numChannels = 2;
 	const uint32_t sampleRate = 44100;
 	const uint32_t numSeconds = 60;
-	const uint32_t sampleCount = sampleRate * numSeconds;
+	const uint32_t sampleCount = (uint32_t)((float)sampleRate * numSeconds);
 	const uint32_t bytesPerSample = bitDepth / 8;
 	const uint16_t blockAlign = numChannels * bytesPerSample;
 
