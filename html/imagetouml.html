@@ -46,7 +46,7 @@
 	<zoom_level>10</zoom_level>\n`;
 		const xmlEnd = "</diagram>";
 
-		function getElement(x, y, size, r, g, b) {
+		function getElement(x, y, size, r, g, b, a) {
 			return `\t<element>
 		<id>UMLClass</id>
 		<coordinates>
@@ -55,7 +55,8 @@
 			<w>${size}</w>
 			<h>${size}</h>
 		</coordinates>
-		<panel_attributes>bg=${rgbToHex(r, g, b)}</panel_attributes>
+		<panel_attributes>bg=${rgbToHex(r, g, b)}
+transparency=${Math.floor(100 - a / 2.55)}</panel_attributes>
 		<additional_attributes/>
 	</element>\n`;
 		}
@@ -84,10 +85,13 @@
 							const r = data[i];
 							const g = data[i + 1];
 							const b = data[i + 2];
-							const pixelIndex = i / 4;
-							const x = Math.floor(pixelIndex) % canvasElem.width;
-							const y = Math.floor(pixelIndex / canvasElem.height);
-							result += getElement(x, y, pixelSize, r, g, b);
+							const a = data[i + 3];
+							if (a > 0) {
+								const pixelIndex = i / 4;
+								const x = Math.floor(pixelIndex) % canvasElem.width;
+								const y = Math.floor(pixelIndex / canvasElem.width);
+								result += getElement(x, y, pixelSize, r, g, b, a);
+							}
 						}
 						result += xmlEnd;
 
