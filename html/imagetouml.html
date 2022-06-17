@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Image to UML Converter</title>
+		<meta name="description" content="Image to UML diagram converter.">
+		<meta name="keywords" content="Image, UML, Unified, Modelling, Language">
+		<meta property="og:title" content="Image to UML Converter">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/imagetouml">
+		<meta property="og:site_name" content="Image to UML Converter">
+		<meta property="og:description" content="Image to UML diagram converter.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: system-ui, Arial, Helvetica, sans-serif;
+		}
+
+		canvas {
+			display: block;
+		}
+
+		#download {
+			display: none;
+		}
+		</style>
+		<script>
+		let canvasElem, downloadElem;
+
+		function setup() {
+			canvasElem = document.getElementById("canvas");
+			downloadElem = document.getElementById("download");
+		}
+
+		function componentToHex(c) {
+			const hex = c.toString(16);
+			return hex.length === 1 ? `0${hex}` : hex;
+		}
+
+		function rgbToHex(r, g, b) {
+			return `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
+		}
+
+		const xmlStart = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+	<diagram program="umlet" version="14.3.0">
+	<zoom_level>10</zoom_level>\n`;
+		const xmlEnd = "</diagram>";
+
+		function getElement(x, y, size, r, g, b) {
+			return `\t<element>
+		<id>UMLClass</id>
+		<coordinates>
+			<x>${x * size}</x>
+			<y>${y * size}</y>
+			<w>${size}</w>
+			<h>${size}</h>
+		</coordinates>
+		<panel_attributes>bg=${rgbToHex(r, g, b)}</panel_attributes>
+		<additional_attributes/>
+	</element>\n`;
+		}
+
+		function imageToUML(elem) {
+			if (elem.files && elem.files[0]) {
+				const imageFile = elem.files[0];
+				const reader = new FileReader();
+				reader.onload = function() {
+					const image = new Image();
+					image.src = this.result;
+					image.onload = function() {
+
+						const pixelSize = 20;
+						const downscaleFactor = Math.floor(Math.max(this.width, this.height) / 50);
+
+						canvasElem.width = this.width / downscaleFactor;
+						canvasElem.height = this.height / downscaleFactor;
+
+						const context = canvasElem.getContext("2d");
+						context.drawImage(this, 0, 0, canvasElem.width, canvasElem.height);
+						const data = context.getImageData(0, 0, canvasElem.width, canvasElem.height).data;
+
+						let result = xmlStart;
+						for (let i = 0; i < data.length; i += 4) {
+							const r = data[i];
+							const g = data[i + 1];
+							const b = data[i + 2];
+							const pixelIndex = i / 4;
+							const x = Math.floor(pixelIndex) % canvasElem.width;
+							const y = Math.floor(pixelIndex / canvasElem.height);
+							result += getElement(x, y, pixelSize, r, g, b);
+						}
+						result += xmlEnd;
+
+						downloadElem.style.display = "block";
+						downloadElem.href = window.URL.createObjectURL(new Blob([result]));
+						downloadElem.download = `${imageFile.name.split(".")[0]}.uxf`;
+					}
+				}
+				reader.readAsDataURL(imageFile);
+			}
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<h1>Image to UML Converter</h1>
+		<input type="file" accept="image/*" onchange="imageToUML(this);">
+		<canvas id="canvas" width="0" height="0"></canvas>
+		<a id="download">Download Umlet File</a>
+	</body>
+</html>
