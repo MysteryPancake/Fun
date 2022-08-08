@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>K-Nearest Neighbors</title>
+		<meta name="description" content="2D implementation of the K-nearest neighbors algorithm.">
+		<meta name="keywords" content="K, Nearest, Neighbors, Sorting">
+		<meta property="og:title" content="K-Nearest Neighbors">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/knearestneighbors">
+		<meta property="og:site_name" content="K-Nearest Neighbors">
+		<meta property="og:description" content="2D implementation of the K-nearest neighbors algorithm.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: system-ui, Arial, Helvetica, sans-serif;
+		}
+		</style>
+		<script>
+		const requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(e) { return window.setTimeout(e, 1000 / 60); };
+		let canvasElem, canvasCtx, numColors, numPoints, k, colors, points, moveSpeed, kElem;
+		const rectSize = 8;
+
+		function setup() {
+			canvasElem = document.getElementById("canvas");
+			canvasCtx = canvasElem.getContext("2d", { alpha: false });
+			kElem = document.getElementById("k");
+			k = parseInt(kElem.value);
+			numColors = parseInt(document.getElementById("numColors").value);
+			numPoints = parseInt(document.getElementById("numPoints").value);
+			moveSpeed = parseFloat(document.getElementById("moveSpeed").value);
+			kElem.max = numPoints;
+			generateColors();
+			generatePoints();
+			draw();
+		}
+
+		function generateColors() {
+			colors = [];
+			for (let i = 0; i < numColors; i++) {
+				colors.push(`#${Math.random().toString(16).slice(2, 8).toUpperCase()}`);
+			}
+		}
+
+		function generatePoints() {
+			points = [];
+			for (let i = 0; i < numPoints; i++) {
+				points.push([
+					Math.random() * (canvasElem.width - rectSize), // X position
+					Math.random() * (canvasElem.height - rectSize), // Y position
+					colors[Math.floor(Math.random() * colors.length)] // Hex color
+				]);
+			}
+		}
+
+		function draw() {
+			// Draw each pixel individually with a rectangle, would be better to use a shader
+			for (let x = 0; x < canvasElem.width; x += rectSize) {
+				for (let y = 0; y < canvasElem.height; y += rectSize) {
+
+					// Sort by distance to find the K closest entries
+					points.sort(function(a, b) {
+						const x1 = a[0] - x;
+						const y1 = a[1] - y;
+						const x2 = b[0] - x;
+						const y2 = b[1] - y;
+						// No need to square root since it won't affect the order
+						return (x1 * x1 + y1 * y1) - (x2 * x2 + y2 * y2);
+					});
+
+					// Find the most common color out of the K closest entries
+					let mostCommon;
+					let counts = {};
+					let maxCount = 0;
+
+					for (let i = 0; i < k; i++) {
+						// Set the initial count to 0
+						if (counts[points[i][2]] === undefined) {
+							counts[points[i][2]] = 0;
+						}
+						// Increment the count by 1
+						const newCount = ++counts[points[i][2]];
+						// Check if we found the maximum count
+						if (newCount > maxCount) {
+							mostCommon = points[i][2];
+							maxCount = newCount;
+						}
+					}
+
+					// Use the result as the color for each pixel
+					canvasCtx.fillStyle = mostCommon;
+					canvasCtx.fillRect(x, y, rectSize, rectSize);
+				}
+			}
+
+			for (let i = 0; i < points.length; i++) {
+				points[i][0] += (Math.random() - 0.5) * moveSpeed;
+				points[i][1] += (Math.random() - 0.5) * moveSpeed;
+				canvasCtx.fillStyle = points[i][2];
+				canvasCtx.fillRect(points[i][0], points[i][1], rectSize, rectSize);
+				canvasCtx.fillStyle = "black";
+				canvasCtx.strokeRect(points[i][0], points[i][1], rectSize, rectSize);
+			}
+
+			requestFrame(draw);
+		}
+
+		function updateK(elem) {
+			k = parseInt(elem.value);
+		}
+
+		function updateColors(elem) {
+			numColors = parseInt(elem.value);
+			generateColors();
+			generatePoints();
+		}
+
+		function updatePoints(elem) {
+			numPoints = parseInt(elem.value);
+			k = Math.min(k, numPoints);
+			kElem.max = numPoints;
+			generatePoints();
+		}
+
+		function updateMoveSpeed(elem) {
+			moveSpeed = parseFloat(elem.value);
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<h1>K-Nearest Neighbors</h1>
+		<canvas id="canvas" width="1024" height="256"></canvas>
+		<div>
+			<label for="k">K value</label>
+			<input id="k" type="range" min="1" value="1" step="1" oninput="updateK(this);">
+			<label for="numColors">Number of colors</label>
+			<input id="numColors" type="range" min="1" max="100" value="10" step="1" oninput="updateColors(this);">
+			<label for="numPoints">Number of points</label>
+			<input id="numPoints" type="range" min="1" max="100" value="50" step="1" oninput="updatePoints(this);">
+			<label for="moveSpeed">Wiggle speed</label>
+			<input id="moveSpeed" type="range" min="0" max="50" value="2" step="0.001" oninput="updateMoveSpeed(this);">
+		</div>
+	</body>
+</html>
