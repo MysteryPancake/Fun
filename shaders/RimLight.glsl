@@ -3,9 +3,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 	vec2 uv = fragCoord / iResolution.xy;
 	
-	float circle = 1.0 - distance(uv - 0.5, vec2(sin(iTime), cos(iTime)) * 0.5);
+	vec2 orbit = vec2(sin(iTime), cos(iTime));
+	float circle = 1.0 - distance(uv - 0.5, orbit * 0.5);
 	float lightStrength = 0.75 + sin(iTime * 5.0) * 0.25;
-	vec2 offset = vec2(sin(iTime), cos(iTime)) * lightStrength * 0.01;
+	vec2 offset = orbit * lightStrength * 0.01;
 
 	vec3 target = vec3(0.0, 1.0, 0.0); // Find green
 	vec3 light = vec3(1.0, 0.5, 0.0); // Orange light color
