@@ -40,7 +40,7 @@
 				const star = document.createElement("span");
 				star.textContent = "*";
 				star.className = "star";
-				star.style.fontSize = starSize;
+				star.style.fontSize = `${starSize}px`;
 
 				// Give it a random color from the colors array
 				star.style.color = colors[Math.floor(Math.random() * colors.length)];
@@ -48,8 +48,8 @@
 				// Offset the position a bit, then move the span to that position
 				const x = event.clientX + starOffset[0];
 				const y = event.clientY + starOffset[1];
-				star.style.left = x;
-				star.style.top = y;
+				star.style.left = `${x}px`;
+				star.style.top = `${y}px`;
 
 				// Add element to the document
 				document.body.appendChild(star);
@@ -76,8 +76,8 @@
 				star.x += star.xVelocity;
 				star.y += star.yVelocity;
 				// Move the element to the updated position
-				star.elem.style.left = star.x;
-				star.elem.style.top = star.y;
+				star.elem.style.left = `${star.x}px`;
+				star.elem.style.top = `${star.y}px`;
 
 				// Shrink the star by 4 pixels each frame
 				star.size -= 4;
@@ -86,7 +86,7 @@
 					stars.delete(star);
 					document.body.removeChild(star.elem);
 				} else {
-					star.elem.style.fontSize = star.size;
+					star.elem.style.fontSize = `${star.size}px`;
 				}
 			});
 
