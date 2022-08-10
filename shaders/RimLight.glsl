@@ -8,8 +8,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	vec2 offset = vec2(sin(iTime), cos(iTime)) * lightStrength * 0.01;
 
 	vec3 target = vec3(0.0, 1.0, 0.0); // Find green
-	vec3 background = vec3(circle * lightStrength, 0.0, 0.1); // Replace with background
-	vec3 light = vec3(1.0, 0.0, 0.0); // Red light color
+	vec3 light = vec3(1.0, 0.5, 0.0); // Orange light color
+	vec3 background = vec3(0.0, 0.0, 0.1) + circle * lightStrength * light;
 
 	float threshold = 0.7; // Controls target color range
 	float softness = 0.1; // Controls linear falloff
