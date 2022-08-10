@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Cursor Physics</title>
+		<meta name="description" content="Demonstration of particles emitting from the cursor with physics.">
+		<meta name="keywords" content="Cursor, Particle, Particles, Physics, Ball, Balls">
+		<meta property="og:title" content="Cursor Physics">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/cursorphysics">
+		<meta property="og:site_name" content="Cursor Physics">
+		<meta property="og:description" content="Demonstration of particles emitting from the cursor with physics.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		/* Forcefully prevent scrollbars */
+		html, body {
+			overflow: hidden;
+			margin: 0;
+			padding: 0;
+		}
+
+		.ball {
+			font-family: Arial, sans-serif;
+			position: absolute;
+			user-select: none;
+			pointer-events: none;
+			border-radius: 50%;
+		}
+		</style>
+		<script>
+		// This uses requestFrame(), some browsers name it differently so this finds the best alternative
+		const requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(e) { return window.setTimeout(e, 1000 / 60); };
+		
+		// Store all balls in a set, makes them easier to remove
+		let balls = new Set();
+		// Starting ball size in pixels
+		const ballSize = 128;
+
+		function setup() {
+
+			document.addEventListener("mousemove", function(event) {
+				// Make a new div for the ball
+				const ball = document.createElement("div");
+				ball.className = "ball";
+				ball.style.width = `${ballSize}px`;
+				ball.style.height = `${ballSize}px`;
+
+				// Give it a random color
+				ball.style.backgroundColor = `rgb(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`;
+
+				// Offset the position a bit, then move the div to that position
+				const x = event.clientX;
+				const y = event.clientY;
+				ball.style.left = `${x - ballSize * 0.5}px`;
+				ball.style.top = `${y - ballSize * 0.5}px`;
+
+				// Add element to the document
+				document.body.appendChild(ball);
+
+				// Add element to the balls array
+				balls.add({
+					elem: ball,
+					x: x,
+					y: y,
+					xVelocity: (Math.random() - 0.5) * 16,
+					yVelocity: 0,
+					xAcceleration: 0,
+					yAcceleration: 1, // Gravity
+					size: ballSize
+				});
+			});
+
+			// Start updating each frame
+			update();
+		}
+
+		function update() {
+
+			balls.forEach(function(ball) {
+				// Move the velocity according to acceleration
+				ball.xVelocity += ball.xAcceleration;
+				ball.yVelocity += ball.yAcceleration;
+				// Move the position according to velocity
+				ball.x += ball.xVelocity;
+				ball.y += ball.yVelocity;
+
+				// Bounce on left
+				if (ball.x < ball.size * 0.5) {
+					ball.x = ball.size * 0.5;
+					ball.xVelocity *= -1;
+				}
+				// Bounce on right
+				if (ball.x > window.innerWidth - ball.size * 0.5) {
+					ball.x = window.innerWidth - ball.size * 0.5;
+					ball.xVelocity *= -1;
+				}
+				// Bounce on bottom
+				if (ball.y > window.innerHeight - ball.size * 0.5) {
+					ball.y = window.innerHeight - ball.size * 0.5;
+					ball.yVelocity *= -1;
+				}
+				
+				// Move the element to the updated position
+				ball.elem.style.left = `${ball.x - ball.size * 0.5}px`;
+				ball.elem.style.top = `${ball.y - ball.size * 0.5}px`;
+
+				// Shrink the ball by 1 pixel each frame
+				ball.size -= 1;
+				// Delete the ball if required
+				if (ball.size <= 0) {
+					balls.delete(ball);
+					document.body.removeChild(ball.elem);
+				} else {
+					ball.elem.style.width = `${ball.size}px`;
+					ball.elem.style.height = `${ball.size}px`;
+				}
+			});
+
+			// Continue updating forever
+			requestFrame(update);
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+	</body>
+</html>
