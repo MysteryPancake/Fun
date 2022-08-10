@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Cursor Particles</title>
+		<meta name="description" content="Demonstration of particles following the cursor.">
+		<meta name="keywords" content="Cursor, Particle, Particles, Star, Stars">
+		<meta property="og:title" content="Cursor Particles">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/cursorparticles">
+		<meta property="og:site_name" content="Cursor Particles">
+		<meta property="og:description" content="Demonstration of particles following the cursor.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		.star {
+			font-family: Arial, sans-serif;
+			position: absolute;
+			user-select: none;
+			pointer-events: none;
+		}
+		</style>
+		<script>
+		// This uses requestFrame(), some browsers name it differently so this finds the best alternative
+		const requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(e) { return window.setTimeout(e, 1000 / 60); };
+		
+		// Store all stars in a set, makes them easier to remove
+		let stars = new Set();
+		// All possible colors for stars
+		const colors = ["#FFFF00", "#000000", "#FF0000", "#0000FF"];
+		// Starting star size in pixels
+		const starSize = 128;
+
+		function setup() {
+
+			// To offset the text so it's more centered on the cursor
+			const starOffset = [-24, -42];
+
+			document.addEventListener("mousemove", function(event) {
+				// Make a new span for the star
+				const star = document.createElement("span");
+				star.textContent = "*";
+				star.className = "star";
+				star.style.fontSize = starSize;
+
+				// Give it a random color from the colors array
+				star.style.color = colors[Math.floor(Math.random() * colors.length)];
+
+				// Offset the position a bit, then move the span to that position
+				const x = event.clientX + starOffset[0];
+				const y = event.clientY + starOffset[1];
+				star.style.left = x;
+				star.style.top = y;
+
+				// Add element to the document
+				document.body.appendChild(star);
+
+				// Add element to the stars array
+				stars.add({
+					elem: star,
+					x: x,
+					y: y,
+					xVelocity: (Math.random() - 0.5) * 8, // Random X velocity
+					yVelocity: (Math.random() - 0.5) * 8, // Random Y velocity
+					size: starSize
+				});
+			});
+
+			// Start updating each frame
+			update();
+		}
+
+		function update() {
+
+			stars.forEach(function(star) {
+				// Move the star according to its velocity
+				star.x += star.xVelocity;
+				star.y += star.yVelocity;
+				// Move the element to the updated position
+				star.elem.style.left = star.x;
+				star.elem.style.top = star.y;
+
+				// Shrink the star by 4 pixels each frame
+				star.size -= 4;
+				// Delete the star if required
+				if (star.size <= 0) {
+					stars.delete(star);
+					document.body.removeChild(star.elem);
+				} else {
+					star.elem.style.fontSize = star.size;
+				}
+			});
+
+			// Continue updating forever
+			requestFrame(update);
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+	</body>
+</html>

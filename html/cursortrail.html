@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Cursor Trail</title>
+		<meta name="description" content="Demonstration of a trail following the cursor.">
+		<meta name="keywords" content="Cursor, Trail, Star, Stars">
+		<meta property="og:title" content="Cursor Trail">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/cursortrail">
+		<meta property="og:site_name" content="Cursor Trail">
+		<meta property="og:description" content="Demonstration of a trail following the cursor.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		.star {
+			font-family: Arial, sans-serif;
+			font-size: 128px;
+			position: absolute;
+			top: -100px;
+			left: -100px;
+			user-select: none;
+			pointer-events: none;
+		}
+		</style>
+		<script>
+		// Store all stars in an array
+		let stars = [];
+		// Create 100 stars
+		const numStars = 100;
+
+		function setup() {
+			
+			// Create all the stars
+			for (let i = 0; i < numStars; i++) {
+
+				// Make a span for each
+				const star = document.createElement("span");
+				star.textContent = "*";
+				star.className = "star";
+
+				// Give each a rainbow color, first value is the hue (0-360)
+				star.style.color = `hsl(${(i / numStars) * 360}, 100%, 50%)`;
+
+				// Add element to the document
+				document.body.appendChild(star);
+
+				// Add element to the stars array
+				stars.push(star);
+			}
+
+			// To offset the text so it's more centered on the cursor
+			const starOffset = [-24, -42];
+
+			document.addEventListener("mousemove", function(event) {
+
+				// Transfer positions along the chain from back to front
+				for (let i = stars.length - 1; i > 0; i--) {
+					stars[i].style.left = stars[i - 1].style.left;
+					stars[i].style.top = stars[i - 1].style.top;
+				}
+
+				// Set position of first star in chain
+				stars[0].style.left = event.clientX + starOffset[0];
+				stars[0].style.top = event.clientY + starOffset[1];
+			});
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+	</body>
+</html>
