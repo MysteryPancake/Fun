@@ -10,7 +10,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   float softness = 0.25; // Controls linear falloff
   
   // Get difference to use for falloff if required
-  float diff = distance(col.xyz, target.xyz) - threshold;
+  float diff = distance(col.xyz, target) - threshold;
   
   // Apply linear falloff if needed, otherwise clamp
   float factor = clamp(diff / softness, 0.0, 1.0);
