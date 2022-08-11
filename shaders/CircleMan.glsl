@@ -18,7 +18,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		vec4 col = texture(iChannel0, uv + vec2(sin(j), cos(j)) * 0.1);
 		
 		// Get difference to use for falloff if required
-		float diff = distance(col.xyz, target.xyz) - threshold;
+		float diff = distance(col.xyz, target) - threshold;
 		
 		// Apply linear falloff if needed, otherwise clamp
 		fragColor = max(fragColor, col * clamp(diff / softness, 0.0, 1.0));

@@ -17,12 +17,12 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	
 	// Background color key
 	vec4 col = texture(iChannel0, uv);
-	float diff = distance(col.xyz, target.xyz) - threshold;
+	float diff = distance(col.xyz, target) - threshold;
 	float factor = clamp(diff / softness, 0.0, 1.0);
 
 	// Same color key with an offset for the edge
 	vec4 colOffset = texture(iChannel0, uv + offset);
-	float diffOffset = distance(colOffset.xyz, target.xyz) - threshold;
+	float diffOffset = distance(colOffset.xyz, target) - threshold;
 	float lightFactor = 1.0 - clamp(diffOffset / softness, 0.0, 1.0);
 	
 	// Color correction for fun
