@@ -1,3 +1,4 @@
+// Available at https://www.shadertoy.com/view/NltyDS
 float noise(float n) {
 	return fract(cos(n * 89.42) * 343.42);
 }
