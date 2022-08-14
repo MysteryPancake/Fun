@@ -18,7 +18,7 @@ float iterate(float x, float y, float t) {
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-	vec2 uv = (fragCoord.xy / iResolution.xy - 0.5) * size;
+	vec2 uv = (fragCoord / iResolution.xy - 0.5) * size;
 	float t = mod(iTime * tstep, tend);
 	float p = iterate(uv.x, uv.y, t);
 	fragColor = vec4(p, p, p, 1.0);
