@@ -1,15 +1,12 @@
 // Available at https://www.shadertoy.com/view/WtffWX
-float w = 16.0;
-float h = 9.0;
-float firstp = 0.0001;
-int iterations = 100;
-float tstart = 0.0;
-float tend = 20.0;
-float tstep = 0.5;
-//float t = 0.0;
+const vec2 size = vec2(16.0, 9.0);
+const float firstp = 0.0001;
+const int iterations = 100;
+const float tend = 20.0;
+const float tstep = 0.5;
 
 float f(float x, float y, float t, float p) {
-	return (sin(x * (x + t) / (y + p) + t) + 1.0) / 2.0;
+	return (sin(x * (x + t) / (y + p) + t) + 1.0) * 0.5;
 }
 
 float iterate(float x, float y, float t) {
@@ -21,9 +18,8 @@ float iterate(float x, float y, float t) {
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-	vec2 uv = vec2((fragCoord.x / iResolution.x) * w, (fragCoord.y / iResolution.y) * h);
-	//t += tstep;
+	vec2 uv = (fragCoord.xy / iResolution.xy - 0.5) * size;
 	float t = mod(iTime * tstep, tend);
-	float p = iterate(uv.x - (w / 2.0), uv.y - (h / 2.0), t);
+	float p = iterate(uv.x, uv.y, t);
 	fragColor = vec4(p, p, p, 1.0);
 }
