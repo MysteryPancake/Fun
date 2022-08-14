@@ -3,7 +3,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 	vec2 uv = fragCoord / iResolution.xy;
 	vec3 result = vec3(0.0);
-	int iterations = 48;
+	const int iterations = 48;
 	
 	for (int i = 0; i <= iterations; i++) {
 		float percent = float(i) / float(iterations);
