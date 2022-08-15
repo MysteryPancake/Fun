@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 	<head>
 		<style>
 		canvas {
@@ -27,22 +28,19 @@
 			document.addEventListener("mousemove", function(event) {
 				if (path.length > 0) {
 					// Set position of first coordinate in chain
-					path[0].x = event.clientX;
-					path[0].y = event.clientY;
+					path[0][0] = event.clientX;
+					path[0][1] = event.clientY;
+
+					// Transfer positions along the chain from back to front
+					for (let i = path.length - 1; i > 0; i--) {
+						path[i][0] = path[i - 1][0];
+						path[i][1] = path[i - 1][1];
+					}
 				} else {
-					console.log("BRUH");
 					// Make 64 path points
 					for (let i = 0; i < 64; i++) {
-						path.push({
-							x: event.clientX,
-							y: event.clientY
-						});
+						path.push([event.clientX, event.clientY]);
 					}
-				}
-				// Transfer positions along the chain from back to front
-				for (let i = path.length - 1; i > 0; i--) {
-					path[i].x = path[i - 1].x;
-					path[i].y = path[i - 1].y;
 				}
 				draw();
 			});
@@ -63,7 +61,7 @@
 			canvasCtx.lineWidth = 2;
 			canvasCtx.beginPath();
 			path.forEach((pos) => {
-				canvasCtx.lineTo(pos.x, pos.y);
+				canvasCtx.lineTo(pos[0], pos[1]);
 			});
 			canvasCtx.stroke();
 		}
