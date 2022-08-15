@@ -1,0 +1,77 @@
+<html>
+	<head>
+		<style>
+		canvas {
+			position: absolute;
+			top: 0;
+			left: 0;
+			user-select: none;
+			pointer-events: none;
+		}
+		</style>
+		<script>
+		let canvasElem, canvasCtx;
+		// Store the path as X,Y coordinates
+		let path = [];
+
+		function setup() {
+			canvasElem = document.getElementById("canvas");
+			canvasElem.width = window.innerWidth;
+			canvasElem.height = window.innerHeight;
+
+			canvasCtx = canvasElem.getContext("2d");
+
+			window.addEventListener("resize", resize);
+			window.addEventListener("orientationchange", resize);
+
+			document.addEventListener("mousemove", function(event) {
+				if (path.length > 0) {
+					// Set position of first coordinate in chain
+					path[0].x = event.clientX;
+					path[0].y = event.clientY;
+				} else {
+					console.log("BRUH");
+					// Make 64 path points
+					for (let i = 0; i < 64; i++) {
+						path.push({
+							x: event.clientX,
+							y: event.clientY
+						});
+					}
+				}
+				// Transfer positions along the chain from back to front
+				for (let i = path.length - 1; i > 0; i--) {
+					path[i].x = path[i - 1].x;
+					path[i].y = path[i - 1].y;
+				}
+				draw();
+			});
+		}
+
+		function resize() {
+			canvasElem.width = window.innerWidth;
+			canvasElem.height = window.innerHeight;
+			draw();
+		}
+
+		function draw() {
+			// Clear canvas
+			canvasCtx.clearRect(0, 0, canvasElem.width, canvasElem.height);
+
+			// Draw line thing
+			canvasCtx.strokeStyle = "black";
+			canvasCtx.lineWidth = 2;
+			canvasCtx.beginPath();
+			path.forEach((pos) => {
+				canvasCtx.lineTo(pos.x, pos.y);
+			});
+			canvasCtx.stroke();
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<canvas id="canvas"></canvas>
+		<h1>Hello world</h1>
+		<p>God help me</p>
+	</body>
+</html>
