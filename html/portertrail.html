@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Porter Trail</title>
+		<meta name="description" content="Trail inspired by Porter Robinson.">
+		<meta name="keywords" content="Canvas, Trail, Porter, Robinson">
+		<meta property="og:title" content="Porter Trail">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/portertrail">
+		<meta property="og:site_name" content="Porter Trail">
+		<meta property="og:description" content="Trail inspired by Porter Robinson.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		html, body {
+			margin: 0;
+			overflow: hidden;
+			padding: 0;
+		}
+
+		canvas {
+			display: block;
+		}
+		</style>
+		<script>
+		let canvasElem, canvasCtx;
+		// This uses requestFrame(), some browsers name it differently so this finds the best alternative
+		const requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(e) { return window.setTimeout(e, 1000 / 60); };
+		// Store the path as X,Y coordinates
+		let path = [];
+
+		function setup() {
+			canvasElem = document.getElementById("canvas");
+			canvasCtx = canvasElem.getContext("2d");
+			// Make 256 path points
+			for (let i = 0; i < 256; i++) {
+				path.push([window.innerWidth * 0.5, window.innerHeight * 0.5]);
+			}
+			window.addEventListener("resize", resize);
+			window.addEventListener("orientationchange", resize);
+			resize();
+			draw();
+		}
+
+		function resize() {
+			canvasElem.width = window.innerWidth;
+			canvasElem.height = window.innerHeight;
+		}
+
+		function draw() {
+			// Fill with white to clear the canvas
+			canvasCtx.fillStyle = "black";
+			canvasCtx.fillRect(0, 0, canvasElem.width, canvasElem.height);
+
+			// Move X coordinate in random direction
+			path[0][0] += (Math.random() - 0.5) * 40;
+			// Keep on screen
+			if (path[0][0] < 0) {
+				path[0][0] = 0;
+			} else if (path[0][0] > canvasElem.width) {
+				path[0][0] = canvasElem.width;
+			}
+
+			// Move Y coordinate in random direction
+			path[0][1] += (Math.random() - 0.5) * 40;
+			// Keep on screen
+			if (path[0][1] < 0) {
+				path[0][1] = 0;
+			} else if (path[0][1] > canvasElem.height) {
+				path[0][1] = canvasElem.height;
+			}
+
+			// Transfer positions along the chain from back to front
+			for (let i = path.length - 1; i > 0; i--) {
+				path[i][0] = path[i - 1][0];
+				path[i][1] = path[i - 1][1];
+			}
+
+			// Draw line thing
+			canvasCtx.strokeStyle = "white";
+			canvasCtx.lineWidth = 2;
+			canvasCtx.beginPath();
+			path.forEach((pos) => {
+				canvasCtx.lineTo(pos[0], pos[1]);
+			});
+			canvasCtx.stroke();
+
+			// Keep drawing forever
+			requestFrame(draw);
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<canvas id="canvas"></canvas>
+	</body>
+</html>
