@@ -1,0 +1,54 @@
+<html>
+	<head>
+		<script>
+		let canvasElem, canvasCtx;
+		// This uses requestFrame(), some browsers name it differently so this finds the best alternative
+		const requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(e) { return window.setTimeout(e, 1000 / 60); };
+		// Store the path as X,Y coordinates
+		let path = [];
+
+		function setup() {
+			canvasElem = document.getElementById("canvas");
+			canvasCtx = canvasElem.getContext("2d");
+			// Make 256 path points
+			for (let i = 0; i < 256; i++) {
+				path.push({
+					x: canvasElem.width * 0.5,
+					y: canvasElem.height * 0.5
+				});
+			}
+			draw();
+		}
+
+		function draw() {
+			// Fill with white to clear the canvas
+			canvasCtx.fillStyle = "black";
+			canvasCtx.fillRect(0, 0, canvasElem.width, canvasElem.height);
+
+			// Move first coordinate in random direction
+			path[0].x += (Math.random() - 0.5) * 20;
+			path[0].y += (Math.random() - 0.5) * 20;
+			// Transfer positions along the chain from back to front
+			for (let i = path.length - 1; i > 0; i--) {
+				path[i].x = path[i - 1].x;
+				path[i].y = path[i - 1].y;
+			}
+
+			// Draw line thing
+			canvasCtx.strokeStyle = "white";
+			canvasCtx.lineWidth = 2;
+			canvasCtx.beginPath();
+			path.forEach((pos) => {
+				canvasCtx.lineTo(pos.x, pos.y);
+			});
+			canvasCtx.stroke();
+
+			// Keep drawing forever
+			requestFrame(draw);
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<canvas id="canvas" width="512" height="512"></canvas>
+	</body>
+</html>
