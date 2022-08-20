@@ -7,8 +7,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	const float threshold = 0.6; // Controls target color range
 	const float softness = 0.1; // Controls linear falloff
 
-	const int steps = 32;
-	const float total = float(steps) / 6.28318530;
+	const float steps = 32.0;
+	const float total = steps / 6.28318530;
 	float outlineSize = (1.0 + sin(iTime * 4.0)) * 0.01;
 	
 	// Apply linear color key
@@ -18,9 +18,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 	fragColor = vec4(uv.y, 0.0, uv.x, 1.0);
 	
-	for (int i = 0; i < steps; i++) {
+	for (float i = 0.0; i < steps; i++) {
 		// Sample image in a circular pattern
-		float j = float(i) / total;
+		float j = i / total;
 		vec4 col = texture(iChannel0, uv + vec2(sin(j), cos(j)) * outlineSize);
 		
 		// Apply linear color key
