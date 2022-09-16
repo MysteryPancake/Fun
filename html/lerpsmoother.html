@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Lerp Smoother</title>
+		<meta name="description" content="Basic smoothing effect using lerp.">
+		<meta name="keywords" content="Lerp, Smooth, Smoothing, Smoother, Linear, Interpolation">
+		<meta property="og:title" content="Lerp Smoother">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/lerpsmoother">
+		<meta property="og:site_name" content="Lerp Smoother">
+		<meta property="og:description" content="Basic smoothing effect using lerp.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: system-ui, Arial, Helvetica, sans-serif;
+		}
+
+		html, body {
+			margin: 0;
+			padding: 0;
+		}
+
+		h1 {
+			padding: 0 16px;
+		}
+
+		div {
+			padding: 16px;
+		}
+		</style>
+		<script>
+		let canvasElem, canvasCtx, smoothFactor;
+		const points = new Float32Array(512);
+		const smoothed = new Float32Array(512);
+
+		function setup() {
+			canvasElem = document.getElementById("canvas");
+			canvasElem.width = window.innerWidth;
+			canvasCtx = canvasElem.getContext("2d", { alpha: false });
+			for (let i = 0; i < points.length; i++) {
+				points[i] = (1 + Math.sin(i * 0.1)) * 0.5 * Math.random();
+			}
+			smoothFactor = parseFloat(document.getElementById("smoothness").value);
+			draw();
+		}
+
+		function drawPoints(arr, color) {
+			canvasCtx.beginPath();
+			canvasCtx.strokeStyle = color;
+			for (let i = 0; i < arr.length; i++) {
+				canvasCtx.lineTo(i / arr.length * canvasElem.width, (1 - arr[i]) * canvasElem.height);
+			}
+			canvasCtx.stroke();
+		}
+
+		function lerp(a, b, factor) {
+			return a + (b - a) * factor;
+		}
+
+		function smooth(elem) {
+			smoothFactor = parseFloat(elem.value);
+			draw();
+		}
+
+		function draw() {
+			smoothed.fill(0);
+
+			const len = points.length - 1;
+			let first = points[0];
+			let last = points[len];
+
+			for (let i = 0; i < points.length; i++) {
+				const lerpedFirst = lerp(points[i], first, smoothFactor);
+				const lerpedLast = lerp(points[len - i], last, smoothFactor);
+
+				smoothed[len - i] = Math.max(smoothed[len - i], lerpedLast);
+				smoothed[i] = Math.max(smoothed[i], lerpedFirst);
+
+				first = lerpedFirst;
+				last = lerpedLast;
+			}
+
+			// Clear canvas
+			canvasCtx.fillStyle = "white";
+			canvasCtx.fillRect(0, 0, canvasElem.width, canvasElem.height);
+
+			// Draw both lines
+			canvasCtx.lineWidth = 2;
+			drawPoints(points, "gray");
+			drawPoints(smoothed, "black");
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<h1>Lerp Smoother</h1>
+		<canvas id="canvas" height="512"></canvas>
+		<div>
+			<label for="smoothness">Smoothness</label>
+			<input id="smoothness" type="range" min="0" max="1" step="0.01" value="0.7" oninput="smooth(this);">
+		</div>
+	</body>
+</html>
