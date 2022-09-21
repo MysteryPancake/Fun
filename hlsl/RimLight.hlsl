@@ -5,20 +5,27 @@
 uniform float4 lightColor;
 
 #pragma shaderfilter set depth__description Depth
-#pragma shaderfilter set depth__default 1
+#pragma shaderfilter set depth__min 0.0
+#pragma shaderfilter set depth__max 8.0
+#pragma shaderfilter set depth__default 1.0
+#pragma shaderfilter set depth__step 0.01
+#pragma shaderfilter set depth__slider true
 uniform float depth;
 
 #pragma shaderfilter set angle__description Angle
-#pragma shaderfilter set angle__default 180
+#pragma shaderfilter set angle__min 0.0
+#pragma shaderfilter set angle__max 360.0
+#pragma shaderfilter set angle__default 180.0
+#pragma shaderfilter set angle__slider true
 uniform float angle;
 
-float4 render(float2 uv)
-{
-	float rad = radians(angle);
-	float2 offset = float2(sin(rad), cos(rad)) * depth * 0.01;
+float4 render(float2 uv) {
+	
+	const float rad = radians(angle);
+	const float2 offset = float2(sin(rad), cos(rad)) * depth * 0.1;
 
-	float4 color = image.Sample(builtin_texture_sampler, uv);
-	float4 colorOffset = image.Sample(builtin_texture_sampler, uv + offset);
+	const float4 color = image.Sample(builtin_texture_sampler, uv);
+	const float4 colorOffset = image.Sample(builtin_texture_sampler, uv + offset);
 
 	return float4(lerp(color.rgb + lightColor.rgb, color.rgb, colorOffset.a), color.a);
 }
