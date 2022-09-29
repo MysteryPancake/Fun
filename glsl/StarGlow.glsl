@@ -5,7 +5,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	fragColor = texture(iChannel0, uv);
 	
 	const float range = 0.1; // Length of glow streaks
-	const float steps = 0.005; // Number of texture samples / 2
+	const float steps = 0.005; // Texture samples
 	const float threshold = 0.6; // Color key threshold (0-1)
 	const float brightness = 5.0; // Glow brightness
 	
