@@ -1,11 +1,16 @@
 // Available at https://www.shadertoy.com/view/ftGfDw
 
-// My SDF grid implementation
 float sdGrid(in vec2 position, in float margin) {
+
 	// Calculate per-axis distance from 0.5 to position mod 1
-	vec2 col = abs(fract(position) - 0.5);
-	// Use the smallest axis result
-	return margin - min(col.x, col.y);
+	vec2 gridDist = abs(fract(position) - 0.5) - margin;
+	
+	// Calculate length for round outer corners, ripped from Inigo Quilez
+	float outsideDist = length(max(gridDist, 0.0));
+	// Calculate inside separately, ripped from Inigo Quilez
+	float insideDist = min(max(gridDist.x, gridDist.y), 0.0);
+	
+	return outsideDist + insideDist;
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
