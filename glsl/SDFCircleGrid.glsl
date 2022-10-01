@@ -15,7 +15,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	float radius = 0.25 + sin(iTime * 2.0) * 0.25;
 	float d = sdCircleGrid(p, radius);
 
-	// Distance, ripped from Inigo Quilez
+	// Coloring, ripped from Inigo Quilez
 	vec3 col = vec3(1.0) - sign(d) * vec3(0.1, 0.4, 0.7);
 	col *= 1.0 - exp(-6.0 * abs(d));
 	col *= 0.8 + 0.2 * cos(120.0 * d);
