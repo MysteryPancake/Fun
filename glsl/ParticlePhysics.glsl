@@ -45,19 +45,19 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		// Dampen each particle differently, for variety
 		float dampening = 0.95 + sin(fragCoord.x * 64.0) * 0.05;
 		
-		// Bounce particles on floor
+		// Bounce particles on floor, thanks spalmer for fixes
 		if (pos.y < 0.0) {
 			vel.y *= -dampening;
-			pos.y = max(pos.y, 0.0);
+			pos.y = max(-pos.y, 0.0);
 		}
 		
-		// Bounce particles on walls
+		// Bounce particles on walls, thanks spalmer for fixes
 		if (pos.x < 0.0) {
 			vel.x *= -dampening;
 			pos.x = max(-pos.x, 0.0);
 		} else if (pos.x > iResolution.x) {
 			vel.x *= -dampening;
-			pos.x = max(iResolution.x - pos.x, iResolution.x);
+			pos.x = iResolution.x + min(iResolution.x - pos.x, 0.0);
 		}
 		
 		// Combine components again
@@ -77,6 +77,7 @@ float line(in vec2 p, in vec2 a, in vec2 b) {
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
+	// Initialize fragColor, thanks mla for the tip
 	fragColor = vec4(0.0);
 
 	for (float i = 0.0; i < NUM_PARTICLES; i++) {
