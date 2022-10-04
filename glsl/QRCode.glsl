@@ -7,5 +7,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	if (abs(uv.x - 0.5) < 0.5) {
 		float coord = (uv.x + floor(uv.y * size)) * size;
 		fragColor = vec4(vec3(pixels[int(coord)]), 1.0);
+	} else {
+		fragColor = vec4(0.0);
 	}
 }
