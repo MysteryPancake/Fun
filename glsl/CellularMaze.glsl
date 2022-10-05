@@ -38,6 +38,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 // IMAGE
 
+#define BLURRY
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-	fragColor = texture(iChannel0, fragCoord / iResolution.xy / gridSize);
+
+    #ifdef BLURRY
+        fragColor = texture(iChannel0, fragCoord / iResolution.xy / gridSize);
+    #else
+        fragColor = texelFetch(iChannel0, ivec2(fragCoord / gridSize), 0);
+    #endif
 }
