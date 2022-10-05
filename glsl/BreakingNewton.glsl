@@ -85,7 +85,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		vec4 posVel = fetch(i);
 		
 		// Draw lines based on position and velocity of each particle
-		float trail = mass(i) / line(fragCoord.xy, posVel.xy, posVel.xy + posVel.zw * 256.0);
+		float trail = mass(i) / line(fragCoord, posVel.xy, posVel.xy + posVel.zw * 256.0);
 		
 		// Make faster particles more yellow
 		fragColor = max(fragColor, vec4(trail, trail * length(posVel.zw) * 24.0, 0.0, 1.0));

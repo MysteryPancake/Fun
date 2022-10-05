@@ -4,7 +4,7 @@
 
 #define gridSize 8.0
 
-#define sample(offset) texelFetch(iChannel0, ivec2(fragCoord) + offset, 0).x
+#define cell(offset) texelFetch(iChannel0, ivec2(fragCoord) + offset, 0).x
 
 #define rand(p) fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453)
 
@@ -26,9 +26,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		float self = texelFetch(iChannel0, ivec2(fragCoord), 0).x;
 
 		// Sum of neighbours, 3 x 3 kernel
-		float sum = sample(ivec2(-1, -1)) + sample(ivec2(0, -1)) + sample(ivec2(1, -1))
-				  + sample(ivec2(-1,  0))                        + sample(ivec2(1,  0))
-				  + sample(ivec2(-1,  1)) + sample(ivec2(0,  1)) + sample(ivec2(1,  1));
+		float sum = cell(ivec2(-1, -1)) + cell(ivec2(0, -1)) + cell(ivec2(1, -1))
+				  + cell(ivec2(-1,  0))                      + cell(ivec2(1,  0))
+				  + cell(ivec2(-1,  1)) + cell(ivec2(0,  1)) + cell(ivec2(1,  1));
 
 		// Swap pattern every 64 frames
 		float offset = sum > float((64 + iFrame) / 64 % 8) ? -0.1 : 0.1;
