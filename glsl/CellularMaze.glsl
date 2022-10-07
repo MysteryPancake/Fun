@@ -18,7 +18,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	if (iFrame % 64 == 0) {
 	
 		// Initialize values, random noise
-		fragColor = vec4(vec3(rand(fragCoord)), 1.0);
+		fragColor = vec4(vec3(rand(fragCoord / iResolution.xy)), 1.0);
 		
 	} else {
 	
