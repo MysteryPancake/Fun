@@ -26,9 +26,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		float self = texelFetch(iChannel0, ivec2(fragCoord), 0).x;
 
 		// Sum of neighbours, 3 x 3 kernel
-		float sum = cell(ivec2(-1, -1)) + cell(ivec2(0, -1)) + cell(ivec2(1, -1))
+		float sum = cell(ivec2(-1,  1)) + cell(ivec2(0,  1)) + cell(ivec2(1,  1))
 				  + cell(ivec2(-1,  0))                      + cell(ivec2(1,  0))
-				  + cell(ivec2(-1,  1)) + cell(ivec2(0,  1)) + cell(ivec2(1,  1));
+				  + cell(ivec2(-1, -1)) + cell(ivec2(0, -1)) + cell(ivec2(1, -1));
 
 		// Swap pattern every 64 frames
 		float offset = sum > float((64 + iFrame) / 64 % 8) ? -0.1 : 0.1;
