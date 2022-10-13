@@ -100,6 +100,11 @@
 			height: 100%;
 			width: 32px;
 		}
+
+		.rgbHolderRow {
+			width: 100%;
+			height: 100%;
+		}
 		</style>
 		<script>
 		let hexInput, target, rightElem;
@@ -125,6 +130,7 @@
 
 		function makeRgbHolder(color) {
 			const holder = document.createElement("div");
+			holder.className = "rgbHolderRow";
 
 			const red = document.createElement("div");
 			red.className = "rgbHolderBox";
@@ -151,18 +157,14 @@
 			historyDiv.className = "historyDiv";
 			
 			const boxHolder = document.createElement("div");
-
 			boxHolder.appendChild(makeColorBox(target));
 			boxHolder.appendChild(makeColorBox(guess));
-
 			historyDiv.appendChild(boxHolder);
 
 			const rgbHolder = document.createElement("div");
 			rgbHolder.className = "rgbHolder";
-
 			rgbHolder.appendChild(makeRgbHolder(target));
 			rgbHolder.appendChild(makeRgbHolder(guess));
-
 			historyDiv.appendChild(rgbHolder);
 
 			const redAccuracy = 100 - Math.abs(guess[0] - target[0]) / 2.55;
