@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Hex Guess</title>
+		<meta name="description" content="Hex code guessing game.">
+		<meta name="keywords" content="Color, Code, Guess, Red, Green, Blue, RGB, Hex">
+		<meta property="og:title" content="Hex Guess">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/hexguess">
+		<meta property="og:site_name" content="Hex Guess">
+		<meta property="og:description" content="Hex code guessing game.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: system-ui, Arial, Helvetica, sans-serif;
+		}
+
+		td {
+			height: 24px;
+			text-align: center;
+			transition: 0.1s;
+			width: 30px;
+		}
+
+		td:hover {
+			background-color: lightgray;
+		}
+
+		table {
+			background-color: white;
+			border-collapse: collapse;
+			cursor: pointer;
+			margin-bottom: 8px;
+		}
+
+		table, label {
+			user-select: none;
+		}
+
+		#colorTarget {
+			height: 512px;
+			margin-bottom: 8px;
+			width: 512px;
+			transition: 0.3s;
+			position: relative;
+		}
+
+		#colorGuess {
+			bottom: 0;
+			height: 50%;
+			position: absolute;
+			transition: 0.3s;
+			width: 100%;
+		}
+
+		#hexInput {
+			width: 6em;
+		}
+
+		#middle {
+			align-items: center;
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+		}
+
+		#right {
+			background-color: white;
+			box-shadow: 0 0 8px gray;
+			overflow-x: hidden;
+			position: absolute;
+			right: 0;
+			top: 0;
+		}
+
+		.largeText {
+			font-size: xx-large;
+		}
+
+		.historyDiv {
+			display: flex;
+			height: 64px;
+			margin: 8px;
+			width: 100%;
+		}
+
+		.colorBox {
+			width: 64px;
+			height: 50%;
+		}
+
+		.rgbHolder {
+			height: 50%;
+			margin: 0 8px;
+		}
+
+		.rgbHolderBox {
+			display: inline-block;
+			height: 100%;
+			width: 32px;
+		}
+		</style>
+		<script>
+		let hexInput, target, rightElem;
+		let halfHex = true;
+
+		function randomColor() {
+			return [Math.floor(Math.random() * 256), Math.floor(Math.random() * 256), Math.floor(Math.random() * 256)];
+		}
+
+		function retry() {
+			hexInput.value = "";
+			target = randomColor();
+			document.getElementById("colorTarget").style.backgroundColor = `rgb(${target[0]},${target[1]},${target[2]})`;
+			document.getElementById("colorGuess").style.backgroundColor = "black";
+		}
+
+		function makeColorBox(color) {
+			const box = document.createElement("div");
+			box.className = "colorBox";
+			box.style.backgroundColor = `rgb(${color[0]},${color[1]},${color[2]})`;
+			return box;
+		}
+
+		function makeRgbHolder(color) {
+			const holder = document.createElement("div");
+
+			const red = document.createElement("div");
+			red.className = "rgbHolderBox";
+			red.style.backgroundColor = `rgb(${color[0]},0,0)`;
+			holder.appendChild(red);
+
+			const green = document.createElement("div");
+			green.className = "rgbHolderBox";
+			green.style.backgroundColor = `rgb(0,${color[1]},0)`;
+			holder.appendChild(green);
+
+			const blue = document.createElement("div");
+			blue.className = "rgbHolderBox";
+			blue.style.backgroundColor = `rgb(0,0,${color[2]})`;
+			holder.appendChild(blue);
+
+			return holder;
+		}
+
+		function addGuess() {
+			const guess = hexToRgb(hexInput.value);
+			
+			const historyDiv = document.createElement("div");
+			historyDiv.className = "historyDiv";
+			
+			const boxHolder = document.createElement("div");
+
+			boxHolder.appendChild(makeColorBox(target));
+			boxHolder.appendChild(makeColorBox(guess));
+
+			historyDiv.appendChild(boxHolder);
+
+			const rgbHolder = document.createElement("div");
+			rgbHolder.className = "rgbHolder";
+
+			rgbHolder.appendChild(makeRgbHolder(target));
+			rgbHolder.appendChild(makeRgbHolder(guess));
+
+			historyDiv.appendChild(rgbHolder);
+
+			const redAccuracy = 100 - Math.abs(guess[0] - target[0]) / 2.55;
+			const greenAccuracy = 100 - Math.abs(guess[1] - target[1]) / 2.55;
+			const blueAccuracy = 100 - Math.abs(guess[2] - target[2]) / 2.55;
+			const accuracy = (redAccuracy + greenAccuracy + blueAccuracy) / 3;
+
+			const score = document.createElement("span");
+			score.textContent = `${accuracy.toFixed(2)}% accurate`;
+			historyDiv.appendChild(score);
+
+			rightElem.appendChild(historyDiv);
+		}
+
+		function submit() {
+			addGuess();
+			retry();
+		}
+
+		function setup() {
+			hexInput = document.getElementById("hexInput");
+			hexInput.addEventListener("keydown", checkSubmit);
+			rightElem = document.getElementById("right");
+			makeTable();
+			retry();
+		}
+
+		function makeTable() {
+			const table = document.getElementById("colorReference");
+
+			const colors = table.insertRow(-1);
+			const names = table.insertRow(-1);
+			const chars = "0123456789ABCDEF";
+
+			for (let i = 0; i < chars.length; i++) {
+				const c = chars.charAt(i);
+
+				const colorCell = colors.insertCell(-1);
+				colorCell.style.backgroundColor = `#${c.repeat(6)}`;
+				colorCell.onclick = () => addChar(c);
+
+				const nameCell = names.insertCell(-1);
+				nameCell.textContent = c;
+				nameCell.onclick = () => addChar(c);
+			}
+		}
+
+		function addChar(char) {
+			hexInput.value += char;
+			updateColor();
+		}
+
+		function checkSubmit(e) {
+			if (e.code === "Space" || e.code === "Enter") {
+				submit();
+			}
+		}
+
+		function pad(str) {
+			return str.length > 1 ? str : `${str}${str}`;
+		}
+
+		function hexToRgb(hex) {
+			let r, g, b;
+			if (halfHex) {
+				r = parseInt(`${hex[0]}${hex[0]}`, 16) || 0;
+				g = parseInt(`${hex[1]}${hex[1]}`, 16) || 0;
+				b = parseInt(`${hex[2]}${hex[2]}`, 16) || 0;
+			} else {
+				r = parseInt(pad(hex.slice(0, 2)), 16) || 0;
+				g = parseInt(pad(hex.slice(2, 4)), 16) || 0;
+				b = parseInt(pad(hex.slice(4, 6)), 16) || 0;
+			}
+			return [r, g, b];
+		}
+
+		function updateColor() {
+			hexInput.value = hexInput.value.slice(0, halfHex ? 3 : 6).toUpperCase().replace(/[^A-F\d]/g, "");
+			const guess = hexToRgb(hexInput.value);
+			document.getElementById("colorGuess").style.backgroundColor = `rgb(${guess[0]},${guess[1]},${guess[2]})`;
+		}
+
+		function toggleHalf(elem) {
+			halfHex = elem.checked;
+			hexInput.placeholder = halfHex ? "000" : "000000";
+			hexInput.maxLength = halfHex ? 3 : 6;
+			const val = hexInput.value;
+			if (halfHex && val.length >= 4) {
+				hexInput.value = `${val[0] || ""}${val[2] || ""}${val[4] || ""}`;
+			} else if (!halfHex && val.length <= 3) {
+				const r = val[0] || "", g = val[1] || "", b = val[2] || "";
+				hexInput.value = `${r}${r}${g}${g}${b}${b}`;
+			}
+			updateColor();
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<div id="middle">
+			<h1>Hex Guess</h1>
+			<div id="colorTarget">
+				<div id="colorGuess"></div>
+			</div>
+			<table id="colorReference"></table>
+			<div>
+				<span class="largeText">#</span>
+				<input id="hexInput" class="largeText" type="text" maxlength="3" placeholder="000" pattern="[a-f0-9]+" oninput="updateColor();" autofocus>
+				<input id="halfHex" type="checkbox" checked onchange="toggleHalf(this);">
+				<label for="halfHex">3 digits</label>
+			</div>
+		</div>
+		<div id="right"></div>
+	</body>
+</html>
