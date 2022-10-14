@@ -150,6 +150,15 @@
 			return holder;
 		}
 
+		function colorDistance(a, b) {
+			// Redmean, adapted from https://en.wikipedia.org/wiki/Color_difference
+			const r = 0.5 * (a[0] + b[0]);
+			const rDiff = a[0] - b[0];
+			const gDiff = a[1] - b[1];
+			const bDiff = a[2] - b[2];
+			return Math.sqrt(rDiff * rDiff * (2 + r / 256) + 4 * gDiff * gDiff + bDiff * bDiff * (2 + (255 - r) / 256));
+		}
+
 		function addGuess() {
 			const guess = hexToRgb(hexInput.value);
 			
@@ -167,14 +176,10 @@
 			rgbHolder.appendChild(makeRgbHolder(guess));
 			historyDiv.appendChild(rgbHolder);
 
-			const redAccuracy = 100 - Math.abs(guess[0] - target[0]) / 2.55;
-			const greenAccuracy = 100 - Math.abs(guess[1] - target[1]) / 2.55;
-			const blueAccuracy = 100 - Math.abs(guess[2] - target[2]) / 2.55;
-			const accuracy = (redAccuracy + greenAccuracy + blueAccuracy) / 3;
-
-			const score = document.createElement("span");
-			score.textContent = `${accuracy.toFixed(2)}% accurate`;
-			historyDiv.appendChild(score);
+			const scoreElem = document.createElement("span");
+			const score = 100 - colorDistance(guess, target) / 7.648339663572415;
+			scoreElem.textContent = `${score.toFixed(2)}% accurate`;
+			historyDiv.appendChild(scoreElem);
 
 			rightElem.appendChild(historyDiv);
 		}
