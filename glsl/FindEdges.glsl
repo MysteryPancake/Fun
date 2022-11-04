@@ -1,3 +1,5 @@
+// Available at https://www.shadertoy.com/view/csjGD1
+
 // BUFFER A
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
