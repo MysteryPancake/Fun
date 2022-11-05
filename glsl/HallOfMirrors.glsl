@@ -6,13 +6,13 @@
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 	// Number of images to display
-	int images = 10;
+	int images = 32;
 	// Scale factor per image
-	float scale = 0.8 + cos(iTime * 2.0) * 0.05;
+	float scale = 0.9 + cos(iTime * 2.0) * 0.1;
 	// Rotation per image in degrees
-	float rotation = sin(iTime * 0.5) * 90.0;
+	float rotation = sin(iTime * 0.5) * 45.0;
 	// Position offset per image in normalized coordinates (0-1)
-	vec2 offset = iMouse.z > 0.0 ? vec2(iMouse.xy / iResolution.xy) : 0.5 + vec2(cos(iTime), sin(iTime)) * 0.25;
+	vec2 offset = iMouse.z > 0.0 ? vec2(iMouse.xy / iResolution.xy) : 0.5 + vec2(cos(iTime), sin(iTime)) * 0.5;
 	// Composite behind or in front
 	bool behind = false;
 
