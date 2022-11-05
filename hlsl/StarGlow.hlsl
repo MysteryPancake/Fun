@@ -37,7 +37,7 @@ float4 render(float2 uv) {
 	const float2 pixelSize = 1.0 / builtin_uv_size;
 	float4 result = image.Sample(builtin_texture_sampler, uv);
 
-	for (int i = -range; i < range; i += steps) {
+	for (int i = -range; i <= range; i += steps) {
 
 		const float falloff = 1.0 - abs(i / range);
 
