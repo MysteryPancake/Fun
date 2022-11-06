@@ -48,6 +48,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		// Prevent out of bounds bugs, could also be done with clamp
 		if (pos.x >= 0.0 && pos.x <= 1.0 && pos.y >= 0.0 && pos.y <= 1.0) {
 			vec4 color = texture(iChannel0, pos);
+			// Alpha blending, see shadertoy.com/view/msSGDm for working example
 			if (behind) {
 				fragColor = fragColor + (1.0 - fragColor.a) * color;
 			} else {
@@ -55,6 +56,4 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 			}
 		}
 	}
-	// Convert premultiplied alpha to straight alpha
-	fragColor.rgb /= fragColor.a;
 }
