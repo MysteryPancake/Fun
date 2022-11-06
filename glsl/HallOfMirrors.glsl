@@ -6,7 +6,7 @@
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 	// Number of images to display
-	int images = 32;
+	int images = 33;
 	// Scale factor per image
 	float scale = 0.9 + cos(iTime * 2.0) * 0.1;
 	// Rotation per image in degrees
