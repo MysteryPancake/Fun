@@ -57,7 +57,7 @@ float4 render(float2 uv) {
 			break;
 		}
 
-		// SCALING: Offset to center, apply scale, reset offset
+		// SCALING: Offset, apply scale, reset offset
 		float2 pos = uv - offset;
 		pos /= pow(scale, i);
 		pos += offset;

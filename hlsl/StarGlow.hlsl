@@ -12,7 +12,7 @@ uniform float threshold;
 #pragma shaderfilter set brightness__min 0.0
 #pragma shaderfilter set brightness__max 1.0
 #pragma shaderfilter set brightness__default 0.1
-#pragma shaderfilter set brightness__step 0.01
+#pragma shaderfilter set brightness__step 0.001
 #pragma shaderfilter set brightness__slider true
 uniform float brightness;
 
@@ -37,7 +37,7 @@ float4 render(float2 uv) {
 	const float2 pixelSize = 1.0 / builtin_uv_size;
 	float4 result = image.Sample(builtin_texture_sampler, uv);
 
-	for (int i = -range; i <= range; i += steps) {
+	for (int i = -range; i < range; i += steps) {
 
 		const float falloff = 1.0 - abs(i / range);
 
