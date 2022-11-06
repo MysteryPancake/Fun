@@ -53,7 +53,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 			float diff = distance(color.xyz, target) - threshold;
 			color.a = clamp(diff / softness, 0.0, 1.0);
 			// Tint towards red/yellow
-			color += vec4(float(i * 4) / float(images), float(i) / float(images), 0.0, 0.0);
+			color.rgb += vec3(float(i * 4) / float(images), float(i) / float(images), 0.0);
 			// Premultiply color
 			color.rgb *= color.a;
 			// Composite behind
