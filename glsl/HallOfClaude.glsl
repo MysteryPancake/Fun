@@ -28,7 +28,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 			break;
 		}
 
-		// SCALING: Offset to center, apply scale, reset offset
+		// SCALING: Offset, apply scale, reset offset
 		vec2 pos = uv - offset;
 		pos /= pow(scale, float(i));
 		pos += offset;
