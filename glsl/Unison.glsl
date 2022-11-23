@@ -96,14 +96,16 @@ vec2 mainSound(int samp, float time) {
 		// Place notes around center frequency
 		for (float j = -spread; j <= spread; j++) {
 			float frequency = notes[i] + j;
-			float amplitude = abs(sin(time * pi * 2.0));
-			result.x += saw(frequency, time, hash(2.0 * j)) * amplitude;
-			result.y += saw(frequency, time, hash(2.0 * j + 1.0)) * amplitude;
+			result.x += saw(frequency, time, hash(2.0 * j));
+			result.y += saw(frequency, time, hash(2.0 * j + 1.0));
 		}
 	}
 	
 	// Prevent volume clipping
 	result /= float(notes.length()) * spread;
+	
+	// Sidechain to sine wave
+	result *= abs(sin(time * pi * 2.0));
 	
 	// Distort drum by making it 2x louder, then clamp to hard clip it
 	result += clamp(drum(noteFreq(drumNote), fract(time * 2.0)) * 2.0, -0.9, 0.9);
