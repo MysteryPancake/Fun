@@ -59,20 +59,22 @@ vec2 mainSound(int samp, float time) {
 	float c = 7.0;
 	float d = 11.0;
 	float e = 19.0;
+	float f = 26.0;
 	float rhythm = 4.0;
 	float drumNote = 5.0;
 	
 	if (fract(time / 4.0) > 0.5) {
 		a += 2.0;
-		b += 2.0;
+		b += 3.0;
 		c += 2.0;
 		d += 3.0;
 		e += 7.0;
+		f += 4.0;
 		drumNote += 2.0;
 		rhythm -= 1.0;
 	}
 	
-	float[] notes = float[] (noteFreq(a), noteFreq(b), noteFreq(c), noteFreq(d), noteFreq(e));
+	float[] notes = float[] (noteFreq(a), noteFreq(b), noteFreq(c), noteFreq(d), noteFreq(e), noteFreq(f));
 	
 	const float spread = 4.0;
 	vec2 result = vec2(0.0);
