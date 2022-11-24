@@ -36,19 +36,19 @@ float hash(float p) {
 	return fract(p);
 }
 
-// Midi note to frequency formula
+// MIDI note to frequency formula
 float noteFreq(float note) {
-	return 440.0 * pow(2.0, floor(note) / 12.0);
+	return 440.0 * pow(2.0, floor(note - 69.0) / 12.0);
 }
 
 // For sawtooth synth
 float saw(float freq, float time, float phase) {
-	return (fract(phase + freq * time / pi) - 0.5) * 2.0;
+	return fract(phase + freq * time) * 2.0 - 1.0;
 }
 
 // For kick drum (808?)
 float drum(float freq, float time) {
-	return sin(freq * time / pi) * exp(-4.0 * time);
+	return sin(freq * time * pi) * exp(-4.0 * time);
 }
 
 // For snares and hi-hats
@@ -58,19 +58,19 @@ vec2 noise(float time, float fade) {
 
 vec2 mainSound(int samp, float time) {
 	
-	// Midi notes (might be offset wrong)
-	float a = 0.0;
-	float b = 4.0;
-	float c = 7.0;
-	float d = 11.0;
-	float e = 19.0;
-	float f = 26.0;
+	// MIDI notes to play
+	float a = 49.0;
+	float b = 53.0;
+	float c = 56.0;
+	float d = 60.0;
+	float e = 68.0;
+	float f = 75.0;
 	
 	// Hi-hat rhythm divisions per beat
 	float rhythm = 4.0;
 	
 	// Base note for the drum (808?)
-	float drumNote = 5.0;
+	float drumNote = 34.0;
 	
 	// Swap notes every 2 beats
 	if (fract(time / 4.0) > 0.5) {
@@ -88,6 +88,10 @@ vec2 mainSound(int samp, float time) {
 	
 	// Unison spread, notes to place around each note
 	const float spread = 4.0;
+	
+	// Detune factor in Hertz
+	const float detune = 0.3;
+	
 	vec2 result = vec2(0.0);
 	
 	// Apply unison effect to each note
@@ -95,7 +99,7 @@ vec2 mainSound(int samp, float time) {
 	
 		// Place notes around center frequency
 		for (float j = -spread; j <= spread; j++) {
-			float frequency = notes[i] + j;
+			float frequency = notes[i] + j * detune;
 			result.x += saw(frequency, time, hash(2.0 * j));
 			result.y += saw(frequency, time, hash(2.0 * j + 1.0));
 		}
