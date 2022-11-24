@@ -6,7 +6,7 @@
 float message(vec2 uv) {
 	uv -= vec2(1.0, 10.0);
 	if ((uv.x < 0.0) || (uv.x >= 32.0) || (uv.y < 0.0) || (uv.y >= 3.0)) return -1.0;
-	int i = 1, bit = int(pow(2.0, floor(32.0 - uv.x)));
+	int i = 1, bit = int(exp2(floor(32.0 - uv.x)));
 	if (int(uv.y) == 2) i = 928473456 / bit;
 	if (int(uv.y) == 1) i = 626348112 / bit;
 	if (int(uv.y) == 0) i = 1735745872 / bit;
@@ -38,7 +38,7 @@ float hash(float p) {
 
 // MIDI note to frequency formula
 float noteFreq(float note) {
-	return 440.0 * pow(2.0, floor(note - 69.0) / 12.0);
+	return 440.0 * exp2(floor(note - 69.0) / 12.0);
 }
 
 // For sawtooth synth
