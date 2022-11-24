@@ -186,24 +186,40 @@ vec2 leadChords(float time, float voices, float detune, float amplitude, float o
 }
 
 vec2 leadSine(float time, float voices, float detune, float amplitude) {
-	time = mod(time, STEP * 16.0);
+	time = mod(time, STEP * 32.0);
 	vec2 result = vec2(0.0);
 	NOTE_SINE(88.0, 0.0, 1.5);
 	NOTE_SINE(100.0, 0.0, 1.5);
-	NOTE_SINE(81.0, 1.5, 7.0);
 	NOTE_SINE(93.0, 1.5, 7.0);
-	NOTE_SINE(90.0, 7.0, 8.0);
+	NOTE_SINE(81.0, 1.5, 7.0);
 	NOTE_SINE(102.0, 7.0, 8.0);
+	NOTE_SINE(90.0, 7.0, 8.0);
 	NOTE_SINE(88.0, 8.0, 9.5);
 	NOTE_SINE(100.0, 8.0, 9.5);
 	NOTE_SINE(85.0, 9.5, 11.0);
 	NOTE_SINE(97.0, 9.5, 11.0);
-	NOTE_SINE(80.0, 11.0, 12.5);
 	NOTE_SINE(92.0, 11.0, 12.5);
-	NOTE_SINE(81.0, 12.5, 13.5);
+	NOTE_SINE(80.0, 11.0, 12.5);
 	NOTE_SINE(93.0, 12.5, 13.5);
-	NOTE_SINE(78.0, 13.5, 16.0);
+	NOTE_SINE(81.0, 12.5, 13.5);
 	NOTE_SINE(90.0, 13.5, 16.0);
+	NOTE_SINE(78.0, 13.5, 16.0);
+	NOTE_SINE(88.0, 16.0, 17.5);
+	NOTE_SINE(100.0, 16.0, 17.5);
+	NOTE_SINE(81.0, 17.5, 23.0);
+	NOTE_SINE(93.0, 17.5, 23.0);
+	NOTE_SINE(90.0, 23.0, 24.0);
+	NOTE_SINE(102.0, 23.0, 24.0);
+	NOTE_SINE(88.0, 24.0, 25.5);
+	NOTE_SINE(100.0, 24.0, 25.5);
+	NOTE_SINE(85.0, 25.5, 28.0);
+	NOTE_SINE(97.0, 25.5, 28.0);
+	NOTE_SINE(88.0, 28.0, 29.0);
+	NOTE_SINE(100.0, 28.0, 29.0);
+	NOTE_SINE(90.0, 29.0, 29.5);
+	NOTE_SINE(102.0, 29.0, 29.5);
+	NOTE_SINE(81.0, 29.5, 32.0);
+	NOTE_SINE(93.0, 29.5, 32.0);
 	return result;
 }
 
@@ -265,7 +281,7 @@ vec2 mainSound(int samp, float iTime) {
 	
 	if (time >= STEP * 32.0) {
 		result += kick(beat, noteFreq(33.0)) * 0.4;
-		result += leadSine(time, 2.0, 4.0, 0.3);
+		result += leadSine(time, 2.0, 4.0, 0.35);
 		result += snare(mod(time + STEP, STEP * 2.0), noteFreq(21.0), 4.0);
 		result += bass(time, 6.0, 0.6 * sidechain);
 	}
