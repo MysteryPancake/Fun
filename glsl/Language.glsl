@@ -126,7 +126,7 @@ float kick(float time, float freq) {
 	float phase = 2.0 * PI * (freq * time - df * dftime * exp(-time / dftime));
 	float body = sin(phase) * smoothstep(0.15, 0.0, time) * 2.0;
 	float click = coloredNoise(time, 8000.0, 2000.0) * smoothstep(0.01, 0.0, time);
-	return body + click;
+	return body + click * 0.7;
 }
 
 // Cheap snare or clap effect
