@@ -5,7 +5,7 @@
 #define BPM 128.0
 #define STEP 60.0 / BPM
 #define LOOPSTEPS 96.0
-#define PI 3.1415926538
+#define MIDIOFFSET 69.0
 
 // BUFFER A
 
@@ -15,7 +15,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	if (mod(time, STEP) < 0.05 || time >= STEP * 32.0) {
 		vec4 vid1 = texture(iChannel0, uv);
 		vec4 vid2 = texture(iChannel2, uv);
-		fragColor = mod(time * 0.5, STEP * 2.0) <= STEP ? vid1 : vid2;
+		fragColor = mod(time * 0.5, STEP * 2.0) < STEP ? vid1 : vid2;
 	} else {
 		fragColor = texture(iChannel1, uv);
 	}
@@ -57,6 +57,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 // SOUND
 
+#define PI 3.1415926538
 #define NOTE(note, start, end) if (time >= start * STEP && time < end * STEP) result += note;
 #define NOTE_SAW(note, start, end) NOTE(superSaw(noteFreq(note), time, voices, detune) * amplitude, start, end);
 #define NOTE_SINE(note, start, end) NOTE(superSine(noteFreq(note), time - start * STEP, voices, detune) * amplitude, start, end);
@@ -72,7 +73,7 @@ float hash(float p) {
 
 // MIDI note to frequency formula
 float noteFreq(float note) {
-	return 440.0 * exp2((note - 69.0) / 12.0);
+	return 440.0 * exp2((note - MIDIOFFSET) / 12.0);
 }
 
 // For sawtooth synths
