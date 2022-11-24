@@ -1,31 +1,5 @@
 // Available at https://www.shadertoy.com/view/mdlSRj
 
-// IMAGE
-
-// From https://www.shadertoy.com/view/ltfSRr
-float message(vec2 uv) {
-	uv -= vec2(1.0, 10.0);
-	if ((uv.x < 0.0) || (uv.x >= 32.0) || (uv.y < 0.0) || (uv.y >= 3.0)) return -1.0;
-	int i = 1, bit = int(exp2(floor(32.0 - uv.x)));
-	if (int(uv.y) == 2) i = 928473456 / bit;
-	if (int(uv.y) == 1) i = 626348112 / bit;
-	if (int(uv.y) == 0) i = 1735745872 / bit;
-	return float(i - 2 * (i / 2));
-}
-
-void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-	if (iResolution.y < 2000.0) {
-		float c = message(fragCoord / 8.0);
-		if (c >= 0.0){
-			fragColor = vec4(c);
-			return;
-		}
-	}
-	fragColor = vec4(fragCoord / iResolution.xy, 0.5 + 0.5 * mod(iTime, 0.5), 1.0);
-}
-
-// SOUND
-
 #define pi 3.1415926538
 
 // 1D hash, from https://www.shadertoy.com/view/4djSRW
