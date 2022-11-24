@@ -161,7 +161,7 @@ vec2 leadChords(float time, float voices, float detune, float amplitude, float o
 	time = mod(time, STEP * 16.0);
 	vec2 result = vec2(0.0);
 	
-	// Every 2nd note is the same, may as well optimize this
+	// Optimize since every 2nd note is the same
 	if (mod(time + STEP * offset, STEP) >= STEP * 0.5) {
 		result += superSaw(noteFreq(64.0), time, voices, detune) * amplitude;
 	}
@@ -275,7 +275,7 @@ vec2 mainSound(int samp, float iTime) {
 	float sidechain = 1.0;
 	
 	if (time >= STEP * 16.0) {
-		sidechain = 1.0 - exp(-8.0 * beat);
+		sidechain = 1.0 - exp(-6.0 * beat);
 		result += cymbals(time, 0.4);
 	}
 	
