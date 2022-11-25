@@ -1,4 +1,4 @@
-// Available at https://www.shadertoy.com/view/DslSRs
+// Available at https://www.shadertoy.com/view/ddlSRl
 
 // IMAGE
 
@@ -9,23 +9,24 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 // BUFFER A
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-
-	// Loop every 128 frames
-	int frame = iFrame % 128;
-	
-	if (frame < 1) {
-		// Initialize color to texture
-		fragColor = texture(iChannel1, fragCoord / iResolution.xy);
+	if (iFrame < 1) {
+		// Initialize color to blue
+		fragColor = vec4(0.1, 0.1, 0.2, 0.0);
 	} else {
-		// Start with original color
+		// Use video color when above color key threshold
+		vec4 vid = texture(iChannel1, fragCoord / iResolution.xy);
 		ivec2 pos = ivec2(fragCoord);
-		fragColor = texelFetch(iChannel0, pos, 0);
+		if (distance(vid.rgb, vec3(0.0, 1.0, 0.0)) > 0.8) {
+			fragColor = vid;
+		} else {
+			fragColor = texelFetch(iChannel0, pos, 0);
+		}
 		
 		// Compare pixels in pairs, sliding window along 1 pixel per frame
-		bool sampleTop = pos.y % 2 == frame % 2;
+		bool sampleTop = pos.y % 2 == iFrame % 2;
 		
-		// SPEEDUP: Sort larger chunks first, then smaller chunks
-		int jump = max(0, 96 - (frame * 2)) + 1;
+		// Faster sorting, see shadertoy.com/view/DslSRs
+		int jump = max(0, 16 + 2 * int(sin(iTime * 8.0) * 8.0)) + 1;
 		ivec2 offset = pos + ivec2(0, sampleTop ? jump : -jump);
 		
 		// Don't read out of bounds pixels
@@ -36,7 +37,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		
 		// Compare red channel and alpha to know whether we need to swap
 		vec4 neighbour = texelFetch(iChannel0, offset, 0);
-		if (length(fragColor.rgb) > length(neighbour.rgb) == sampleTop) {
+		if (fragColor.a <= 0.0 || length(fragColor.rgb) > length(neighbour.rgb) == sampleTop) {
 			fragColor = neighbour;
 		}
 	}
