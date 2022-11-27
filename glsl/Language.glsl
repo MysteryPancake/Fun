@@ -117,6 +117,7 @@ vec2 superSine(float freq, float time, float voices, float detune) {
 
 // From https://www.shadertoy.com/view/sls3WM
 float coloredNoise(float time, float freq, float Q) {
+	// Forgot to remap the hash to -1, 1, whoops
 	return sin(2.0 * PI * freq * fract(time)) * hash(time * Q);
 }
 
@@ -297,5 +298,5 @@ vec2 mainSound(int samp, float iTime) {
 	
 	//result += metronome(beat);
 	
-	return clamp(result, -1.0, 1.0);
+	return result;
 }
