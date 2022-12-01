@@ -1,4 +1,4 @@
-// Available at https://www.shadertoy.com/view/mdXSWl
+// Available at https://www.shadertoy.com/view/Ds2Sz1
 
 // IMAGE
 
@@ -9,11 +9,12 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 // BUFFER A
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-	const int scale = 16;
+	const int scale = 32;
+	int modFrame = iFrame % scale;
 	vec2 uv = fragCoord / iResolution.xy;
-	if (int(fragCoord.y) % scale == iFrame % scale) {
-		fragColor = texture(iChannel0, uv);
-	} else {
+	if (int(fragCoord.x) % scale == modFrame || int(fragCoord.y) % scale == modFrame) {
 		fragColor = texture(iChannel1, uv);
+	} else {
+		fragColor = texture(iChannel0, uv);
 	}
 }
