@@ -34,8 +34,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	
 	// Add nice rainbow colors
 	float self = cell(pos);
-	fragColor = vec4(hsv2rgb(vec3(self, 1.0, 1.0)), 1.0);
-	float backgroundMix = 1.0;
+	vec3 bg = hsv2rgb(vec3(self, 1.0, 1.0));
+	float bgMix = 1.0;
 	
 	// 3 x 3 kernel, checks all 8 neighbors
 	for (int x = -1; x <= 1; x++) {
@@ -50,11 +50,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 				// Draw a line from the center to the neighbor
 				const vec2 center = vec2(0.5);
 				float dist = line(fract(pos / scale), center, center + offset);
-				backgroundMix = min(backgroundMix, dist * lineWidth);
+				bgMix = min(bgMix, dist * lineWidth);
 			}
 		}
 	}
 	
 	// Combine background and lines, clip a little
-	fragColor = mix(0.8 + fragColor, fragColor * 0.25, backgroundMix);
+	fragColor = vec4(mix(0.8 + bg, bg * 0.25, bgMix), 1.0);
 }
