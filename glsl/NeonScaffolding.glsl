@@ -30,7 +30,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 pos = iMouse.z > 0.0 ? fragCoord - iMouse.xy : fragCoord + float(iFrame);
     
     // Number of color subdivisions, ideally a whole number
-    float colors = 3.0 - cos(iTime * 0.2);
+    float colors = 3.0 + cos(iTime * 0.2);
     
     // Add nice rainbow colors
     fragColor = vec4(hsv2rgb(vec3(cell(pos), 1.0, 1.0)), 1.0);
