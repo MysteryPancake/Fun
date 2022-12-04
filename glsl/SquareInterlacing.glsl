@@ -8,8 +8,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 // BUFFER A
 
+const int scale = 32;
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-	const int scale = 32;
 	int modFrame = iFrame % scale;
 	vec2 uv = fragCoord / iResolution.xy;
 	if (int(fragCoord.x) % scale == modFrame || int(fragCoord.y) % scale == modFrame) {

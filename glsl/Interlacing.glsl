@@ -8,8 +8,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 // BUFFER A
 
+const int scale = 16;
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-	const int scale = 16;
 	vec2 uv = fragCoord / iResolution.xy;
 	if (int(fragCoord.y) % scale == iFrame % scale) {
 		fragColor = texture(iChannel0, uv);
