@@ -5,12 +5,11 @@
 uniform float4 lightColor;
 
 #pragma shaderfilter set depth__description Depth
-#pragma shaderfilter set depth__min 0.0
-#pragma shaderfilter set depth__max 128.0
-#pragma shaderfilter set depth__default 8.0
-#pragma shaderfilter set depth__step 1.0
+#pragma shaderfilter set depth__min 0
+#pragma shaderfilter set depth__max 128
+#pragma shaderfilter set depth__default 8
 #pragma shaderfilter set depth__slider true
-uniform float depth;
+uniform int depth;
 
 #pragma shaderfilter set angle__description Angle
 #pragma shaderfilter set angle__min 0.0

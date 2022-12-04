@@ -1,12 +1,11 @@
 // HLSL port of HallOfMirrors.glsl for OBS ShaderFilter Plus
 
 #pragma shaderfilter set images__description Images
-#pragma shaderfilter set images__min 0.0
-#pragma shaderfilter set images__max 128.0
-#pragma shaderfilter set images__default 10.0
-#pragma shaderfilter set images__step 1.0
+#pragma shaderfilter set images__min 0
+#pragma shaderfilter set images__max 128
+#pragma shaderfilter set images__default 10
 #pragma shaderfilter set images__slider true
-uniform float images;
+uniform int images;
 
 #pragma shaderfilter set scale__description Scale
 #pragma shaderfilter set scale__min 0.0

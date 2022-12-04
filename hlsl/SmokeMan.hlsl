@@ -13,20 +13,18 @@ uniform float4 tintColor;
 uniform float baseMix;
 
 #pragma shaderfilter set steps__description Steps
-#pragma shaderfilter set steps__min 1.0
-#pragma shaderfilter set steps__max 32.0
-#pragma shaderfilter set steps__default 8.0
-#pragma shaderfilter set steps__step 1.0
+#pragma shaderfilter set steps__min 1
+#pragma shaderfilter set steps__max 32
+#pragma shaderfilter set steps__default 8
 #pragma shaderfilter set steps__slider true
-uniform float steps;
+uniform int steps;
 
 #pragma shaderfilter set height__description Height
-#pragma shaderfilter set height__min 0.0
-#pragma shaderfilter set height__max 1024.0
-#pragma shaderfilter set height__default 256.0
-#pragma shaderfilter set height__step 1.0
+#pragma shaderfilter set height__min 0
+#pragma shaderfilter set height__max 1024
+#pragma shaderfilter set height__default 256
 #pragma shaderfilter set height__slider true
-uniform float height;
+uniform int height;
 
 #pragma shaderfilter set speed__description Speed
 #pragma shaderfilter set speed__min 0.0
@@ -56,7 +54,7 @@ float4 render(float2 uv) {
 	float4 result;
 
 	for (int i = 0; i < height; i += steps) {
-		const float percent = i / height;
+		const float percent = i / float(height);
 		const float2 offset = float2(sin(builtin_elapsed_time * speed + uv.y * frequency) * i * amplitude, i);
 
 		const float4 col = image.Sample(builtin_texture_sampler, uv + offset * pixelSize);

@@ -5,20 +5,18 @@
 uniform float4 color;
 
 #pragma shaderfilter set steps__description Steps
-#pragma shaderfilter set steps__min 1.0
-#pragma shaderfilter set steps__max 64.0
-#pragma shaderfilter set steps__default 16.0
-#pragma shaderfilter set steps__step 1.0
+#pragma shaderfilter set steps__min 1
+#pragma shaderfilter set steps__max 64
+#pragma shaderfilter set steps__default 16
 #pragma shaderfilter set steps__slider true
-uniform float steps;
+uniform int steps;
 
 #pragma shaderfilter set width__description Width
-#pragma shaderfilter set width__min 0.0
-#pragma shaderfilter set width__max 128.0
-#pragma shaderfilter set width__default 8.0
-#pragma shaderfilter set width__step 1.0
+#pragma shaderfilter set width__min 0
+#pragma shaderfilter set width__max 128
+#pragma shaderfilter set width__default 8
 #pragma shaderfilter set width__slider true
-uniform float width;
+uniform int width;
 
 #pragma shaderfilter set opacity__description Opacity
 #pragma shaderfilter set opacity__min 0.0
