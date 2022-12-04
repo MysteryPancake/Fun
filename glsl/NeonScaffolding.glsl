@@ -49,8 +49,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 			if (self == cell(pos + offset * scale)) {
 				// Draw a line from the center to the neighbor
 				const vec2 center = vec2(0.5);
-				float factor = line(fract(pos / scale), center, center + offset);
-				backgroundMix = min(backgroundMix, factor * lineWidth);
+				float dist = line(fract(pos / scale), center, center + offset);
+				backgroundMix = min(backgroundMix, dist * lineWidth);
 			}
 		}
 	}
