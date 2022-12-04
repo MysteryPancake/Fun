@@ -4,7 +4,7 @@
 
 const float PI_4 = 0.785398163397448309616;
 const float scale = 32.0;
-const float lineWidth = scale * 0.4;
+const float lineWidth = scale * 0.3;
 
 // Posterized noise
 float noise(vec2 p, float levels) {
@@ -33,7 +33,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	float colors = 3.0 + cos(iTime * 0.2);
 	
 	// Add nice rainbow colors
-	fragColor = vec4(hsv2rgb(vec3(cell(pos), 1.0, 1.0)), 1.0);
+	float self = cell(pos);
+	fragColor = vec4(hsv2rgb(vec3(self, 1.0, 1.0)), 1.0);
 	float backgroundMix = 1.0;
 	
 	// 3 x 3 kernel, checks all 8 neighbors
@@ -45,7 +46,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 			vec2 offset = vec2(x, y);
 			
 			// Check neighbour has matching color
-			if (cell(pos) == cell(pos + offset * scale)) {
+			if (self == cell(pos + offset * scale)) {
 				// Draw a line from the center to the corner
 				const vec2 center = vec2(0.5);
 				float factor = line(fract(pos / scale), center, center + offset);
