@@ -3,7 +3,7 @@
 #define cell(pos) noise(floor((pos) / scale), colors)
 
 const float scale = 32.0;
-const float lineWidth = scale * 0.3;
+const float lineWidth = 10.0;
 
 // Posterized noise
 float noise(vec2 p, float levels) {
