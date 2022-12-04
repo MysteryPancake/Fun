@@ -2,7 +2,6 @@
 
 #define cell(pos) noise(floor((pos) / scale), colors)
 
-const float PI_4 = 0.785398163397448309616;
 const float scale = 32.0;
 const float lineWidth = scale * 0.3;
 
