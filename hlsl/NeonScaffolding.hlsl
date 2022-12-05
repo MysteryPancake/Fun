@@ -16,11 +16,12 @@ uniform int colors;
 uniform float scale;
 
 #pragma shaderfilter set lineWidth__description Line Width
-#pragma shaderfilter set lineWidth__min 1
-#pragma shaderfilter set lineWidth__max 30
-#pragma shaderfilter set lineWidth__default 3
+#pragma shaderfilter set lineWidth__min 0.0
+#pragma shaderfilter set lineWidth__max 1.0
+#pragma shaderfilter set lineWidth__default 0.1
+#pragma shaderfilter set lineWidth__step 0.01
 #pragma shaderfilter set lineWidth__slider true
-uniform int lineWidth;
+uniform float lineWidth;
 
 #pragma shaderfilter set lightness__description Lightness
 #pragma shaderfilter set lightness__min 0.0
@@ -43,27 +44,24 @@ float noise(float2 p, float levels) {
 	return floor(frac(sin(dot(p, float2(1.989, 2.233))) * 43758.54) * levels) / levels;
 }
 
-// From https://www.shadertoy.com/view/3tdSDj
+// From https://www.shadertoy.com/view/3tdSDj, shortened by FabriceNeyret2
 float sdLine(float2 p, float2 a, float2 b) {
-	const float2 ba = b - a;
-	const float2 pa = p - a;
-	const float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
-	return length(pa - h * ba);
+	b -= a; p -= a;
+	return length(p - b * clamp(dot(p, b) / dot(b, b), 0.0, 1.0));
 }
 
-// From https://www.shadertoy.com/view/lsS3Wc
-float3 hsv2rgb(float3 c) {
-	const float3 rgb = clamp(abs(fmod(c.x * 6.0 + float3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
-	return c.z * lerp(float3(1.0, 1.0, 1.0), rgb, c.y);
+// Modified from https://www.shadertoy.com/view/lsS3Wc
+float3 hue2rgb(float hue) {
+	return clamp(abs(fmod(hue * 6.0 + float3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
 }
 
 float4 render(float2 uv) {
 
-	const float2 pos = uv * builtin_uv_size;
+	float2 pos = (uv * builtin_uv_size) / scale;
 	
 	// Add nice rainbow colors
-	const float self = noise(floor(pos / scale), colors);
-	const float3 bg = hsv2rgb(float3(self, 1.0, 1.0));
+	const float self = noise(floor(pos), colors);
+	const float3 bg = hue2rgb(self);
 	float bgMix = 1.0;
 	
 	// 3 x 3 kernel, checks all 8 neighbors
@@ -72,13 +70,14 @@ float4 render(float2 uv) {
 		
 			// Ignore self
 			if (x == 0 && y == 0) continue;
-			const float2 offset = float2(x, y) * scale;
+			const float2 offset = float2(x, y);
 			
 			// Check neighbor has matching color
-			if (self == noise(floor((pos + offset) / scale), colors)) {
+			const float neighbor = noise(floor(pos + offset), colors);
+			if (self == neighbor) {
 				// Draw a line from the center to the neighbor
-				const float2 center = scale * 0.5;
-				const float dist = sdLine(fmod(pos, scale), center, center + offset);
+				const float2 center = float2(0.5, 0.5);
+				const float dist = sdLine(frac(pos), center, center + offset);
 				bgMix = min(bgMix, dist / lineWidth);
 			}
 		}
