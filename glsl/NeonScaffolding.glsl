@@ -5,7 +5,7 @@ const float lineWidth = 0.1;
 
 // Posterized noise
 float noise(vec2 p, float levels) {
-	return floor(fract(sin(dot(p, vec2(1.989, 2.233))) * 43758.54) * levels) / levels;
+	return floor(fract(sin(dot(floor(p), vec2(1.989, 2.233))) * 43758.54) * levels) / levels;
 }
 
 // From https://www.shadertoy.com/view/3tdSDj, shortened by FabriceNeyret2
@@ -28,7 +28,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	float colors = 3.0 + cos(iTime * 0.2);
 	
 	// Add nice rainbow colors
-	float self = noise(floor(pos), colors);
+	float self = noise(pos, colors);
 	vec3 bg = hue2rgb(self);
 	float bgMix = 1.0;
 	
@@ -41,7 +41,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 			vec2 offset = vec2(x, y);
 			
 			// Check neighbor has matching color
-			float neighbor = noise(floor(pos + offset), colors);
+			float neighbor = noise(pos + offset, colors);
 			if (self == neighbor) {
 				// Draw a line from the center to the neighbor
 				const vec2 center = vec2(0.5);
@@ -52,5 +52,5 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	}
 	
 	// Combine background and lines, clip a little
-	fragColor = vec4(mix(0.8 + bg, bg * 0.25, bgMix), 1.0);
+	fragColor = vec4(mix(0.8 + bg, bg * 0.2, bgMix), 1.0);
 }
