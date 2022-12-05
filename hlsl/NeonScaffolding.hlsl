@@ -57,7 +57,7 @@ float3 hue2rgb(float hue) {
 
 float4 render(float2 uv) {
 
-	float2 pos = (uv * builtin_uv_size) / scale;
+	const float2 pos = (uv * builtin_uv_size) / scale;
 	
 	// Add nice rainbow colors
 	const float self = noise(floor(pos), colors);
