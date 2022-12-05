@@ -3,7 +3,7 @@
 #define cell(pos) noise(floor((pos) / scale), colors)
 
 const float scale = 32.0;
-const float lineWidth = 0.1;
+const float lineWidth = 3.0;
 
 // Posterized noise
 float noise(vec2 p, float levels) {
@@ -42,13 +42,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		
 			// Ignore self
 			if (x == 0 && y == 0) continue;
-			vec2 offset = vec2(x, y);
+			vec2 offset = vec2(x, y) * scale;
 			
 			// Check neighbor has matching color
-			if (self == cell(pos + offset * scale)) {
+			if (self == cell(pos + offset)) {
 				// Draw a line from the center to the neighbor
-				const vec2 center = vec2(0.5);
-				float dist = line(fract(pos / scale), center, center + offset);
+				const vec2 center = vec2(scale * 0.5);
+				float dist = line(mod(pos, scale), center, center + offset);
 				bgMix = min(bgMix, dist / lineWidth);
 			}
 		}
