@@ -16,12 +16,11 @@ uniform int colors;
 uniform float scale;
 
 #pragma shaderfilter set lineWidth__description Line Width
-#pragma shaderfilter set lineWidth__min 0.0
-#pragma shaderfilter set lineWidth__max 1.0
-#pragma shaderfilter set lineWidth__default 0.1
-#pragma shaderfilter set lineWidth__step 0.01
+#pragma shaderfilter set lineWidth__min 1
+#pragma shaderfilter set lineWidth__max 30
+#pragma shaderfilter set lineWidth__default 3
 #pragma shaderfilter set lineWidth__slider true
-uniform float lineWidth;
+uniform int lineWidth;
 
 #pragma shaderfilter set lightness__description Lightness
 #pragma shaderfilter set lightness__min 0.0
@@ -73,13 +72,13 @@ float4 render(float2 uv) {
 		
 			// Ignore self
 			if (x == 0 && y == 0) continue;
-			const float2 offset = float2(x, y);
+			const float2 offset = float2(x, y) * scale;
 			
 			// Check neighbor has matching color
-			if (self == noise(floor((pos + offset * scale) / scale), colors)) {
+			if (self == noise(floor((pos + offset) / scale), colors)) {
 				// Draw a line from the center to the neighbor
-				const float2 center = float2(0.5, 0.5);
-				const float dist = sdLine(frac(pos / scale), center, center + offset);
+				const float2 center = scale * 0.5;
+				const float dist = sdLine(fmod(pos, scale), center, center + offset);
 				bgMix = min(bgMix, dist / lineWidth);
 			}
 		}
