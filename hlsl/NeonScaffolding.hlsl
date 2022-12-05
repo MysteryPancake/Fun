@@ -34,14 +34,14 @@ uniform float lightness;
 #pragma shaderfilter set bgAlpha__description Background
 #pragma shaderfilter set bgAlpha__min 0.0
 #pragma shaderfilter set bgAlpha__max 1.0
-#pragma shaderfilter set bgAlpha__default 0.25
+#pragma shaderfilter set bgAlpha__default 0.2
 #pragma shaderfilter set bgAlpha__step 0.01
 #pragma shaderfilter set bgAlpha__slider true
 uniform float bgAlpha;
 
 // Posterized noise
 float noise(float2 p, float levels) {
-	return floor(frac(sin(dot(p, float2(1.989, 2.233))) * 43758.54) * levels) / levels;
+	return floor(frac(sin(dot(floor(p), float2(1.989, 2.233))) * 43758.54) * levels) / levels;
 }
 
 // From https://www.shadertoy.com/view/3tdSDj, shortened by FabriceNeyret2
@@ -60,7 +60,7 @@ float4 render(float2 uv) {
 	const float2 pos = (uv * builtin_uv_size) / scale;
 	
 	// Add nice rainbow colors
-	const float self = noise(floor(pos), colors);
+	const float self = noise(pos, colors);
 	const float3 bg = hue2rgb(self);
 	float bgMix = 1.0;
 	
@@ -73,7 +73,7 @@ float4 render(float2 uv) {
 			const float2 offset = float2(x, y);
 			
 			// Check neighbor has matching color
-			const float neighbor = noise(floor(pos + offset), colors);
+			const float neighbor = noise(pos + offset, colors);
 			if (self == neighbor) {
 				// Draw a line from the center to the neighbor
 				const float2 center = float2(0.5, 0.5);
