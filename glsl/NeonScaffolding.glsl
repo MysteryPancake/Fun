@@ -1,39 +1,35 @@
 // Available at https://www.shadertoy.com/view/ms2XWR
 
-#define cell(pos) noise(floor((pos) / scale), colors)
-
 const float scale = 32.0;
-const float lineWidth = 3.0;
+const float lineWidth = 0.1;
 
 // Posterized noise
 float noise(vec2 p, float levels) {
 	return floor(fract(sin(dot(p, vec2(1.989, 2.233))) * 43758.54) * levels) / levels;
 }
 
-// From https://www.shadertoy.com/view/3tdSDj
+// From https://www.shadertoy.com/view/3tdSDj, shortened by FabriceNeyret2
 float line(vec2 p, vec2 a, vec2 b) {
-	vec2 ba = b - a;
-	vec2 pa = p - a;
-	float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
-	return length(pa - h * ba);
+	b -= a; p -= a;
+	return length(p - b * clamp(dot(p, b) / dot(b, b), 0.0, 1.0));
 }
 
-// From https://www.shadertoy.com/view/lsS3Wc
-vec3 hsv2rgb(vec3 c) {
-	vec3 rgb = clamp(abs(mod(c.x * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
-	return c.z * mix(vec3(1.0), rgb, c.y);
+// Modified from https://www.shadertoy.com/view/lsS3Wc
+vec3 hue2rgb(float hue) {
+	return clamp(abs(mod(hue * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	
-	vec2 pos = iMouse.z > 0.0 ? fragCoord - iMouse.xy : fragCoord + float(iFrame);
+	vec2 pos = iMouse.z > 0.0 ? fragCoord - iMouse.xy : fragCoord + iTime * 60.0;
+	pos /= scale;
 	
 	// Number of color subdivisions, ideally a whole number
 	float colors = 3.0 + cos(iTime * 0.2);
 	
 	// Add nice rainbow colors
-	float self = cell(pos);
-	vec3 bg = hsv2rgb(vec3(self, 1.0, 1.0));
+	float self = noise(floor(pos), colors);
+	vec3 bg = hue2rgb(self);
 	float bgMix = 1.0;
 	
 	// 3 x 3 kernel, checks all 8 neighbors
@@ -42,13 +38,14 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		
 			// Ignore self
 			if (x == 0 && y == 0) continue;
-			vec2 offset = vec2(x, y) * scale;
+			vec2 offset = vec2(x, y);
 			
 			// Check neighbor has matching color
-			if (self == cell(pos + offset)) {
+			float neighbor = noise(floor(pos + offset), colors);
+			if (self == neighbor) {
 				// Draw a line from the center to the neighbor
-				const vec2 center = vec2(scale * 0.5);
-				float dist = line(mod(pos, scale), center, center + offset);
+				const vec2 center = vec2(0.5);
+				float dist = line(fract(pos), center, center + offset);
 				bgMix = min(bgMix, dist / lineWidth);
 			}
 		}
