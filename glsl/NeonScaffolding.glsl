@@ -9,9 +9,8 @@ float noise(vec2 p, float levels) {
 }
 
 // From https://www.shadertoy.com/view/3tdSDj, shortened by FabriceNeyret2
-float line(vec2 p, vec2 a, vec2 b) {
-	b -= a; p -= a;
-	return length(p - b * clamp(dot(p, b) / dot(b, b), 0.0, 1.0));
+float line(vec2 p, vec2 dir) {
+	return length(p - dir * max(0.0, dot(p, dir) / dot(dir, dir)));
 }
 
 // Modified from https://www.shadertoy.com/view/lsS3Wc
@@ -21,8 +20,7 @@ vec3 hue2rgb(float hue) {
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	
-	vec2 pos = iMouse.z > 0.0 ? fragCoord - iMouse.xy : fragCoord + iTime * 60.0;
-	pos /= scale;
+	vec2 pos = (iMouse.z > 0.0 ? fragCoord - iMouse.xy : fragCoord + iTime * 60.0) / scale;
 	
 	// Number of color subdivisions, ideally a whole number
 	float colors = 3.0 + cos(iTime * 0.2);
@@ -41,11 +39,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 			vec2 offset = vec2(x, y);
 			
 			// Check neighbor has matching color
-			float neighbor = noise(pos + offset, colors);
-			if (self == neighbor) {
+			if (self == noise(pos + offset, colors)) {
 				// Draw a line from the center to the neighbor
-				const vec2 center = vec2(0.5);
-				float dist = line(fract(pos), center, center + offset);
+				float dist = line(fract(pos) - 0.5, offset);
 				bgMix = min(bgMix, dist / lineWidth);
 			}
 		}
