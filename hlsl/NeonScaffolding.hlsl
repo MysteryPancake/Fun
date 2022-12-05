@@ -45,9 +45,8 @@ float noise(float2 p, float levels) {
 }
 
 // From https://www.shadertoy.com/view/3tdSDj, shortened by FabriceNeyret2
-float sdLine(float2 p, float2 a, float2 b) {
-	b -= a; p -= a;
-	return length(p - b * clamp(dot(p, b) / dot(b, b), 0.0, 1.0));
+float sdLine(float2 p, float2 dir) {
+	return length(p - dir * max(0.0, dot(p, dir) / dot(dir, dir)));
 }
 
 // Modified from https://www.shadertoy.com/view/lsS3Wc
@@ -73,11 +72,9 @@ float4 render(float2 uv) {
 			const float2 offset = float2(x, y);
 			
 			// Check neighbor has matching color
-			const float neighbor = noise(pos + offset, colors);
-			if (self == neighbor) {
+			if (self == noise(pos + offset, colors)) {
 				// Draw a line from the center to the neighbor
-				const float2 center = float2(0.5, 0.5);
-				const float dist = sdLine(frac(pos), center, center + offset);
+				const float dist = sdLine(frac(pos) - 0.5, offset);
 				bgMix = min(bgMix, dist / lineWidth);
 			}
 		}
