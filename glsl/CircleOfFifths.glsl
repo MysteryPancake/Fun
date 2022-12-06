@@ -63,7 +63,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		
 		// Draw lines around circle
 		vec2 dir = vec2(cos(phase + PI_4), sin(phase + PI_4));
-		fragColor *= mix(smoothstep(0.0025, 0.005, line(uv, dir)), 1.0, 0.7);
+		fragColor *= mix(smoothstep(0.0, length(uv) * 0.03, line(uv, dir)), 1.0, 0.7);
 		
 		// Draw note letters
 		int charIndex = 65 + (5 + i) * 3 % 7;
