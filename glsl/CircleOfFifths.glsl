@@ -79,7 +79,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	fragColor *= smoothstep(0.0, 0.1, 0.5 - length(uv));
 	
 	// Draw red highlight
-	const vec4 red = vec4(1.0, 0.0, 0.0, 1.0);
+	vec4 red = vec4(1.0, 0.5 * length(uv), 0.0, 1.0);
 	float phase = id * PI / 6.0;
 	vec2 angle = vec2(sin(phase), cos(phase));
 	float factor = smoothstep(0.0, 0.01, line(uv, angle) - length(uv) * 0.25);
