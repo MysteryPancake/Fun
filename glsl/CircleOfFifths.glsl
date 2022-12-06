@@ -172,7 +172,7 @@ vec2 mainSound(int samp, float time) {
 	// Funkier timing every 4 chords
 	float funk = mod(id, 8.0) >= 4.0 ? 1.5 : 1.0;
 	// Add hi-hats after a bit
-	float hats = id >= 8.0 ? 0.07 : 0.0;
+	float hats = id >= 8.0 ? 0.08 : 0.0;
 	
 	float t = mod(time, STEP * 4.0);
 	vec2 result = chord(t, offset, minor, funk, hats);
