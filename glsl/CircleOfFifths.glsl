@@ -63,7 +63,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		
 		// Draw lines around circle
 		vec2 dir = vec2(cos(phase + PI_4), sin(phase + PI_4));
-		fragColor *= mix(smoothstep(0.0025, 0.005, line(uv, dir)), 1.0, 0.5);
+		fragColor *= mix(smoothstep(0.0025, 0.005, line(uv, dir)), 1.0, 0.7);
 		
 		// Draw note letters
 		int charIndex = 65 + (5 + i) * 3 % 7;
@@ -75,15 +75,15 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		}
 	}
 	
+	// Draw vignette
+	fragColor *= smoothstep(0.0, 0.1, 0.5 - length(uv));
+	
 	// Draw red highlight
 	const vec4 red = vec4(1.0, 0.0, 0.0, 1.0);
 	float phase = id * PI / 6.0;
 	vec2 angle = vec2(sin(phase), cos(phase));
-	float factor = smoothstep(0.0, 0.02, line(uv, angle) - length(uv) * 0.25);
+	float factor = smoothstep(0.0, 0.01, line(uv, angle) - length(uv) * 0.25);
 	fragColor += red * (1.0 - factor);
-	
-	// Draw vignette
-	fragColor *= smoothstep(0.0, 0.1, 0.5 - length(uv));
 }
 
 // SOUND
