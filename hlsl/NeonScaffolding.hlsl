@@ -39,6 +39,13 @@ uniform float lightness;
 #pragma shaderfilter set bgAlpha__slider true
 uniform float bgAlpha;
 
+#pragma shaderfilter set scrollSpeed__description Scroll Speed
+#pragma shaderfilter set scrollSpeed__min 0
+#pragma shaderfilter set scrollSpeed__max 2048
+#pragma shaderfilter set scrollSpeed__default 60
+#pragma shaderfilter set scrollSpeed__slider true
+uniform int scrollSpeed;
+
 // Posterized noise
 float noise(float2 p, float levels) {
 	return floor(frac(sin(dot(floor(p), float2(1.989, 2.233))) * 43758.54) * levels) / levels;
@@ -56,7 +63,7 @@ float3 hue2rgb(float hue) {
 
 float4 render(float2 uv) {
 
-	const float2 pos = (uv * builtin_uv_size) / scale;
+	const float2 pos = (uv * builtin_uv_size + builtin_elapsed_time * scrollSpeed) / scale;
 	
 	// Add nice rainbow colors
 	const float self = noise(pos, colors);
