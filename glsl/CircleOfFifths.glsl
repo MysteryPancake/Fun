@@ -141,14 +141,9 @@ vec2 noiseHit(float time, float fade) {
 // Notes are auto-transposed using modulo, so they wrap to the same octave
 vec2 chord(float time, float offset, float minor, float funk, float hats) {
 
-	vec2 result = vec2(0.0);
-	
 	// Bass
 	const float bass = 57.0;
-	result += epiano(noteFreq(bass + mod(offset, 12.0) - 24.0), time, 2.0);
-	
-	// Hi-hats
-	result += noiseHit(mod(time, STEP), 30.0) * hats;
+	vec2 result = epiano(noteFreq(bass + mod(offset, 12.0) - 24.0), time, 2.0);
 	
 	// Root (bass plus 2 octaves)
 	result += epiano(noteFreq(bass + mod(offset, 12.0)), time - STEP * 0.5, 1.25);
@@ -161,6 +156,8 @@ vec2 chord(float time, float offset, float minor, float funk, float hats) {
 	// Ninth
 	result += epiano(noteFreq(bass + mod(offset + 14.0, 12.0)), time - STEP * funk, 1.5);
 	
+	// Hi-hats
+	result += noiseHit(mod(time, STEP), 30.0) * hats;
 	return result;
 }
 
@@ -187,6 +184,5 @@ vec2 mainSound(int samp, float time) {
 	if (id >= 16.0) {
 		result += kick(mod(time, STEP * 2.0)) * 0.45;
 	}
-	
 	return result;
 }
