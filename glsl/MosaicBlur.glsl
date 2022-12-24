@@ -12,10 +12,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	vec4 bottomLeft = textureLod(iChannel0, (rounded + vec2(0.0, 1.0)) / pixels, 0.0);
 	vec4 bottomRight = textureLod(iChannel0, (rounded + vec2(1.0, 1.0)) / pixels, 0.0);
 	
-	#ifdef USE_SMOOTHSTEP
-	vec2 fraction = smoothstep(0.0, 1.0, fract(uv * pixels));
-	#else
 	vec2 fraction = fract(uv * pixels);
+	#ifdef USE_SMOOTHSTEP
+	fraction = smoothstep(0.0, 1.0, fraction);
 	#endif
 	
 	vec4 top = mix(topLeft, topRight, fraction.x);
