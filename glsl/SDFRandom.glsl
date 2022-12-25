@@ -20,7 +20,7 @@ float chaos(vec2 p) {
 	for (float i = 1.0; i <= iterations; i++) {
 		// Random starting offset for each waveform
 		vec2 offset = vec2(noise(i), noise(i + iterations));
-		// Not very random period
+		// Period could be randomized, kept linear here
 		vec2 period = vec2(spread) + i * 0.02;
 		// Generate triangle waveform
 		vec2 tri = triangle(p + offset * spread, period);
