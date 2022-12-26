@@ -8,7 +8,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	// Blurred slightly for edge isolation
 	vec4 edges = textureLod(iChannel0, uv, 2.0);
 	// Blurred more for underlying surface
-	float blur = 4.0 + abs(mod(iTime * 4.0, 4.0) - 2.0);
+	float blur = 4.0 + sin(iTime * 4.0) * 2.0;
 	vec4 blurred = textureLod(iChannel0, uv, blur);
 	
 	// Mix original with blurred depending on edge difference
