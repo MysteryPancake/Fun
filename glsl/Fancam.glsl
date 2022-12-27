@@ -65,7 +65,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	float yrot = 16.0 - outPow(mod4 * 2.0, 3.0) * 16.0
 		- inPow(mod2 - 1.0, 5.0) * 16.0;
 	float zrot = mod4 > 2.0
-		? 16.0 - outPow(mod2, 4.0) * 16.0
+		? 8.0 - outPow(mod2, 4.0) * 8.0
 		: sin(iTime * PI) * 0.5;
 	
 	// Flip motion every 2 iterations
