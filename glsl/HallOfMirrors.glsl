@@ -50,7 +50,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 			vec4 color = texture(iChannel0, pos);
 			// Alpha blending, see shadertoy.com/view/msSGDm for working example
 			if (behind) {
-				fragColor = fragColor + (1.0 - fragColor.a) * color;
+				fragColor += (1.0 - fragColor.a) * color;
 			} else {
 				fragColor = color + (1.0 - color.a) * fragColor;
 			}

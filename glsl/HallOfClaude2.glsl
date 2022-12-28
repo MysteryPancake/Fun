@@ -1,4 +1,4 @@
-// Available at https://www.shadertoy.com/view/msSGDm
+// Available at https://www.shadertoy.com/view/dtfGRl
 
 // Modification of HallOfMirrors.glsl
 
@@ -9,14 +9,14 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	// Scale factor per image
 	float scale = 0.9 + cos(iTime) * 0.05;
 	// Rotation per image in degrees
-	float rotation = sin(iTime) * 90.0;
+	float rotation = sin(iTime) * 45.0;
 	// Position offset per image in normalized coordinates (0-1)
-	vec2 offset = iMouse.z > 0.0 ? vec2(iMouse.xy / iResolution.xy) : 0.5 + vec2(cos(iTime), sin(iTime)) * 0.5;
+	vec2 offset = iMouse.z > 0.0 ? vec2(iMouse.xy / iResolution.xy) : 0.5 + vec2(cos(iTime), sin(iTime)) * 0.25;
 
 	float rad = radians(-rotation);
 	vec2 uv = fragCoord / iResolution.xy;
 	fragColor = vec4(0.0);
-
+	
 	for (int i = 0; i < images; ++i) {
 		// Avoid divide by zero error
 		if (scale <= 0.0) {
@@ -42,19 +42,19 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		pos /= iResolution.xy;
 		pos += vec2(0.5);
 
-		// Prevent out of bounds bugs, could also be done with clamp
-		if (pos.x >= 0.0 && pos.x <= 1.0 && pos.y >= 0.0 && pos.y <= 1.0) {
-			// Color key
-			vec4 color = texture(iChannel0, pos);
-			color.a = smoothstep(0.5, 0.8, distance(color.rgb, vec3(0.0, 1.0, 0.0)));
-			// Tint towards red/yellow
-			color.rgb += vec3(float(i * 4) / float(images), float(i) / float(images), 0.0);
-			// Premultiply color
-			color.rgb *= color.a;
-			// Composite behind
-			fragColor += (1.0 - fragColor.a) * color;
-			// Early exit
-			if (color.a >= 1.0) break;
-		}
+		// Color key
+		vec4 color = texture(iChannel0, pos);
+		color.a = smoothstep(0.5, 0.8, distance(color.rgb, vec3(0.0, 1.0, 0.0)));
+		// Tint towards red/yellow
+		color.rgb += vec3(float(i * 4) / float(images), float(i) / float(images), 0.0);
+		// Premultiply color
+		color.rgb *= color.a;
+		// Composite behind
+		fragColor += (1.0 - fragColor.a) * color;
+		// Early exit
+		if (color.a >= 1.0) break;
 	}
+	
+	// Make background yellow
+	fragColor += (1.0 - fragColor.a) * vec4(1.0, 1.0, 0.0, 1.0);
 }
