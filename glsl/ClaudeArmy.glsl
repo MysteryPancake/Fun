@@ -35,7 +35,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		
 		// Color key
 		vec4 color = texture(iChannel0, pos);
-		color.a = smoothstep(0.7, 0.9, distance(color.rgb, vec3(0.0, 1.0, 0.0)));
+		color.a = smoothstep(0.6, 0.7, distance(color.rgb, vec3(0.0, 1.0, 0.0)));
 		// Tint towards white
 		float fog = sqrt(float(i) / float(images));
 		color.rgb -= 0.3 + sin(float(i)) * 0.1;
