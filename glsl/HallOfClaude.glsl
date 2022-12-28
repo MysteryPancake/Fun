@@ -48,7 +48,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 			// Composite behind
 			fragColor += (1.0 - fragColor.a) * color;
 			// Early exit
-			if (color.a >= 1.0) break;
+			if (fragColor.a >= 1.0) break;
 		}
 	}
 }
