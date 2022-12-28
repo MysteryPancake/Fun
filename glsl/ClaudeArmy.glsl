@@ -29,16 +29,14 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		pos.y = max(pos.y, 0.005);
 		
 		// Flip every 2nd person for variety
-		if (i % 2 == 0) {
-			pos.x *= -1.0;
-		}
+		if (i % 2 == 1) pos.x *= -1.0;
 		
 		// Color key
 		vec4 color = texture(iChannel0, pos);
 		color.a = smoothstep(0.6, 0.7, distance(color.rgb, vec3(0.0, 1.0, 0.0)));
 		
 		// Brightness variation for variety
-		color.rgb -= 0.3 + sin(float(i)) * 0.1;
+		color.rgb -= 0.3 - cos(float(i * 4)) * 0.1;
 		
 		// Tint towards white
 		float fog = sqrt(float(i) / float(images));
