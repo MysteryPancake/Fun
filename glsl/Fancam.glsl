@@ -101,7 +101,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	
 	if (h.y > 1.0) {
 		// Video
-		fragColor = texture(iChannel0, 0.5 + vec2(p.x, p.y));
+		vec2 size = vec2(textureSize(iChannel0, 0));
+		vec2 uv = vec2(p.x * size.y / size.x, p.y);
+		fragColor = texture(iChannel0, 0.5 + uv);
 	} else {
 		// Background and stars
 		fragColor = color;
