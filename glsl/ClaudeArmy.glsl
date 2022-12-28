@@ -18,13 +18,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	
 	for (int i = 0; i < images; ++i) {
 		// Different heights for variety
-		float height = cos(float(i) + iTime) * 0.02;
+		float height = cos(float(i) + iTime) * 0.1;
 		
 		// Offset, apply scale, reset offset
-		vec2 offset = vec2(i, 0.5 + 0.5 * camAngle + height);
+		vec2 offset = vec2(i, 0.5 + 0.5 * camAngle);
 		vec2 pos = uv - offset;
 		pos /= pow(scale, float(i));
-		vec2 camPos = vec2(iMouse.z > 0.0 ? -m.x : iTime * 0.5, camAngle);
+		vec2 camPos = vec2(iMouse.z > 0.0 ? -m.x : iTime * 0.5, camAngle + height);
 		pos += offset + camPos;
 		
 		// Clamp bottom and discard top
