@@ -34,6 +34,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		// Flip every 2nd one for variety
 		if (i % 2 == 1) pos.x *= -1.0;
 		
+		// Below is required if the wrap mode isn't repeat
+		pos.x = fract(pos.x);
+		
 		// Color key
 		vec4 color = texture(iChannel0, pos);
 		color.a = smoothstep(0.6, 0.7, distance(color.rgb, vec3(0.0, 1.0, 0.0)));

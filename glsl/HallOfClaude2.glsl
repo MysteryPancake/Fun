@@ -35,6 +35,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		// Reset aspect ratio, reset offset
 		pos /= iResolution.xy;
 		pos += vec2(0.5);
+		
+		// Below is required if the wrap mode isn't repeat
+		pos = fract(pos);
 
 		// Color key
 		vec4 color = texture(iChannel0, pos);
