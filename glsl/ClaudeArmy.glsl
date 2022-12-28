@@ -7,21 +7,21 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	// Number of images to display
 	int images = 128;
 	// Scale factor per image
-	float scale = 0.95;
+	float scale = 0.96;
 	
 	vec2 uv = fragCoord / iResolution.xy;
 	vec2 m = iMouse.xy / iResolution.xy;
 	fragColor = vec4(0.0);
 	
 	// View angle
-	float camAngle = iMouse.z > 0.0 ? 1.5 - 3.0 * m.y : sin(iTime) * 0.3 + 0.9;
+	float camAngle = iMouse.z > 0.0 ? 1.5 - 2.0 * m.y : 0.6 - sin(iTime) * 0.5;
 	
 	for (int i = 0; i < images; ++i) {
 		// Offset, apply scale, reset offset
 		vec2 offset = vec2(i, 0.5 + 0.5 * camAngle);
-		vec2 pos = 2.0 * (uv - offset);
+		vec2 pos = uv - offset;
 		pos /= pow(scale, float(i));
-		vec2 camPos = vec2(iMouse.z > 0.0 ? -2.0 * m.x : iTime * 0.5, camAngle);
+		vec2 camPos = vec2(iMouse.z > 0.0 ? -m.x : iTime * 0.5, camAngle);
 		pos += offset + camPos;
 		
 		// Clamp bottom and discard top
