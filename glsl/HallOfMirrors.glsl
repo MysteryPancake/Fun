@@ -21,12 +21,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	fragColor = vec4(0.0);
 
 	for (int i = 0; i < images; ++i) {
-		// Avoid divide by zero error
-		if (scale <= 0.0) {
-			fragColor = texture(iChannel0, uv);
-			break;
-		}
-
 		// SCALING: Offset, apply scale, reset offset
 		vec2 pos = uv - offset;
 		pos /= pow(scale, float(i));
