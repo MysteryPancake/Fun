@@ -17,8 +17,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	float camAngle = iMouse.z > 0.0 ? 1.5 - 2.0 * m.y : 0.6 - sin(iTime) * 0.5;
 	
 	for (int i = 0; i < images; ++i) {
+		// Different heights for variety
+		float height = cos(float(i) + iTime) * 0.02;
+		
 		// Offset, apply scale, reset offset
-		vec2 offset = vec2(i, 0.5 + 0.5 * camAngle);
+		vec2 offset = vec2(i, 0.5 + 0.5 * camAngle + height);
 		vec2 pos = uv - offset;
 		pos /= pow(scale, float(i));
 		vec2 camPos = vec2(iMouse.z > 0.0 ? -m.x : iTime * 0.5, camAngle);
@@ -28,7 +31,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		if (pos.y >= 1.0) continue;
 		pos.y = max(pos.y, 0.005);
 		
-		// Flip every 2nd person for variety
+		// Flip every 2nd one for variety
 		if (i % 2 == 1) pos.x *= -1.0;
 		
 		// Color key
