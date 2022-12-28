@@ -25,7 +25,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		pos += offset + camPos;
 		
 		// Clamp bottom and discard top
-		if (pos.y > 1.0) continue;
+		if (pos.y >= 1.0) continue;
 		pos.y = max(pos.y, 0.005);
 		
 		// Flip every 2nd person for variety
@@ -36,14 +36,17 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		// Color key
 		vec4 color = texture(iChannel0, pos);
 		color.a = smoothstep(0.6, 0.7, distance(color.rgb, vec3(0.0, 1.0, 0.0)));
+		
 		// Tint towards white
 		float fog = sqrt(float(i) / float(images));
 		color.rgb -= 0.3 + sin(float(i)) * 0.1;
 		color.rgb = mix(color.rgb, vec3(1.0), fog);
+		
 		// Premultiply color
 		color.rgb *= color.a;
 		// Composite behind
 		fragColor += (1.0 - fragColor.a) * color;
+		
 		// Early exit
 		if (color.a >= 1.0) break;
 	}
