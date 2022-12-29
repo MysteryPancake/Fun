@@ -28,7 +28,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		pos += offset + camPos;
 		
 		// Clamp bottom and discard top
-		if (pos.y >= 1.0) continue;
+		if (pos.y >= 0.995) continue;
 		pos.y = max(pos.y, 0.005);
 		
 		// Flip every 2nd one for variety
@@ -54,7 +54,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		fragColor += (1.0 - fragColor.a) * color;
 		
 		// Early exit
-		if (fragColor.a >= 1.0) break;
+		if (fragColor.a >= 1.0) return;
 	}
 	
 	// Make background white
