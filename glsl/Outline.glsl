@@ -1,32 +1,31 @@
 // Available at https://www.shadertoy.com/view/sltcRf
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
-	vec2 uv = fragCoord / iResolution.xy;
-
 	const vec3 target = vec3(0.0, 1.0, 0.0); // Find green
-	const float threshold = 0.6; // Controls target color range
-	const float softness = 0.1; // Controls linear falloff
-
+	const float TAU = 6.28318530;
 	const float steps = 32.0;
-	const float total = steps / 6.28318530;
-	float outlineSize = (1.0 + sin(iTime * 4.0)) * 0.01;
 	
-	// Apply linear color key
-	vec4 mat = texture(iChannel0, uv);
-	float diff = distance(mat.xyz, target.xyz) - threshold;
-	float factor = clamp(diff / softness, 0.0, 1.0);
-
+	float radius = iMouse.z > 0.0 ? length(0.5 - iMouse.xy / iResolution.xy) : sin(iTime * 4.0) * 0.05 + 0.05;
+	vec2 uv = fragCoord / iResolution.xy;
+	
+	// Correct aspect ratio
+	vec2 texSize = vec2(textureSize(iChannel0, 0));
+	vec2 aspect = vec2(texSize.y / texSize.x, 1.0);
+	
 	fragColor = vec4(uv.y, 0.0, uv.x, 1.0);
-	
-	for (float i = 0.0; i < steps; i++) {
+	for (float i = 0.0; i < TAU; i += TAU / steps) {
 		// Sample image in a circular pattern
-		float j = i / total;
-		vec4 col = texture(iChannel0, uv + vec2(sin(j), cos(j)) * outlineSize);
+		vec2 offset = vec2(sin(i), cos(i)) * aspect * radius;
+		vec4 col = texture(iChannel0, uv + offset);
 		
-		// Apply linear color key
-		float diff2 = distance(col.xyz, target.xyz) - threshold;
-		fragColor = mix(fragColor, vec4(1.0), clamp(diff2 / softness, 0.0, 1.0));
+		// Mix outline with background
+		float alpha = smoothstep(0.5, 0.7, distance(col.rgb, target));
+		fragColor = mix(fragColor, vec4(1.0), alpha);
 	}
 	
+	// Overlay original video
+	vec4 mat = texture(iChannel0, uv);
+	float factor = smoothstep(0.5, 0.7, distance(mat.rgb, target));
 	fragColor = mix(fragColor, mat, factor);
 }
