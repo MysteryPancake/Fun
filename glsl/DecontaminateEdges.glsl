@@ -4,7 +4,7 @@ const float TAU = 6.28318530;
 
 float getAlpha(vec3 col) {
 	const vec3 green = vec3(0.0, 1.0, 0.0);
-	return smoothstep(0.5, 0.7, distance(col, green));
+	return smoothstep(0.6, 0.7, distance(col, green));
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
