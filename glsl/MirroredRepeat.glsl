@@ -13,7 +13,7 @@ int mirror(int p, int size) {
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
-	float scale = cos(iTime) * 3.0 + 4.0;
+	float scale = sin(iTime) * 3.0 + 4.0;
 	ivec2 size = textureSize(iChannel0, 0);
 	
 	float mid = fragCoord.x / iResolution.x - 0.5;
