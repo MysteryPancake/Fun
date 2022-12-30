@@ -37,10 +37,14 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		// Below is required if the wrap mode isn't repeat
 		pos.x = fract(pos.x);
 		
-		// Color key
+		// Color key (despill from Inigo Quilez)
 		vec4 color = texture(iChannel0, pos);
-		color.a = smoothstep(0.6, 0.7, distance(color.rgb, vec3(0.0, 1.0, 0.0)));
-		
+		float rbMax = max(color.r, color.b);
+		float og = color.g; 
+		color.g = min(color.g, rbMax * 0.85); 
+		color += og - color.g;
+		color.a = 1.0 - clamp((og - rbMax) * 4.0, 0.0, 1.0);
+
 		// Brightness variation for variety
 		color.rgb -= 0.3 - cos(float(i * 4)) * 0.1;
 		
