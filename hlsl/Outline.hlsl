@@ -29,13 +29,12 @@ uniform float opacity;
 float4 render(float2 uv) {
 
 	const float2 pixelSize = 1.0 / builtin_uv_size;
-	const float total = steps / 6.28318530;
+	const float TAU = 6.28318530;
 	float4 result;
 
-	for (int i = 0; i < steps; i++) {
+	for (float i = 0.0; i < TAU; i += TAU / steps) {
 		// Sample image in a circular pattern
-		const float j = i / total;
-		const float4 col = image.Sample(builtin_texture_sampler, uv + float2(sin(j), cos(j)) * width * pixelSize);
+		const float4 col = image.Sample(builtin_texture_sampler, uv + float2(sin(i), cos(i)) * width * pixelSize);
 		result = lerp(result, color, col.a);
 	}
 
