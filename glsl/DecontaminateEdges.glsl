@@ -13,7 +13,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	const float radiusSteps = 16.0;
 	
 	// Shrink factor, change with mouse
-	float radius = iMouse.z > 0.0 ? length(iMouse.xy / iResolution.xy - 0.5) * 0.5 : cos(iTime * 3.0) * 0.04 + 0.04;
+	float radius = iMouse.z > 0.0 ? length(iMouse.xy / iResolution.xy - 0.5) * 200.0 : cos(iTime * 3.0) * 30.0 + 30.0;
 	
 	vec2 uv = fragCoord / iResolution.xy;
 	vec3 bg = vec3(0.8 * smoothstep(0.9, 0.0, length(uv - 0.5)));
@@ -22,8 +22,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	float alpha = getAlpha(fragColor.rgb);
 	
 	// Correct aspect ratio
-	vec2 texSize = vec2(textureSize(iChannel0, 0));
-	vec2 aspect = vec2(texSize.y / texSize.x, 1.0);
+	vec2 aspect = 1.0 / vec2(textureSize(iChannel0, 0));
 	
 	// STEP 1: Find average direction away from edge
 	

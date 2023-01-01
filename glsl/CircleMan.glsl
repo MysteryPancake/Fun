@@ -6,12 +6,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	const float TAU = 6.28318530;
 	const float steps = 64.0;
 	
-	float radius = iMouse.z > 0.0 ? length(0.5 - iMouse.xy / iResolution.xy) : sin(iTime * 4.0) * 0.05 + 0.05;
+	float radius = iMouse.z > 0.0 ? length(0.5 - iMouse.xy / iResolution.xy) * 200.0 : sin(iTime * 4.0) * 20.0 + 20.0;
 	vec2 uv = fragCoord / iResolution.xy;
 	
 	// Correct aspect ratio
-	vec2 texSize = vec2(textureSize(iChannel0, 0));
-	vec2 aspect = vec2(texSize.y / texSize.x, 1.0);
+	vec2 aspect = 1.0 / vec2(textureSize(iChannel0, 0));
 	
 	fragColor = texture(iChannel0, uv);
 	for (float i = 0.0; i < TAU; i += TAU / steps) {
