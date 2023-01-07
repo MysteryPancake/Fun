@@ -115,8 +115,8 @@ vec2 mainSound(int samp, float time) {
 	result.y += coloredNoise(time + 1.5, 100.0, 1000.0) * 0.3;
 	
 	// Mid frequency rumble
-	result.x += coloredNoise(time, 700.0, 2000.0) * 0.07;
-	result.y += coloredNoise(time + 1.5, 700.0, 2000.0) * 0.07;
+	result.x += coloredNoise(time, 700.0, 2000.0) * 0.05;
+	result.y += coloredNoise(time + 1.5, 700.0, 2000.0) * 0.05;
 	
 	// Distorted noise for rain
 	result.x += distort(coloredNoise(time, 120.0, 2000.0), time) * 0.25;
