@@ -37,12 +37,12 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	// Fade towards blur over time
 	fragColor.r = max(0.0, fragColor.r - 0.03);
 	
-	// Draw 16 circles on screen each frame
-	const float particles = 16.0;
-	for (float i = 0.0; i < particles; i++) {
+	// Draw 16 drops on screen each frame
+	const float drops = 16.0;
+	for (float i = 0.0; i < drops; i++) {
 		float seed = (iTime + i) * 1024.0;
 		vec2 pos = hash2d(seed) * iResolution.xy;
-		float size = 6.0 + hash(seed) * 12.0;
+		float size = 4.0 + hash(seed) * 8.0;
 		fragColor.r += smoothstep(size, 0.0, distance(fragCoord, pos));
 	}
 }
