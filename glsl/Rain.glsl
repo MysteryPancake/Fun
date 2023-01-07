@@ -78,7 +78,6 @@ float hash(float p) {
 	return fract(p);
 }
 
-
 // From https://www.shadertoy.com/view/tttfRj
 float noise(float s) {
 	int si = int(floor(s));
@@ -95,7 +94,7 @@ float coloredNoise(float time, float freq, float Q) {
 // Works like Waveshaper in FL Studio
 float distort(float x, float time) {
 	// Curved distortion, more bass
-	float a = smoothstep(0.25, 1.0, abs(x));
+	float a = smoothstep(0.2, 1.0, abs(x));
 	// Straight distortion, more treble
 	float b = clamp((abs(x) - 0.6) * 1.5, 0.0, 1.0);
 	// Unipolar distortion, same for positive and negative sides
