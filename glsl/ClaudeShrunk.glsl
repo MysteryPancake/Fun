@@ -10,7 +10,6 @@ float getAlpha(vec3 col) {
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 	const float dirSteps = 32.0;
-	const float radiusSteps = 16.0;
 	
 	// Shrink factor, change with mouse
 	float radius = iMouse.z > 0.0 ? length(iMouse.xy / iResolution.xy - 0.5) * 500.0 : 30.0;
