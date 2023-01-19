@@ -1,3 +1,5 @@
+// Available at https://www.shadertoy.com/view/dl23Wt
+
 const float TAU = 6.28318530;
 
 float getAlpha(vec3 col) {
