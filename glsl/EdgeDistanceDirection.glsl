@@ -72,11 +72,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	} else if (uv.y > 0.5) {
 		// Direction relative to edge (range -1 to 1)
 		fragColor.rgb = vec3(dirAvg * 0.5 + 0.5, 1.0);
-	} else if (uv.y < 0.25) {
-		// Distance from interior
-		fragColor.rgb = vec3(interiorDist / radius * 0.5);
-	} else {
+	} else if (uv.y > 0.25) {
 		// Distance from edge
 		fragColor.rgb = vec3(dist / radius);
+	} else {
+		// Distance from interior
+		fragColor.rgb = vec3(interiorDist / radius * 0.5);
 	}
 }
