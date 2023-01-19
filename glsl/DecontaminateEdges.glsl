@@ -10,7 +10,6 @@ float getAlpha(vec3 col) {
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 	const float dirSteps = 64.0;
-	const float radiusSteps = 16.0;
 	
 	// Shrink factor, change with mouse
 	float radius = iMouse.z > 0.0 ? length(iMouse.xy / iResolution.xy - 0.5) * 200.0 : cos(iTime * 3.0) * 30.0 + 30.0;
@@ -52,12 +51,12 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 	// STEP 2: Raycast in average direction until an edge is hit
 	
-	float minD = radius / radiusSteps;
-	float d = minD;
-	for (; d < radius; d += minD) {
+	float d = radius * 0.5;
+	float move = d * 0.5;
+	// Binary search works better than linear search
+	for (int i = 0; i < 8; i++, move *= 0.5) {
 		vec4 col = texture(iChannel0, uv + dirSum * aspect * d);
-		// Raycast success, edge was found
-		if (alpha > getAlpha(col.rgb)) break;
+		d += alpha > getAlpha(col.rgb) ? -move : move;
 	}
 	
 	// Distort the image
