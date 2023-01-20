@@ -32,7 +32,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	
 	// Draw grid
 	vec2 grid = fract(uv * 16.0);
-	fragColor.rgb += vec3(step(0.9, max(grid.x, grid.y))) * 0.03;
+	fragColor.rgb += vec3(step(0.9, max(grid.x, grid.y))) * 0.05;
 	
 	// Binary search
 	int steps = 6;
