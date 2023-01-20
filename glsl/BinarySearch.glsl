@@ -7,7 +7,7 @@ bool check(float guess) {
 
 // Each step, move another half towards the target
 float search(float maximum, int steps) {
-	float current = maximum;
+	float current = maximum * 0.5;
 	float move = current * 0.5;
 	for (int i = 0; i < steps; i++, move *= 0.5) {
 		current -= check(current) ? move : -move;
