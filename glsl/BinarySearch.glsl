@@ -32,5 +32,5 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	fragColor.rgb = hue2rgb(floor(uv.y * steps) / steps) * line;
 	
 	// Vignette
-	fragColor.rgb += length(uv - 0.5) * 0.25;
+	fragColor.rgb += smoothstep(0.1, 1.0, length(uv - 0.5)) * 0.25;
 }
