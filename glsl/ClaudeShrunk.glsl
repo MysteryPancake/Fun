@@ -25,29 +25,23 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	
 	// STEP 1: Find average direction away from edge
 	
-	vec2 dirSum = vec2(0.0);
-	float total = 0.0;
-	
+	vec2 dirAvg = vec2(0.0);
 	for (float i = 0.0; i < TAU; i += TAU / dirSteps) {
 		// Move in a circle to find edges within radius
 		vec2 dir = vec2(sin(i), cos(i));
 		vec4 col = texture(iChannel0, uv + dir * aspect * radius);
-		
 		// Edge was found, accumulate for average
-		if (alpha > getAlpha(col.rgb)) {
-			dirSum += dir;
-			total++;
-		}
+		if (alpha > getAlpha(col.rgb)) dirAvg += dir;
 	}
 	
 	// No edges within radius
-	if (total <= 0.0) {
+	if (length(dirAvg) <= 0.0) {
 		fragColor.rgb = mix(bg, fragColor.rgb, alpha);
 		return;
 	}
 	
 	// Calculate average direction
-	dirSum = normalize(dirSum / total);
+	dirAvg = normalize(dirAvg);
 
 	// STEP 2: Raycast in average direction until an edge is hit
 	
@@ -55,11 +49,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	float move = d * 0.5;
 	// Binary search works better than linear search
 	for (int i = 0; i < 8; i++, move *= 0.5) {
-		vec4 col = texture(iChannel0, uv + dirSum * aspect * d);
+		vec4 col = texture(iChannel0, uv + dirAvg * aspect * d);
 		d += alpha > getAlpha(col.rgb) ? -move : move;
 	}
 	
 	// Distort the image
-	fragColor = texture(iChannel0, uv + dirSum * aspect * (radius - d));
+	fragColor = texture(iChannel0, uv + dirAvg * aspect * (radius - d));
 	fragColor.rgb = mix(bg, fragColor.rgb, getAlpha(fragColor.rgb));
 }

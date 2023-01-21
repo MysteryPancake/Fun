@@ -24,7 +24,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	// STEP 1: Find average direction away from edge
 	
 	vec2 dirAvg = vec2(0.0);
-	float total = 0.0;
 	bool interior = false;
 	
 	for (float i = 0.0; i < TAU; i += TAU / dirSteps) {
@@ -36,20 +35,19 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 		float neighbor = getAlpha(col.rgb);
 		if (alpha != neighbor) {
 			dirAvg += dir;
-			total++;
 			interior = alpha > neighbor;
 		}
 	}
 	
 	// No edges within radius
-	if (total <= 0.0) {
+	if (length(dirAvg) <= 0.0) {
 		vec3 bg = uv.y < 0.5 ? vec3(0.5) : vec3(0.5, 0.5, 1.0);
 		fragColor.rgb = mix(bg, fragColor.rgb, alpha);
 		return;
 	}
 	
 	// Calculate average direction
-	dirAvg = normalize(dirAvg / total);
+	dirAvg = normalize(dirAvg);
 
 	// STEP 2: Raycast in average direction until an edge is hit
 	
