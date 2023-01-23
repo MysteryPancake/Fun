@@ -5,7 +5,7 @@ float waveSine(float freq, float time) {
 }
 
 float waveSquare(float freq, float time) {
-	return step(0.0, 0.5 - fract(freq * time)) * 2.0 - 1.0;
+	return ceil(0.5 - fract(freq * time)) * 2.0 - 1.0;
 }
 
 float waveTriangle(float freq, float time) {
