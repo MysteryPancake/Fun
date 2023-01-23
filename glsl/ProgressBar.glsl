@@ -5,7 +5,7 @@
 void mainImage(out vec4 O, in vec2 u) {
 	float y = 12. / iResolution.x; 
 	u *= y;
-	O = 1. - A(.47) + A(.4) * (u.x > ceil(sin(iTime) * 6. + 6.) ? O - O + .9 : vec4(0, .5, .9, 1));
+	O = 1. - A(.45) + A(.4) * (u.x > ceil(sin(iTime) * 6. + 6.) ? O - O + .9 : vec4(0, .5, .9, 1));
 }
 
 // Original, by me + iapafoto (192 chars)
