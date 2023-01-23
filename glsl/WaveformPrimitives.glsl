@@ -63,5 +63,5 @@ vec2 mainSound(int samp, float time) {
 		result = waveSaw(freq, time);
 	}
 	
-	return vec2(result * 0.2);
+	return vec2(result * 0.1);
 }
