@@ -1,6 +1,6 @@
 // Available at https://www.shadertoy.com/view/mlX3Rf
 
-const float PI = 3.14159265359;
+const float PI = 3.1415926;
 
 // From https://www.shadertoy.com/view/Xds3zN
 float sdBox(vec3 p, vec3 b) {
