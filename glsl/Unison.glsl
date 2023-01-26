@@ -1,6 +1,6 @@
 // Available at https://www.shadertoy.com/view/mdlSRj
 
-#define pi 3.1415926538
+const float PI = 3.1415926;
 
 // 1D hash, from https://www.shadertoy.com/view/4djSRW
 float hash(float p) {
@@ -12,7 +12,7 @@ float hash(float p) {
 
 // MIDI note to frequency formula
 float noteFreq(float note) {
-	return 440.0 * exp2(floor(note - 69.0) / 12.0);
+	return 440.0 * exp2((note - 69.0) / 12.0);
 }
 
 // For sawtooth synth
@@ -22,7 +22,7 @@ float saw(float freq, float time, float phase) {
 
 // For kick drum (808?)
 float drum(float freq, float time) {
-	return sin(freq * time * pi) * exp(-4.0 * time);
+	return sin(freq * time * PI) * exp(-4.0 * time);
 }
 
 // For snares and hi-hats
@@ -83,7 +83,7 @@ vec2 mainSound(int samp, float time) {
 	result /= float(notes.length()) * spread;
 	
 	// Sidechain to sine wave
-	result *= abs(sin(time * pi * 2.0));
+	result *= abs(sin(time * PI * 2.0));
 	
 	// Distort drum by making it 2x louder, then clamp to hard clip it
 	result += clamp(drum(noteFreq(drumNote), fract(time * 2.0)) * 2.0, -0.9, 0.9);
