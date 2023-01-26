@@ -2,10 +2,10 @@
 
 // COMMON
 
-#define BPM 128.0
-#define STEP 60.0 / BPM
-#define LOOPSTEPS 96.0
-#define MIDIOFFSET 69.0
+const float BPM = 128.0;
+const float STEP = 60.0 / BPM;
+const float LOOPSTEPS = 96.0;
+const float MIDIOFFSET = 69.0;
 
 // BUFFER A
 
@@ -57,7 +57,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 // SOUND
 
-#define PI 3.1415926538
+const float PI = 3.1415926;
+const float TAU = 6.28318530;
+
 #define NOTE(note, start, end) if (time >= start * STEP && time < end * STEP) result += note;
 #define NOTE_SAW(note, start, end) NOTE(superSaw(noteFreq(note), time, voices, detune) * amplitude, start, end);
 #define NOTE_SINE(note, start, end) NOTE(superSine(noteFreq(note), time - start * STEP, voices, detune) * amplitude, start, end);
@@ -83,7 +85,7 @@ float saw(float freq, float time, float phase) {
 
 // For lead whistle
 float sine(float freq, float time, float phase, float fade) {
-	return sin(freq * (time + phase) * PI * 2.0) * exp(-fade * time);
+	return sin(freq * (time + phase) * TAU) * exp(-fade * time);
 }
 
 // For cymbals
@@ -118,21 +120,21 @@ vec2 superSine(float freq, float time, float voices, float detune) {
 // From https://www.shadertoy.com/view/sls3WM
 float coloredNoise(float time, float freq, float Q) {
 	// Forgot to remap the hash to -1, 1, whoops
-	return sin(2.0 * PI * freq * fract(time)) * hash(time * Q);
+	return sin(TAU * freq * fract(time)) * hash(time * Q);
 }
 
 // From https://www.shadertoy.com/view/sls3WM
 float kick(float time, float freq) {
 	const float df = 512.0, dftime = 0.01;
-	float phase = 2.0 * PI * (freq * time - df * dftime * exp(-time / dftime));
+	float phase = TAU * (freq * time - df * dftime * exp(-time / dftime));
 	float body = sin(phase) * smoothstep(0.15, 0.0, time) * 2.0;
 	float click = coloredNoise(time, 8000.0, 2000.0) * smoothstep(0.01, 0.0, time);
-	return body + click * 0.7;
+	return body + click;
 }
 
 // Cheap snare or clap effect
 vec2 snare(float time, float freq, float fade) {
-	return noiseHit(time, fade) * abs(sin(freq * time * PI * 2.0));
+	return noiseHit(time, fade) * abs(sin(freq * time * TAU));
 }
 
 vec2 leadBass(float time, float voices, float detune, float amplitude) {
