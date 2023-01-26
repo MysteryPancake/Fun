@@ -2,9 +2,9 @@
 
 // COMMON
 
-const float PI = 3.1415926538;
+const float PI = 3.1415926;
 const float PI_4 = PI * 0.25;
-const float TAU = PI * 2.0;
+const float TAU = 6.28318530;
 
 const float BPM = 200.0;
 const float STEP = 60.0 / BPM;
@@ -122,13 +122,13 @@ float noise(float s) {
 
 // From https://www.shadertoy.com/view/sls3WM
 float coloredNoise(float time, float freq, float Q) {
-	return sin(2.0 * PI * freq * fract(time)) * noise(time * Q);
+	return sin(TAU * freq * fract(time)) * noise(time * Q);
 }
 
 // From https://www.shadertoy.com/view/sls3WM
 float kick(float time) {
 	const float df = 512.0, dftime = 0.01, freq = 60.0;
-	float phase = 2.0 * PI * (freq * time - df * dftime * exp(-time / dftime));
+	float phase = TAU * (freq * time - df * dftime * exp(-time / dftime));
 	float body = sin(phase) * smoothstep(0.3, 0.0, time) * 1.5;
 	float click = coloredNoise(time, 8000.0, 2000.0) * smoothstep(0.007, 0.0, time);
 	return body + click;
