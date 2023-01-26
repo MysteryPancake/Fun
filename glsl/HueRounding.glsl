@@ -2,8 +2,8 @@
 
 // COMMON
 
-const float PI = 3.1415926538;
-const float TAU = PI * 2.0;
+const float PI = 3.1415926;
+const float TAU = 6.28318530;
 
 // From https://www.shadertoy.com/view/lsS3Wc
 vec3 hsv2rgb(vec3 c) {
