@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Brute Force Sudoku</title>
+		<meta name="description" content="Terrible Sudoku solver with no backtracking.">
+		<meta name="keywords" content="Sudoku, Brute, Force, Puzzle, Solve, Hack">
+		<meta property="og:title" content="Brute Force Sudoku">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/sudoku">
+		<meta property="og:site_name" content="Brute Force Sudoku">
+		<meta property="og:description" content="Terrible Sudoku solver with no backtracking.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: system-ui, Arial, Helvetica, sans-serif;
+		}
+
+		canvas {
+			border: 4px solid black;
+		}
+
+		input[type="button"] {
+			border: 2px solid black;
+			cursor: pointer;
+			font-size: xx-large;
+			margin-top: 8px;
+			padding: 8px 16px;
+		}
+
+		input[type="text"] {
+			font-size: xx-large;
+			width: 45em;
+		}
+		</style>
+		<script>
+		let canvasElem, canvasCtx;
+		let board = new Uint8Array(81);
+
+		function setup() {
+			canvasElem = document.getElementById("canvas");
+			canvasCtx = canvasElem.getContext("2d", { alpha: false });
+			draw();
+		}
+
+		function loadBoard() {
+			const str = document.getElementById("boardString").value;
+			for (let i = 0; i < str.length; i++) {
+				board[i] = parseInt(str.charAt(i));
+			}
+			draw();
+		}
+
+		function getCandidates(index) {
+			const candidates = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+			const squareId = Math.floor(index / 3) % 3 * 3 + Math.floor(index / 27) * 27;
+			const rowId = Math.floor(index / 9) * 9;
+			const colId = index % 9;
+			for (let j = 0; j < 9; j++) {
+				// Filter by square
+				candidates.delete(board[squareId + j % 3 + Math.floor(j / 3) * 9]);
+				// Filter by row
+				candidates.delete(board[rowId + j]);
+				// Filter by column
+				candidates.delete(board[colId + j * 9]);
+			}
+			return candidates;
+		}
+
+		function solveStep() {
+			for (let i = 0; i < 81; i++) {
+				if (board[i] > 0) continue;
+				const candidates = getCandidates(i);
+				if (candidates.size === 1) {
+					board[i] = candidates.values().next().value;
+					break;
+				}
+			}
+			draw();
+		}
+
+		function draw() {
+			// Draw background
+			canvasCtx.fillStyle = "white";
+			canvasCtx.fillRect(0, 0, canvasElem.width, canvasElem.height);
+
+			canvasCtx.fillStyle = "#DDDDDD";
+			canvasCtx.fillRect(300, 0, 300, 300);
+			canvasCtx.fillRect(0, 300, 300, 300);
+			canvasCtx.fillRect(600, 300, 300, 300);
+			canvasCtx.fillRect(300, 600, 300, 300);
+
+			// Draw rows and columns
+			canvasCtx.strokeStyle = "black";
+			for (let i = 1; i < 9; i++) {
+				canvasCtx.lineWidth = i % 3 === 0 ? 3 : 1;
+				const x = i * 100;
+				// Rows
+				canvasCtx.beginPath();
+				canvasCtx.moveTo(0, x);
+				canvasCtx.lineTo(canvasElem.width, x);
+				canvasCtx.stroke();
+				// Columns
+				canvasCtx.beginPath();
+				canvasCtx.moveTo(x, 0);
+				canvasCtx.lineTo(x, canvasElem.height);
+				canvasCtx.stroke();
+			}
+
+			canvasCtx.textAlign = "center";
+			canvasCtx.textBaseline = "middle";
+			for (let i = 0; i < board.length; i++) {
+				const digit = board[i];
+				const x = i % 9 * 100;
+				const y = Math.floor(i / 9) * 100;
+				if (digit > 0) {
+					canvasCtx.fillStyle = "black";
+					canvasCtx.font = "50px Arial";
+					canvasCtx.fillText(digit, 50 + x, 50 + y);
+				} else {
+					const candidates = getCandidates(i);
+					canvasCtx.fillStyle = candidates.size === 1 ? "red" : "#00000060";
+					canvasCtx.font = "25px Arial";
+					let id = 0;
+					candidates.forEach(number => {
+						canvasCtx.fillText(number, 25 + x + id % 3 * 25, 25 + y + Math.floor(id / 3) * 25);
+						++id;
+					});
+				}
+			}
+		}
+		</script>
+	</head>
+	<body onload="setup();">
+		<h1>Brute Force Sudoku</h1>
+		<input type="text" id="boardString" value="070000043040009610800634900094052000358460020000800530080070091902100005007040802">
+		<input type="button" value="Load Board" onclick="loadBoard();">
+		<div>
+			<canvas id="canvas" width="900" height="900"></canvas>
+		</div>
+		<input type="button" value="Solve One" onclick="solveStep();">
+	</body>
+</html>
