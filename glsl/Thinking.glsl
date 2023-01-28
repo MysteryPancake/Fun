@@ -4,7 +4,6 @@
 
 const float BPM = 112.0;
 const float STEP = 60.0 / BPM;
-const float LOOPSTEPS = 96.0;
 
 // This song uses nonstandard tuning (50 cents above 440 Hertz)
 const float TUNING = 440.0;
@@ -25,11 +24,12 @@ float noteFreq(float note) {
 	return TUNING * exp2((note - MIDIOFFSET) / 12.0);
 }
 
-// Basic waveforms, see https://www.shadertoy.com/view/clXSR7
+// Triangle waveform, see https://www.shadertoy.com/view/clXSR7
 vec2 tri(float freq, float time, vec2 phase) {
 	return abs(fract(phase + freq * time) - 0.5) * 4.0 - 1.0;
 }
 
+// Sawtooth waveform, see https://www.shadertoy.com/view/clXSR7
 vec2 saw(float freq, float time, vec2 phase) {
 	return fract(phase + freq * time) * 2.0 - 1.0;
 }
@@ -52,10 +52,11 @@ float noise(float s) {
 }
 
 // From https://www.shadertoy.com/view/sls3WM
-float coloredNoise(float time, float freq, float Q) {
-	return sin(TAU * freq * fract(time)) * noise(time * Q);
+float coloredNoise(float time, float freq, float bandwidth) {
+	return sin(TAU * freq * fract(time)) * noise(time * bandwidth);
 }
 
+// Used for bass and lead synths
 vec2 timedSaw(float freq, float time, float start, float end, float seed) {
 	if (time >= start * STEP && time < end * STEP) {
 		vec2 phase = vec2(hash(seed * 1024.0));
@@ -68,6 +69,7 @@ vec2 timedSaw(float freq, float time, float start, float end, float seed) {
 	return vec2(0.0);
 }
 
+// Used for voices
 vec2 timedTri(float freq, float time, float start, float end, float seed) {
 	if (time >= start * STEP && time < end * STEP) {
 		vec2 phase = vec2(hash(1024.0 * seed + 2048.0 * start), hash(2048.0 * seed + 1024.0 * start));
@@ -82,7 +84,7 @@ vec2 timedTri(float freq, float time, float start, float end, float seed) {
 	return vec2(0.0);
 }
 
-// Seems to reduce compilation a bit
+// Seems to reduce compilation time
 vec2 sawChord(float time, float start, float a, float b, float c, float d, float e) {
 	float end = start + 0.25;
 	vec2 result = timedSaw(a, time, start, end, 0.0);
@@ -93,6 +95,7 @@ vec2 sawChord(float time, float start, float a, float b, float c, float d, float
 	return result;
 }
 
+// Seems to reduce compilation time
 vec2 lead(float time, float a, float b, float c, float d, float e, float f, float g, float h, float i, float j, float k, float l, float m, float n, float o) {
 	vec2 result = vec2(0.0);
 	// 3 chord repetition, optimized
@@ -112,6 +115,7 @@ vec2 lead(float time, float a, float b, float c, float d, float e, float f, floa
 	return result;
 }
 
+// I wrote these notes in FL Studio, then wrote a MIDI to code conversion script
 vec2 bass1(float time) {
 	vec2 result = timedSaw(33.0, time, 0.0, 0.25, 0.0);
 	result += timedSaw(33.0, time, 0.5, 0.75, 1.0);
@@ -180,9 +184,7 @@ vec2 bass2(float time) {
 }
 
 vec2 voice1(float time) {
-	vec2 result = timedTri(76.0, time, 1.75, 2.0, 0.0);
-	result += timedTri(76.0, time, 2.25, 3.25, 1.0);
-	return result;
+	return timedTri(76.0, time, 1.75, 2.0, 0.0) + timedTri(76.0, time, 2.25, 3.25, 1.0);
 }
 
 vec2 voice2(float time) {
@@ -234,10 +236,12 @@ vec2 voice3(float time) {
 }
 
 // From https://www.shadertoy.com/view/sls3WM
+// Sliding pitch sine wave, used for bass drop and kick
 float drop(float time, float df, float dftime, float freq) {
 	return sin(TAU * (freq * time - df * dftime * exp(-time / dftime)));
 }
 
+// From https://www.shadertoy.com/view/sls3WM
 float kick(float time) {
 	float body = drop(time, 512.0, 0.01, 60.0) * smoothstep(0.3, 0.0, time) * 2.0;
 	float click = coloredNoise(time, 8000.0, 2000.0) * smoothstep(0.007, 0.0, time);
@@ -254,6 +258,7 @@ vec2 snare(float time) {
 	return snoise * nenv + body * 3.8;
 }
 
+// Exponential sidechain curve
 float sidechain(float time, float speed) {
 	return 1.0 - exp(time * -speed);
 }
@@ -268,9 +273,10 @@ struct Song {
 };
 
 Song getSong(float time) {
+
 	Song song;
 	song.drums = song.bass = song.voice = song.lead = vec2(0.0);
-
+	
 	// Initial echos on lead synth
 	int leadEchos = 4;
 	// Sidechain factor (0-1)
@@ -285,8 +291,7 @@ Song getSong(float time) {
 		song.sidechain *= sidechain(t, 6.0);
 		// Bass drop
 		if (time < STEP * 16.0) {
-			float bassDrop = drop(t, 70.0, 0.2, 40.0);
-			song.bass += clamp(bassDrop * 5.0, -0.7, 0.7) * song.sidechain;
+			song.bass += clamp(drop(t, 70.0, 0.2, 40.0) * 5.0, -0.7, 0.7) * song.sidechain;
 		}
 	}
 	
@@ -325,7 +330,7 @@ Song getSong(float time) {
 		for (int i = 0; i <= 2; i++) {
 			// Linear delay, repeats every 0.05 seconds
 			float delay = float(i) * 0.05;
-			// Linear fade echo volume (1 to 0)
+			// Fade echo volume linearly (1 to 0)
 			float fade = 1.0 - float(i) / 3.0;
 			// Ping-pong panning, pans each echo left then right
 			vec2 pan = i <= 0 ? vec2(1.0) : (i % 2 == 0 ? vec2(1.0, 0.5) : vec2(0.5, 1.0));
@@ -334,13 +339,14 @@ Song getSong(float time) {
 		}
 	}
 	
+	// Wiggle volume a bit to add variety
 	float tremolo = 1.0 - sin(time / STEP * TAU) * 0.1;
 	
 	// Lead voices
 	for (int i = 0; i <= 2; i++) {
 		// Linear delay
 		float delay = float(i) * 0.13;
-		// Linear fade echo volume (1 to 0)
+		// Fade echo volume linearly (1 to 0)
 		float fade = 1.0 - float(i) / 3.0;
 		// Ping-pong panning, pans each echo right then left
 		vec2 pan = i <= 0 ? vec2(1.0) : (i % 2 == 1 ? vec2(1.0, 0.0) : vec2(0.0, 1.0));
@@ -356,33 +362,33 @@ Song getSong(float time) {
 		}
 	}
 	
-	// Drop lead delay near the end
+	// Cut lead delay every few bars for variety
 	if (time >= STEP * 64.0 && mod(time, STEP * 64.0) < STEP * 32.0) leadEchos = 0;
 	
-	// Synths
+	// Lead synths
 	for (int i = 0; i <= leadEchos; i++) {
 		// Exponential delay, seems to reduce phase weirdness
 		float delay = (exp(float(i) * 0.1) - 1.0) * 0.5;
-		// Linearly fade echo volume from 1 to 0
+		// Fade echo volume linearly (1 to 0)
 		float fade = 1.0 - float(i) / float(leadEchos + 1);
 		// Ping-pong panning, pans each echo left then right
 		vec2 pan = i <= 0 ? vec2(1.0) : (i % 2 == 0 ? vec2(1.0, 0.4) : vec2(0.4, 1.0));
 		
-		// The first bar
+		// First bar
 		song.lead += lead(mod(time, STEP * 8.0) - delay,
 			45.0, 52.0, 60.0, 64.0, 67.0,
 			47.0, 54.0, 57.0, 62.0, 66.0,
 			47.0, 55.0, 57.0, 62.0, 66.0
 		) * song.sidechain * 0.2 * fade * pan * tremolo;
 		
-		// Repeats after the first bar (1st time)
+		// Repeats after first bar (1st time)
 		song.lead += lead(mod(time - STEP * 4.0, STEP * 16.0) - delay,
 			52.0, 59.0, 59.0, 64.0, 67.0,
 			52.0, 57.0, 57.0, 62.0, 66.0,
 			52.0, 57.0, 57.0, 62.0, 66.0
 		) * song.sidechain * 0.2 * fade * pan * tremolo;
 		
-		// Repeats after the first bar (2nd time)
+		// Repeats after first bar (2nd time)
 		song.lead += lead(mod(time - STEP * 12.0, STEP * 16.0) - delay,
 			49.0, 56.0, 59.0, 64.0, 68.0,
 			49.0, 56.0, 56.0, 59.0, 64.0,
@@ -390,29 +396,30 @@ Song getSong(float time) {
 		) * song.sidechain * 0.2 * fade * pan * tremolo;
 	}
 	
-	// Hats
+	// Hats, first panned right, second panned left
 	song.drums += noiseHit(mod(time, STEP * 0.5), 36.0) * 0.45 * vec2(0.6, 1.0);
 	song.drums += noiseHit(mod(time - STEP / 6.0, STEP * 0.5), 36.0) * 0.49 * vec2(1.0, 0.6);
 	
-	// More hats
+	// More hats, adds more high end
 	if (time > STEP * 32.75) {
 		float offset = time + STEP * 0.25;
 		t = mod(offset, STEP);
 		vec2 hat = vec2(coloredNoise(t, 13000.0, 6000.0), coloredNoise(t, 13000.0, 6200.0));
+		// Ping-pong panning, pans left then right
 		vec2 pan = mod(offset, STEP * 2.0) >= STEP ? vec2(1.0, 0.3) : vec2(0.3, 1.0);
 		song.drums += hat * exp(-5.0 * t) * pan * song.sidechain * 0.5;
 	}
 	
-	// Riser
 	const float freq = 16000.0;
-	const float Q = 10000.0;
-	if (time < STEP * 16.0) {
-		song.drums += coloredNoise(time, freq, Q) * exp(0.8 * (time - STEP * 16.0)) * song.sidechain * 0.35;
-	}
+	const float bandwidth = 10000.0;
 	
+	// Riser
+	if (time < STEP * 16.0) {
+		song.drums += coloredNoise(time, freq, bandwidth) * exp(0.8 * (time - STEP * 16.0)) * song.sidechain * 0.35;
+	}
 	// Faller
 	if (time > STEP * 16.0) {
-		song.drums += coloredNoise(time, freq, Q) * exp(STEP * 16.0 - time) * song.sidechain * 0.3;
+		song.drums += coloredNoise(time, freq, bandwidth) * exp(STEP * 16.0 - time) * song.sidechain * 0.3;
 	}
 	
 	return song;
