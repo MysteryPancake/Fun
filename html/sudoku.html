@@ -51,28 +51,44 @@
 			draw();
 		}
 
-		function getCandidates(index) {
+		function getAllCandidates(index, squareId) {
 			const candidates = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-			const squareId = Math.floor(index / 3) % 3 * 3 + Math.floor(index / 27) * 27;
 			const rowId = Math.floor(index / 9) * 9;
 			const colId = index % 9;
-			for (let j = 0; j < 9; j++) {
+			for (let i = 0; i < 9; i++) {
 				// Filter by square
-				candidates.delete(board[squareId + j % 3 + Math.floor(j / 3) * 9]);
+				candidates.delete(board[squareId + i % 3 + Math.floor(i / 3) * 9]);
 				// Filter by row
-				candidates.delete(board[rowId + j]);
+				candidates.delete(board[rowId + i]);
 				// Filter by column
-				candidates.delete(board[colId + j * 9]);
+				candidates.delete(board[colId + i * 9]);
 			}
 			return candidates;
+		}
+
+		function getCandidates(index) {
+			// Find naked singles
+			const squareId = Math.floor(index / 3) % 3 * 3 + Math.floor(index / 27) * 27;
+			const allCandidates = getAllCandidates(index, squareId);
+			if (allCandidates.size === 1) {
+				return [allCandidates, allCandidates.values().next().value];
+			}
+			// Find hidden singles (horribly unoptimized)
+			const filtered = new Set(allCandidates);
+			for (let i = 0; i < 9; i++) {
+				const id = squareId + i % 3 + Math.floor(i / 3) * 9;
+				if (id === index || board[id] > 0) continue;
+				getAllCandidates(id, squareId).forEach(candidate => filtered.delete(candidate));
+			}
+			return [allCandidates, filtered.size === 1 && filtered.values().next().value];
 		}
 
 		function solveStep() {
 			for (let i = 0; i < 81; i++) {
 				if (board[i] > 0) continue;
 				const candidates = getCandidates(i);
-				if (candidates.size === 1) {
-					board[i] = candidates.values().next().value;
+				if (candidates[1]) {
+					board[i] = candidates[1];
 					break;
 				}
 			}
@@ -119,10 +135,10 @@
 					canvasCtx.fillText(digit, 50 + x, 50 + y);
 				} else {
 					const candidates = getCandidates(i);
-					canvasCtx.fillStyle = candidates.size === 1 ? "red" : "#00000060";
 					canvasCtx.font = "25px Arial";
 					let id = 0;
-					candidates.forEach(number => {
+					candidates[0].forEach(number => {
+						canvasCtx.fillStyle = candidates[1] === number ? "red" : "#00000060";
 						canvasCtx.fillText(number, 25 + x + id % 3 * 25, 25 + y + Math.floor(id / 3) * 25);
 						++id;
 					});
