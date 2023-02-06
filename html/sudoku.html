@@ -136,11 +136,10 @@
 				} else {
 					const candidates = getCandidates(i);
 					canvasCtx.font = "25px Arial";
-					let id = 0;
 					candidates[0].forEach(number => {
+						const id = number - 1;
 						canvasCtx.fillStyle = candidates[1] === number ? "red" : "#00000060";
 						canvasCtx.fillText(number, 25 + x + id % 3 * 25, 25 + y + Math.floor(id / 3) * 25);
-						++id;
 					});
 				}
 			}
