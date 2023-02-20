@@ -1,3 +1,5 @@
+// Available at https://www.shadertoy.com/view/mt2XDd
+
 float getAlpha(vec3 color) {
 	return smoothstep(0.5, 0.7, distance(color.rgb, vec3(0.0, 1.0, 0.0)));
 }
