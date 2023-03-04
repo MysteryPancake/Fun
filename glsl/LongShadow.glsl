@@ -14,7 +14,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	vec2 aspect = 1.0 / iResolution.xy;
 	
 	// In pixels
-	float shadowLength = 64.0;
+	float shadowLength = 512.0;
 	// Lower values mean better precision
 	float shadowPrecision = 4.0;
 	// In radians
