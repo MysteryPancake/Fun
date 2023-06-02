@@ -33,8 +33,7 @@
 			let roughness = 0.5;
 			let segments = 32;
 			let along = true;
-			const padding = 128;
-
+			
 			function setup() {
 				document.getElementById("hairs").value = hairs;
 				document.getElementById("roughness").value = roughness;
@@ -49,13 +48,15 @@
 			}
 
 			function draw() {
+				// Clear canvas
 				canvasCtx.fillRect(0, 0, canvasElem.width, canvasElem.height);
+				const padding = 128;
+				const segLength = canvasElem.height / segments * 0.75;
 				for (let i = 1; i <= hairs; i++) {
-					canvasCtx.beginPath();
 					let pos = [padding + i * (canvasElem.width - padding * 2) / (hairs + 1), canvasElem.height];
+					canvasCtx.beginPath();
 					canvasCtx.moveTo(pos[0], pos[1]);
 					let angle = Math.PI;
-					const segLength = canvasElem.height / segments * 0.75;
 					for (let j = 1; j <= segments; j++) {
 						angle += (along ? j / segments : 1.0) * roughness * (Math.random() - 0.5);
 						pos[0] += Math.sin(angle) * segLength;
