@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Hair Blower</title>
+		<meta name="description" content="Hair blowing animation concept.">
+		<meta name="keywords" content="Hair, Blow, Blowing, Blower, Animation, Simulation, 2D">
+		<meta property="og:title" content="Hair Blower">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/hairblower">
+		<meta property="og:site_name" content="Hair Blower">
+		<meta property="og:description" content="Hair blowing animation concept.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: system-ui, Arial, Helvetica, sans-serif;
+		}
+
+		canvas {
+			display: block;
+			border: 1px solid black;
+		}
+		</style>
+		<script>
+			let canvasElem, canvasCtx;
+			const requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(e) { return window.setTimeout(e, 1000 / 60); };
+			let hairs = 1;
+			let roughness = 0.5;
+			let segments = 32;
+			let along = true;
+			const padding = 128;
+
+			function setup() {
+				document.getElementById("hairs").value = hairs;
+				document.getElementById("roughness").value = roughness;
+				document.getElementById("segments").value = segments;
+				document.getElementById("along").checked = along;
+				canvasElem = document.getElementById("canvas");
+				canvasCtx = canvasElem.getContext("2d");
+				canvasCtx.fillStyle = "white";
+				canvasCtx.strokeStyle = "black";
+				canvasCtx.lineWidth = 1;
+				requestFrame(draw);
+			}
+
+			function draw() {
+				canvasCtx.fillRect(0, 0, canvasElem.width, canvasElem.height);
+				for (let i = 1; i <= hairs; i++) {
+					canvasCtx.beginPath();
+					let pos = [padding + i * (canvasElem.width - padding * 2) / (hairs + 1), canvasElem.height];
+					canvasCtx.moveTo(pos[0], pos[1]);
+					let angle = Math.PI;
+					const segLength = canvasElem.height / segments * 0.75;
+					for (let j = 1; j <= segments; j++) {
+						angle += (along ? j / segments : 1.0) * roughness * (Math.random() - 0.5);
+						pos[0] += Math.sin(angle) * segLength;
+						pos[1] += Math.cos(angle) * segLength;
+						canvasCtx.lineTo(pos[0], pos[1]);
+					}
+					canvasCtx.stroke();
+				}
+				requestFrame(draw);
+			}
+
+			function setRoughness(elem) {
+				roughness = parseFloat(elem.value);
+				document.getElementById("roughness_label").textContent = `Roughness (${elem.value})`;
+			}
+
+			function setDivisions(elem) {
+				segments = parseInt(elem.value);
+				document.getElementById("segments_label").textContent = `Segments (${elem.value})`;
+			}
+
+			function setHairs(elem) {
+				hairs = parseInt(elem.value);
+				document.getElementById("hairs_label").textContent = `Hairs (${elem.value})`;
+			}
+
+			function setAlong(elem) {
+				along = elem.checked;
+			}
+		</script>
+	</head>
+	<body onload="setup();">
+		<h1>Hair Blower</h1>
+		<canvas id="canvas" width="1024" height="512"></canvas>
+		<div>
+			<input id="hairs" type="range" min="1" max="512" oninput="setHairs(this);">
+			<label id="hairs_label" for="hairs">Hairs (1)</label>
+		</div>
+		<div>
+			<input id="segments" type="range" min="1" max="512" oninput="setDivisions(this);">
+			<label id="segments_label" for="segments">Segments (32)</label>
+		</div>
+		<div>
+			<input id="roughness" type="range" min="0" max="1" step="0.01" oninput="setRoughness(this);">
+			<label id="roughness_label" for="roughness">Roughness (0.5)</label>
+		</div>
+		<div>
+			<input id="along" type="checkbox" oninput="setAlong(this);">
+			<label id="along_label" for="along">Increase roughness along strand</label>
+		</div>
+	</body>
+</html>
