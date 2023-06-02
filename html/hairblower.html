@@ -20,6 +20,11 @@
 			display: block;
 			border: 1px solid black;
 		}
+
+		input[type="range"] {
+			display: block;
+			width: 1024px;
+		}
 		</style>
 		<script>
 			let canvasElem, canvasCtx;
@@ -86,20 +91,20 @@
 		<h1>Hair Blower</h1>
 		<canvas id="canvas" width="1024" height="512"></canvas>
 		<div>
-			<input id="hairs" type="range" min="1" max="512" oninput="setHairs(this);">
 			<label id="hairs_label" for="hairs">Hairs (1)</label>
+			<input id="hairs" type="range" min="1" max="512" oninput="setHairs(this);">
 		</div>
 		<div>
-			<input id="segments" type="range" min="1" max="512" oninput="setDivisions(this);">
 			<label id="segments_label" for="segments">Segments (32)</label>
+			<input id="segments" type="range" min="1" max="512" oninput="setDivisions(this);">
 		</div>
 		<div>
-			<input id="roughness" type="range" min="0" max="1" step="0.01" oninput="setRoughness(this);">
 			<label id="roughness_label" for="roughness">Roughness (0.5)</label>
+			<input id="roughness" type="range" min="0" max="1" step="0.01" oninput="setRoughness(this);">
 		</div>
 		<div>
-			<input id="along" type="checkbox" oninput="setAlong(this);">
 			<label id="along_label" for="along">Increase roughness along strand</label>
+			<input id="along" type="checkbox" oninput="setAlong(this);">
 		</div>
 	</body>
 </html>
