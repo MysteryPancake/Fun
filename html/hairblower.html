@@ -27,14 +27,15 @@
 		}
 		</style>
 		<script>
-			let canvasElem, canvasCtx;
-			const requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(e) { return window.setTimeout(e, 1000 / 60); };
+			let canvasElem, canvasCtx, drawInterval;
+			let fps = 60;
 			let hairs = 1;
 			let roughness = 0.5;
 			let segments = 32;
 			let along = true;
 			
 			function setup() {
+				document.getElementById("fps").value = fps;
 				document.getElementById("hairs").value = hairs;
 				document.getElementById("roughness").value = roughness;
 				document.getElementById("segments").value = segments;
@@ -44,7 +45,7 @@
 				canvasCtx.fillStyle = "white";
 				canvasCtx.strokeStyle = "black";
 				canvasCtx.lineWidth = 1;
-				requestFrame(draw);
+				drawInterval = window.setInterval(draw, 1000 / fps);
 			}
 
 			function draw() {
@@ -65,7 +66,6 @@
 					}
 					canvasCtx.stroke();
 				}
-				requestFrame(draw);
 			}
 
 			function setRoughness(elem) {
@@ -86,11 +86,22 @@
 			function setAlong(elem) {
 				along = elem.checked;
 			}
+
+			function setFPS(elem) {
+				fps = parseInt(elem.value);
+				window.clearInterval(drawInterval)
+				drawInterval = window.setInterval(draw, 1000 / fps);
+				document.getElementById("fps_label").textContent = `Framerate (${elem.value})`;
+			}
 		</script>
 	</head>
 	<body onload="setup();">
 		<h1>Hair Blower</h1>
 		<canvas id="canvas" width="1024" height="512"></canvas>
+		<div>
+			<label id="fps_label" for="fps">Framerate (60)</label>
+			<input id="fps" type="range" min="1" max="60" oninput="setFPS(this);">
+		</div>
 		<div>
 			<label id="hairs_label" for="hairs">Hairs (1)</label>
 			<input id="hairs" type="range" min="1" max="512" oninput="setHairs(this);">
