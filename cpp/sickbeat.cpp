@@ -1,10 +1,9 @@
+#define _USE_MATH_DEFINES
 #include <iostream>
 #include <fstream>
 #include <math.h>
 
 using namespace std;
-
-#define pi 3.14159265358979323846
 
 struct WavHeader
 {
@@ -40,7 +39,7 @@ float sawtooth(float d, float x)
 	if (d == 0.0f) return d;
 	// Smooth harsh attack
 	float smoothAttack = min(1.0f, d * 50.0f);
-	return (1.0f - 2.0f * acos((1.0f - d) * -cos(x / 2.0f)) / pi) * (2.0f * atan(sin(x / 2.0f) / d) / pi) * smoothAttack;
+	return (1.0f - 2.0f * acos((1.0f - d) * -cos(x / 2.0f)) / M_PI) * (2.0f * atan(sin(x / 2.0f) / d) / M_PI) * smoothAttack;
 }
 
 // Time, base note, range, notes per second, mod
