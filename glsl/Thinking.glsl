@@ -461,5 +461,5 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
 vec2 mainSound(int samp, float time) {
 	Song song = getSong(time);
-	return song.drums + song.bass + song.lead + song.voice;
+	return 0.75 * (song.drums + song.bass + song.lead + song.voice);
 }
