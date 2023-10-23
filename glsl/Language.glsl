@@ -3,19 +3,19 @@
 // COMMON
 
 const float BPM = 128.0;
-const float STEP = 60.0 / BPM;
-const float LOOPSTEPS = 96.0;
+const float SPB = 60.0 / BPM;
+const float LOOPS = 96.0;
 const float MIDIOFFSET = 69.0;
 
 // BUFFER A
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	vec2 uv = fragCoord / iResolution.xy;
-	float time = mod(iTime, STEP * LOOPSTEPS);
-	if (mod(time, STEP) < 0.05 || time >= STEP * 32.0) {
+	float time = mod(iTime, SPB * LOOPS);
+	if (mod(time, SPB) < 0.05 || time >= SPB * 32.0) {
 		vec4 vid1 = texture(iChannel0, uv);
 		vec4 vid2 = texture(iChannel2, uv);
-		fragColor = mod(time * 0.5, STEP * 2.0) < STEP ? vid1 : vid2;
+		fragColor = mod(time * 0.5, SPB * 2.0) < SPB ? vid1 : vid2;
 	} else {
 		fragColor = texture(iChannel1, uv);
 	}
@@ -48,9 +48,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	const vec2 center = vec2(0.5);
 	float dist = distance(uv, center);
 	vec2 dir = uv - center;
-	float time = mod(iTime, STEP * LOOPSTEPS);
-	float beat = mod(time, STEP);
-	float lens = time >= STEP * 32.0 ? 0.3 / beat : max(0.0, 0.75 - beat);
+	float time = mod(iTime, SPB * LOOPS);
+	float beat = mod(time, SPB);
+	float lens = time >= SPB * 32.0 ? 0.3 / beat : max(0.0, 0.75 - beat);
 	vec4 color = vec4(uv, 0.5, 0.0) * dist * lens;
 	fragColor = texture(iChannel0, uv - dist * dir * lens) + color;
 }
@@ -60,10 +60,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 const float PI = 3.1415926;
 const float TAU = 6.28318530;
 
-#define NOTE(note, start, end) if (time >= start * STEP && time < end * STEP) result += note;
+#define NOTE(note, start, end) if (time >= start * SPB && time < end * SPB) result += note;
 #define NOTE_SAW(note, start, end) NOTE(superSaw(noteFreq(note), time, voices, detune) * amplitude, start, end);
-#define NOTE_SINE(note, start, end) NOTE(superSine(noteFreq(note), time - start * STEP, voices, detune) * amplitude, start, end);
-#define NOTE_BASS(note, start, end) NOTE(sine(noteFreq(note), time - start * STEP, 0.0, fade) * amplitude, start, end);
+#define NOTE_SINE(note, start, end) NOTE(superSine(noteFreq(note), time - start * SPB, voices, detune) * amplitude, start, end);
+#define NOTE_BASS(note, start, end) NOTE(sine(noteFreq(note), time - start * SPB, 0.0, fade) * amplitude, start, end);
 
 // 1D hash, from https://www.shadertoy.com/view/4djSRW
 float hash(float p) {
@@ -138,7 +138,7 @@ vec2 snare(float time, float freq, float fade) {
 }
 
 vec2 leadBass(float time, float voices, float detune, float amplitude) {
-	time = mod(time, STEP * 16.0);
+	time = mod(time, SPB * 16.0);
 	vec2 result = vec2(0.0);
 	NOTE_SAW(57.0, 0.0, 2.0);
 	NOTE_SAW(38.0, 0.0, 2.0);
@@ -162,11 +162,11 @@ vec2 leadBass(float time, float voices, float detune, float amplitude) {
 }
 
 vec2 leadChords(float time, float voices, float detune, float amplitude, float offset) {
-	time = mod(time, STEP * 16.0);
+	time = mod(time, SPB * 16.0);
 	vec2 result = vec2(0.0);
 	
 	// Optimize since every 2nd note is the same
-	if (mod(time + STEP * offset, STEP) >= STEP * 0.5) {
+	if (mod(time + SPB * offset, SPB) >= SPB * 0.5) {
 		result += superSaw(noteFreq(64.0), time, voices, detune) * amplitude;
 	}
 	
@@ -190,7 +190,7 @@ vec2 leadChords(float time, float voices, float detune, float amplitude, float o
 }
 
 vec2 leadSine(float time, float voices, float detune, float amplitude) {
-	time = mod(time, STEP * 32.0);
+	time = mod(time, SPB * 32.0);
 	vec2 result = vec2(0.0);
 	NOTE_SINE(88.0, 0.0, 1.5);
 	NOTE_SINE(100.0, 0.0, 1.5);
@@ -228,7 +228,7 @@ vec2 leadSine(float time, float voices, float detune, float amplitude) {
 }
 
 vec2 bass(float time, float fade, float amplitude) {
-	time = mod(time, STEP * 16.0);
+	time = mod(time, SPB * 16.0);
 	vec2 result = vec2(0.0);
 	NOTE_BASS(38.0, 0.5, 1.0);
 	NOTE_BASS(38.0, 1.0, 1.5);
@@ -261,9 +261,9 @@ vec2 bass(float time, float fade, float amplitude) {
 }
 
 vec2 cymbals(float time, float amplitude) {
-	//vec2 pan = mod(time + STEP * 0.5, STEP * 2.0) > STEP ? vec2(0.5, 1.0) : vec2(1.0, 0.5);
-	vec2 pan = mod(time, STEP * 2.0) > STEP ? vec2(0.5, 1.0) : vec2(1.0, 0.5);
-	return noiseHit(mod(time + STEP * 0.5, STEP), 3.0) * amplitude * pan;
+	//vec2 pan = mod(time + SPB * 0.5, SPB * 2.0) > SPB ? vec2(0.5, 1.0) : vec2(1.0, 0.5);
+	vec2 pan = mod(time, SPB * 2.0) > SPB ? vec2(0.5, 1.0) : vec2(1.0, 0.5);
+	return noiseHit(mod(time + SPB * 0.5, SPB), 3.0) * amplitude * pan;
 }
 
 // For debugging
@@ -273,29 +273,29 @@ vec2 metronome(float time) {
 
 vec2 mainSound(int samp, float iTime) {
 	
-	float time = mod(iTime, STEP * LOOPSTEPS);
-	float beat = mod(time, STEP);
+	float time = mod(iTime, SPB * LOOPS);
+	float beat = mod(time, SPB);
 	vec2 result = vec2(0.0);
 	float sidechain = 1.0;
 	
-	if (time >= STEP * 16.0) {
+	if (time >= SPB * 16.0) {
 		sidechain = 1.0 - exp(-6.0 * beat);
 		result += cymbals(time, 0.4);
 	}
 	
-	if (time >= STEP * 32.0) {
+	if (time >= SPB * 32.0) {
 		result += kick(beat, noteFreq(33.0)) * 0.4;
 		result += leadSine(time, 2.0, 4.0, 0.35);
-		result += snare(mod(time + STEP, STEP * 2.0), noteFreq(21.0), 4.0);
+		result += snare(mod(time + SPB, SPB * 2.0), noteFreq(21.0), 4.0);
 		result += bass(time, 6.0, 0.6 * sidechain);
 	}
 	
-	if (time < STEP * 30.5 || time >= STEP * 32.0) {
+	if (time < SPB * 30.5 || time >= SPB * 32.0) {
 		result += leadBass(time, 1.0, 0.5, 0.4 * sidechain);
 	}
 	
 	// Make it more funky every 2nd loop
-	float funk = int(iTime / (STEP * LOOPSTEPS)) % 2 == 0 ? 0.5 : 0.0;
+	float funk = int(iTime / (SPB * LOOPS)) % 2 == 0 ? 0.5 : 0.0;
 	result += leadChords(time, 2.0, 0.5, 0.6 * sidechain, funk);
 	
 	//result += metronome(beat);

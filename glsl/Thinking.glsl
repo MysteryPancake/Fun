@@ -3,7 +3,7 @@
 // COMMON
 
 const float BPM = 112.0;
-const float STEP = 60.0 / BPM;
+const float SPB = 60.0 / BPM; // Seconds per beat
 
 // This song uses nonstandard tuning (50 cents above 440 Hertz)
 const float TUNING = 440.0;
@@ -58,7 +58,7 @@ float coloredNoise(float time, float freq, float bandwidth) {
 
 // Used for bass and lead synths
 vec2 timedSaw(float freq, float time, float start, float end, float seed) {
-	if (time >= start * STEP && time < end * STEP) {
+	if (time >= start * SPB && time < end * SPB) {
 		vec2 phase = vec2(hash(seed * 1024.0));
 		// Keep bass mostly mono
 		if (freq > 45.0) {
@@ -71,10 +71,10 @@ vec2 timedSaw(float freq, float time, float start, float end, float seed) {
 
 // Used for voices
 vec2 timedTri(float freq, float time, float start, float end, float seed) {
-	if (time >= start * STEP && time < end * STEP) {
+	if (time >= start * SPB && time < end * SPB) {
 		vec2 phase = vec2(hash(1024.0 * seed + 2048.0 * start), hash(2048.0 * seed + 1024.0 * start));
 		float hertz = noteFreq(freq);
-		float timeOffset = time - start * STEP;
+		float timeOffset = time - start * SPB;
 		// Increase vibrato over time
 		float vibrato = sin(time * freq * 0.8) * 1.6 * timeOffset;
 		// Layer a triangle and saw wave, makes a string-like sound
@@ -99,8 +99,8 @@ vec2 sawChord(float time, float start, float a, float b, float c, float d, float
 vec2 lead(float time, float a, float b, float c, float d, float e, float f, float g, float h, float i, float j, float k, float l, float m, float n, float o) {
 	vec2 result = vec2(0.0);
 	// 3 chord repetition, optimized
-	if (time <= STEP * 1.5) {
-		float t = mod(time, STEP * 0.5);
+	if (time <= SPB * 1.5) {
+		float t = mod(time, SPB * 0.5);
 		result += sawChord(t, 0.0, a, b, c, d, e);
 	}
 	
@@ -284,45 +284,45 @@ Song getSong(float time) {
 	// Temporary variable for sidechain
 	float t = 0.0;
 	
-	if (time >= STEP * 15.2) {
+	if (time >= SPB * 15.2) {
 		// Snare 1
-		t = mod(time - STEP * 3.2, STEP * 4.0);
+		t = mod(time - SPB * 3.2, SPB * 4.0);
 		song.drums += snare(t);
 		song.sidechain *= sidechain(t, 6.0);
 		// Bass drop
-		if (time < STEP * 16.0) {
+		if (time < SPB * 16.0) {
 			song.bass += clamp(drop(t, 70.0, 0.2, 40.0) * 5.0, -0.7, 0.7) * song.sidechain;
 		}
 	}
 	
 	// Drum fill, surrounds snare 1
-	t = mod(time, STEP * 16.0) - STEP * 14.7;
+	t = mod(time, SPB * 16.0) - SPB * 14.7;
 	if (t > 0.0) {
 		song.drums += kick(t) * 0.45;
 		song.sidechain *= sidechain(t, 8.0);
-		t -= STEP * 0.34;
+		t -= SPB * 0.34;
 		if (t > 0.0) {
 			song.drums += kick(t) * 0.5;
 			song.sidechain *= sidechain(t, 8.0);
 		}
-		t -= STEP * 0.5;
+		t -= SPB * 0.5;
 		if (t > 0.0) {
 			song.drums += kick(t) * 0.55;
 			song.sidechain *= sidechain(t, 8.0);
 		}
 	}
 	
-	if (time >= STEP * 16.0) {
+	if (time >= SPB * 16.0) {
 		// Add more delay after the intro
 		leadEchos = 7;
 		
 		// Kick
-		t = mod(time, STEP * 4.0);
+		t = mod(time, SPB * 4.0);
 		song.drums += kick(t) * 0.7;
 		song.sidechain *= sidechain(t, 5.0);
 
 		// Snare 2
-		t = mod(time - STEP * 1.2, STEP * 4.0);
+		t = mod(time - SPB * 1.2, SPB * 4.0);
 		song.drums += snare(t);
 		song.sidechain *= sidechain(t, 6.0);
 
@@ -334,13 +334,13 @@ Song getSong(float time) {
 			float fade = 1.0 - float(i) / 3.0;
 			// Ping-pong panning, pans each echo left then right
 			vec2 pan = i <= 0 ? vec2(1.0) : (i % 2 == 0 ? vec2(1.0, 0.5) : vec2(0.5, 1.0));
-			song.bass += bass1(mod(time - STEP * 16.0, STEP * 32.0) - delay) * song.sidechain * 0.65 * fade * pan;
-			song.bass += bass2(mod(time, STEP * 32.0) - delay) * song.sidechain * 0.65 * fade * pan;
+			song.bass += bass1(mod(time - SPB * 16.0, SPB * 32.0) - delay) * song.sidechain * 0.65 * fade * pan;
+			song.bass += bass2(mod(time, SPB * 32.0) - delay) * song.sidechain * 0.65 * fade * pan;
 		}
 	}
 	
 	// Wiggle volume a bit to add variety
-	float tremolo = 1.0 - sin(time / STEP * TAU) * 0.1;
+	float tremolo = 1.0 - sin(time / SPB * TAU) * 0.1;
 	
 	// Lead voices
 	for (int i = 0; i <= 2; i++) {
@@ -351,19 +351,19 @@ Song getSong(float time) {
 		// Ping-pong panning, pans each echo right then left
 		vec2 pan = i <= 0 ? vec2(1.0) : (i % 2 == 1 ? vec2(1.0, 0.0) : vec2(0.0, 1.0));
 		// RIP compilation time
-		if (time >= STEP * 16.0) {
-			if (mod(time - STEP * 16.0, STEP * 48.0) >= STEP * 32.0) {
-				song.voice += voice3(mod(time, STEP * 8.0) - delay) * fade * pan * song.sidechain * tremolo;
+		if (time >= SPB * 16.0) {
+			if (mod(time - SPB * 16.0, SPB * 48.0) >= SPB * 32.0) {
+				song.voice += voice3(mod(time, SPB * 8.0) - delay) * fade * pan * song.sidechain * tremolo;
 			} else {
-				song.voice += voice2(mod(time, STEP * 16.0) - delay) * fade * pan * song.sidechain * tremolo;
+				song.voice += voice2(mod(time, SPB * 16.0) - delay) * fade * pan * song.sidechain * tremolo;
 			}
-		} else if (time >= STEP * 8.0) {
-			song.voice += voice1(mod(time, STEP * 4.0) - delay) * fade * pan * song.sidechain * tremolo;
+		} else if (time >= SPB * 8.0) {
+			song.voice += voice1(mod(time, SPB * 4.0) - delay) * fade * pan * song.sidechain * tremolo;
 		}
 	}
 	
 	// Cut lead delay every few bars for variety
-	if (time >= STEP * 64.0 && mod(time, STEP * 64.0) < STEP * 32.0) leadEchos = 0;
+	if (time >= SPB * 64.0 && mod(time, SPB * 64.0) < SPB * 32.0) leadEchos = 0;
 	
 	// Lead synths
 	for (int i = 0; i <= leadEchos; i++) {
@@ -375,21 +375,21 @@ Song getSong(float time) {
 		vec2 pan = i <= 0 ? vec2(1.0) : (i % 2 == 0 ? vec2(1.0, 0.4) : vec2(0.4, 1.0));
 		
 		// First bar
-		song.lead += lead(mod(time, STEP * 8.0) - delay,
+		song.lead += lead(mod(time, SPB * 8.0) - delay,
 			45.0, 52.0, 60.0, 64.0, 67.0,
 			47.0, 54.0, 57.0, 62.0, 66.0,
 			47.0, 55.0, 57.0, 62.0, 66.0
 		) * song.sidechain * 0.2 * fade * pan * tremolo;
 		
 		// Repeats after first bar (1st time)
-		song.lead += lead(mod(time - STEP * 4.0, STEP * 16.0) - delay,
+		song.lead += lead(mod(time - SPB * 4.0, SPB * 16.0) - delay,
 			52.0, 59.0, 59.0, 64.0, 67.0,
 			52.0, 57.0, 57.0, 62.0, 66.0,
 			52.0, 57.0, 57.0, 62.0, 66.0
 		) * song.sidechain * 0.2 * fade * pan * tremolo;
 		
 		// Repeats after first bar (2nd time)
-		song.lead += lead(mod(time - STEP * 12.0, STEP * 16.0) - delay,
+		song.lead += lead(mod(time - SPB * 12.0, SPB * 16.0) - delay,
 			49.0, 56.0, 59.0, 64.0, 68.0,
 			49.0, 56.0, 56.0, 59.0, 64.0,
 			49.0, 56.0, 57.0, 59.0, 64.0
@@ -397,16 +397,16 @@ Song getSong(float time) {
 	}
 	
 	// Hats, first panned right, second panned left
-	song.drums += noiseHit(mod(time, STEP * 0.5), 36.0) * 0.45 * vec2(0.6, 1.0);
-	song.drums += noiseHit(mod(time - STEP / 6.0, STEP * 0.5), 36.0) * 0.49 * vec2(1.0, 0.6);
+	song.drums += noiseHit(mod(time, SPB * 0.5), 36.0) * 0.45 * vec2(0.6, 1.0);
+	song.drums += noiseHit(mod(time - SPB / 6.0, SPB * 0.5), 36.0) * 0.49 * vec2(1.0, 0.6);
 	
 	// More hats, adds more high end
-	if (time > STEP * 32.75) {
-		float offset = time + STEP * 0.25;
-		t = mod(offset, STEP);
+	if (time > SPB * 32.75) {
+		float offset = time + SPB * 0.25;
+		t = mod(offset, SPB);
 		vec2 hat = vec2(coloredNoise(t, 13000.0, 6000.0), coloredNoise(t, 13000.0, 6200.0));
 		// Ping-pong panning, pans left then right
-		vec2 pan = mod(offset, STEP * 2.0) >= STEP ? vec2(1.0, 0.3) : vec2(0.3, 1.0);
+		vec2 pan = mod(offset, SPB * 2.0) >= SPB ? vec2(1.0, 0.3) : vec2(0.3, 1.0);
 		song.drums += hat * exp(-5.0 * t) * pan * song.sidechain * 0.5;
 	}
 	
@@ -414,12 +414,12 @@ Song getSong(float time) {
 	const float bandwidth = 10000.0;
 	
 	// Riser
-	if (time < STEP * 16.0) {
-		song.drums += coloredNoise(time, freq, bandwidth) * exp(0.8 * (time - STEP * 16.0)) * song.sidechain * 0.35;
+	if (time < SPB * 16.0) {
+		song.drums += coloredNoise(time, freq, bandwidth) * exp(0.8 * (time - SPB * 16.0)) * song.sidechain * 0.35;
 	}
 	// Faller
-	if (time > STEP * 16.0) {
-		song.drums += coloredNoise(time, freq, bandwidth) * exp(STEP * 16.0 - time) * song.sidechain * 0.3;
+	if (time > SPB * 16.0) {
+		song.drums += coloredNoise(time, freq, bandwidth) * exp(SPB * 16.0 - time) * song.sidechain * 0.3;
 	}
 	
 	return song;
@@ -435,7 +435,7 @@ vec3 drawTrack(vec2 uv, vec2 samp, float offset, vec3 color) {
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	vec2 uv = fragCoord / iResolution.xy;
-	Song song = getSong(iTime + (uv.x - 1.0) * STEP * 0.5);
+	Song song = getSong(iTime + (uv.x - 1.0) * SPB * 0.5);
 	Song songNow = getSong(iTime);
 	float boom = 1.0 - songNow.sidechain;
 	

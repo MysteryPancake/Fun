@@ -2,12 +2,12 @@
 
 // COMMON
 
-const float PI = 3.1415926;
+const float PI = 3.1415926538;
 const float PI_4 = PI * 0.25;
-const float TAU = 6.28318530;
+const float TAU = PI * 2.0;
 
 const float BPM = 200.0;
-const float STEP = 60.0 / BPM;
+const float SPB = 60.0 / BPM; // Seconds per beat
 
 // IMAGE
 
@@ -50,14 +50,14 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	
 	// Start with white background
 	fragColor = vec4(1.0);
-	float id = floor(iTime / STEP / 4.0);
+	float id = floor(iTime / SPB / 4.0);
 	
 	// Draw each note
 	for (int i = 0; i < 12; i++) {
 		float phase = float(i) / 12.0 * TAU;
-		float radius = 5.0 - sin(PI_4 * (float(i % 2) + iTime) / STEP) * 0.25;
+		float radius = 5.0 - sin(PI_4 * (float(i % 2) + iTime) / SPB) * 0.25;
 		if (id >= 16.0) {
-			radius -= mod(iTime, STEP * 2.0);
+			radius -= mod(iTime, SPB * 2.0);
 		}
 		vec2 offset = vec2(cos(phase), sin(phase)) * radius;
 		
@@ -122,13 +122,13 @@ float noise(float s) {
 
 // From https://www.shadertoy.com/view/sls3WM
 float coloredNoise(float time, float freq, float Q) {
-	return sin(TAU * freq * fract(time)) * noise(time * Q);
+	return sin(2.0 * PI * freq * fract(time)) * noise(time * Q);
 }
 
 // From https://www.shadertoy.com/view/sls3WM
 float kick(float time) {
 	const float df = 512.0, dftime = 0.01, freq = 60.0;
-	float phase = TAU * (freq * time - df * dftime * exp(-time / dftime));
+	float phase = 2.0 * PI * (freq * time - df * dftime * exp(-time / dftime));
 	float body = sin(phase) * smoothstep(0.3, 0.0, time) * 1.5;
 	float click = coloredNoise(time, 8000.0, 2000.0) * smoothstep(0.007, 0.0, time);
 	return body + click;
@@ -146,25 +146,25 @@ vec2 chord(float time, float offset, float minor, float funk, float hats) {
 	vec2 result = epiano(noteFreq(bass + mod(offset, 12.0) - 24.0), time, 2.0);
 	
 	// Root (bass plus 2 octaves)
-	result += epiano(noteFreq(bass + mod(offset, 12.0)), time - STEP * 0.5, 1.25);
+	result += epiano(noteFreq(bass + mod(offset, 12.0)), time - SPB * 0.5, 1.25);
 	// Third
-	result += epiano(noteFreq(bass + mod(offset + 4.0 - minor, 12.0)), time - STEP * funk, 1.5);
+	result += epiano(noteFreq(bass + mod(offset + 4.0 - minor, 12.0)), time - SPB * funk, 1.5);
 	// Fifth
-	result += epiano(noteFreq(bass + mod(offset + 7.0, 12.0)), time - STEP * 0.5, 1.25);
+	result += epiano(noteFreq(bass + mod(offset + 7.0, 12.0)), time - SPB * 0.5, 1.25);
 	// Seventh
-	result += epiano(noteFreq(bass + mod(offset + 11.0 - minor, 12.0)), time - STEP * funk, 1.5);
+	result += epiano(noteFreq(bass + mod(offset + 11.0 - minor, 12.0)), time - SPB * funk, 1.5);
 	// Ninth
-	result += epiano(noteFreq(bass + mod(offset + 14.0, 12.0)), time - STEP * funk, 1.5);
+	result += epiano(noteFreq(bass + mod(offset + 14.0, 12.0)), time - SPB * funk, 1.5);
 	
 	// Hi-hats
-	result += noiseHit(mod(time, STEP), 30.0) * hats;
+	result += noiseHit(mod(time, SPB), 30.0) * hats;
 	return result;
 }
 
 vec2 mainSound(int samp, float time) {
 
 	// Unique identifier for current beat
-	float id = floor(time / STEP / 4.0);
+	float id = floor(time / SPB / 4.0);
 	// Circle of fifths, move up a fifth each step (7 MIDI notes)
 	float offset = id * 7.0;
 	// Play a minor chord for every 3 major chords
@@ -174,15 +174,15 @@ vec2 mainSound(int samp, float time) {
 	// Add hi-hats after a bit
 	float hats = id >= 8.0 ? 0.08 : 0.0;
 	
-	float t = mod(time, STEP * 4.0);
+	float t = mod(time, SPB * 4.0);
 	vec2 result = chord(t, offset, minor, funk, hats);
 	// Two tap ping-pong delay
-	result += vec2(0.5, 0.2) * chord(t - STEP * 0.5, offset, minor, funk, hats);
-	result += vec2(0.05, 0.1) * chord(t - STEP, offset, minor, funk, hats);
+	result += vec2(0.5, 0.2) * chord(t - SPB * 0.5, offset, minor, funk, hats);
+	result += vec2(0.05, 0.1) * chord(t - SPB, offset, minor, funk, hats);
 	
 	// Kick drum
 	if (id >= 16.0) {
-		result += kick(mod(time, STEP * 2.0)) * 0.45;
+		result += kick(mod(time, SPB * 2.0)) * 0.45;
 	}
 	return result;
 }
