@@ -128,7 +128,7 @@ Song getSong(float time, int reverb) {
 		float offsetScale = variety ? 0.5 : 1.2;
 		float timeScale = variety ? 2.0 : 1.0;
 		
-		// Convolution reverb doesn't have a time offset, but it sounds better with it
+		// Convolution reverb doesn't have a random time offset, but it sounds better with it
 		timeOffset += hash11(timeOffset * 126.7) * offsetScale;
 		
 		song.reverb += leadSynth(time * timeScale - timeOffset) * impulse(timeOffset);
