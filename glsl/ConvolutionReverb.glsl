@@ -88,7 +88,7 @@ float leadSynth(float time) {
 	);
 	float beatTime = 1.5 * time / SPB;
 	int note = notes[int(abs(beatTime)) % notes.length()];
-	float volume = step(fract(beatTime), 0.5);
+	float volume = step(fract(beatTime), 0.5 + sin(time * TAU * 0.125 / SPB) * 0.05);
 	return waveSaw(noteFreq(note), time) * volume;
 }
 
@@ -105,7 +105,7 @@ float leadBass(float time) {
 	);
 	float beatTime = 1.5 * time / SPB;
 	int bass = notes[int(abs(beatTime)) % notes.length()];
-	float volume = step(fract(beatTime - 0.5), 0.3);
+	float volume = step(fract(beatTime - 0.5), 0.4 + cos(time * TAU * 0.125 / SPB) * 0.1);
 	return waveSaw(noteFreq(bass), time) * volume;
 }
 
