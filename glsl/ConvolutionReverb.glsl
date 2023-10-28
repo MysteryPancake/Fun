@@ -35,7 +35,7 @@ vec2 hash22(vec2 p) {
 	return fract((p3.xx+p3.yz)*p3.zy);
 }
 
-// Impulse for convolution, this will be sampled NUM_SAMPLES times
+// Impulse for convolution, this will be sampled REVERB_SAMPLES times
 vec2 impulse(float time) {
 	time *= iSampleRate;
 	return hash22(vec2(time * 452.3, time * 274.6)) * 2.0 - 1.0;
