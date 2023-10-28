@@ -117,10 +117,10 @@ struct Song {
 	float sidechain;
 };
 
-Song getSong(float time) {
+Song getSong(float time, int reverb) {
 	Song song;
 	song.reverb = vec2(0.0);
-	for (int i = 0; i < REVERB_SAMPLES; i++) {
+	for (int i = 0; i < reverb; i++) {
 		float timeOffset = float(i) / iSampleRate;
 		
 		// Butcher the settings every 2nd time for variety
@@ -154,8 +154,8 @@ vec3 drawTrack(vec2 uv, vec2 samp, float offset, vec3 color) {
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	vec2 uv = fragCoord / iResolution.xy;
-	Song song = getSong(iTime + (uv.x - 1.0) * SPB * 0.1);
-	Song songNow = getSong(iTime);
+	Song song = getSong(iTime + (uv.x - 1.0) * SPB * 0.1, REVERB_SAMPLES / 4);
+	Song songNow = getSong(iTime, 0);
 	float boom = 1.0 - songNow.sidechain;
 	
 	// Draw foreground
@@ -176,7 +176,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 // SOUND
 
 vec2 mainSound(int samp, float time) {
-	Song song = getSong(time);
+	Song song = getSong(time, REVERB_SAMPLES);
 	vec2 dry = (song.leads + song.bass) * song.sidechain + song.drums;
 	vec2 wet = song.reverb * song.sidechain;
 	return mix(dry, wet, WETNESS) * 0.45;
