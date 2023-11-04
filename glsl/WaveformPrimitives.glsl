@@ -7,7 +7,7 @@ float waveSine(float freq, float time) {
 	return sin(6.28318530 * freq * time);
 }
 
-// Square wave. Used ceil() instead of sign() so 0 is rounded up.
+// Square wave. ceil() has less error than sign().
 float waveSquare(float freq, float time) {
 	return ceil(0.5 - fract(freq * time)) * 2.0 - 1.0;
 }
