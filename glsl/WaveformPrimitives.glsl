@@ -1,3 +1,5 @@
+// Available at https://www.shadertoy.com/view/clXSR7
+
 // COMMON
 
 // Sine wave. The constant here is Tau (2 * PI)
