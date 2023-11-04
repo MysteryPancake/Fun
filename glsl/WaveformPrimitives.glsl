@@ -36,8 +36,8 @@ vec3 drawWave(float x, float p) {
 	const vec3 green = vec3(0.0, 1.0, 0.0);
 	
 	vec3 color = (x > 0.0 ? green : red) * smoothstep(1.5, 1.0, abs(p));
-	float mask = 0.04 / min(abs(p - 1.0), abs(p + 1.0));
-	float wave = 0.06 / abs(x - p);
+	float mask = 0.01 / min(abs(p - 1.0), abs(p + 1.0));
+	float wave = 0.04 / abs(x - p);
 	return color * (min(mask, 1.0) * 0.3 + 0.15) + wave;
 }
 
