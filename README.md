@@ -148,11 +148,11 @@ Smarter continuous simulation of a queue of customers, made for a problem solvin
 
 <img src="./images/queuevisualiser.png" width="500">
 
-### [Raw Audio Player](https://mysterypancake.github.io/Fun/html/rawaudioplayer)
+### [Raw Audio Player](https://mysterypancake.github.io/Fun/html/rawaudio)
 
 Plays an audio signal stored as a string of numbers.
 
-<img src="./images/rawaudioplayer.png" width="500">
+<img src="./images/rawaudio.png" width="500">
 
 ### [Resampling Demo](https://mysterypancake.github.io/Fun/html/resamplingdemo)
 
