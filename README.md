@@ -90,7 +90,7 @@ The latest and greatest in frog drawing technology, made for Joseph Tonien's web
 
 ### [Hair Blower](https://mysterypancake.github.io/Fun/html/hairblower)
 
-Ultra realistic hair blowing simulation definitely not made in 5 minutes. Better than Vellum in Houdini?
+Ultra realistic hair blowing simulation definitely not made in 5 minutes. 10/10 better than Vellum in Houdini
 
 <img src="./images/hairblower.png" width="500">
 
