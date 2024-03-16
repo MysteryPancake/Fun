@@ -89,7 +89,7 @@ My old horribly broken method of smoothing with lerp. [For much better methods, 
 
 Trails a point travelling in a random direction, similar to [Porter Robinson's music videos.](https://www.youtube.com/watch?v=ahEovqzpLeU)
 
-I think this is a form of [simple brownian motion](https://www.youtube.com/watch?v=ZNzoTGv_XiQ).
+This is a form of [simple brownian motion](https://www.youtube.com/watch?v=ZNzoTGv_XiQ).
 
 <img src="./images/portertrail.png" width="500">
 
@@ -109,7 +109,14 @@ This was originally designed for Cinema Sense, an app for blind people to experi
 
 - [Queue Simulator](https://mysterypancake.github.io/Fun/html/queuesimulator)
 - [Queue Visualiser](https://mysterypancake.github.io/Fun/html/queuevisualiser)
-- [Resampling Demo](https://mysterypancake.github.io/Fun/html/resamplingdemo)
+
+## [Resampling Demo](https://mysterypancake.github.io/Fun/html/resamplingdemo)
+
+Draws and plays many signal interpolation methods. I made this for debugging while making an audio plugin.
+
+Sinc is the highest quality option for audio, but also the most expensive.
+
+<img src="./images/resamplingdemo.png" width="500">
 
 ## [Resize Calculator](https://mysterypancake.github.io/Fun/html/resizecalculator)
 
