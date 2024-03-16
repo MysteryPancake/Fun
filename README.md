@@ -134,4 +134,18 @@ Made to cheat in daily Sudoku challenges, inspired by Ellen.
 
 <img src="./images/sudoku.png" width="500">
 
-- [UML to Java Converter](https://mysterypancake.github.io/Fun/html/umltojava)
+## [UML to Java Converter](https://mysterypancake.github.io/Fun/html/umltojava)
+
+Converts UML syntax to Java code, filling in constructors, getters and setters where possible using fuzzy matching.
+
+Supports basic syntax like `+`, `-`, `#`, `getVar()`, `changeVar()`, `setVar()`, and variables declared as `type`, `name: type` or `type name`
+
+<img src="./images/umltojava.png" width="500">
+
+Supports some advanced syntax like `<<read only>>`, `{read only}`, `/AbstractClass/`, `<<abstract>>`, `<<interface>>`, `__staticMethod()__`
+
+<img src="./images/umltojava2.png" width="500">
+
+Also has basic support for `<<enumerator>>` and `<<enum>>`:
+
+<img src="./images/umltojava3.png" width="500">
