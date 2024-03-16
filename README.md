@@ -1,7 +1,7 @@
 # Fun
 Small fun scripts I like playing with.
 
-## Websites
+# Websites
 - [Arithmetic Sequence Calculator](https://mysterypancake.github.io/Fun/html/arithmetic)
 - [Random Audio Splicer](https://mysterypancake.github.io/Fun/html/audiosplicer)
 - [Boolean Comparisons](https://mysterypancake.github.io/Fun/html/booleancomparisons)
@@ -16,7 +16,13 @@ Small fun scripts I like playing with.
 - [Fake Login](https://mysterypancake.github.io/Fun/html/fakelogin)
 - [Frog Drawer](https://mysterypancake.github.io/Fun/html/frogdrawer)
 - [Hair Blower](https://mysterypancake.github.io/Fun/html/hairblower)
-- [Image to UML](https://mysterypancake.github.io/Fun/html/imagetouml)
+
+## [Image to UML](https://mysterypancake.github.io/Fun/html/imagetouml)
+
+Converts an image to a UMLet diagram. It recreates the image using coloured rectangle nodes for each pixel.
+
+<img src="./images/imagetouml.png" width="600">
+
 - [K-Nearest Neighbors](https://mysterypancake.github.io/Fun/html/knearestneighbors)
 - [Lerp Smoother](https://mysterypancake.github.io/Fun/html/lerpsmoother)
 - [Porter Trail](https://mysterypancake.github.io/Fun/html/portertrail)
