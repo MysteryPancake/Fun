@@ -89,7 +89,7 @@
 					for (let sample = 0; sample < outputData.length; sample++) {
 						const originalSample = inputData[sample];
 						// Round signal to 1 or -1, infinite amplification
-						const distorted = originalSample === 0 ? 0 : (originalSample > 0 ? 1 : -1);
+						const distorted = Math.sign(originalSample);
 						outputData[sample] = (distorted * mixRatio) + (originalSample * (1 - mixRatio));
 					}
 				}
