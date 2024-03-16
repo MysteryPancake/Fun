@@ -43,10 +43,29 @@ Did you know you can run simple code in CSS? Math totally works, just use `count
 
 <img src="./images/cssprogram.png" width="500">
 
-- [Cursor Draw](https://mysterypancake.github.io/Fun/html/cursordraw)
-- [Cursor Particles](https://mysterypancake.github.io/Fun/html/cursorparticles)
-- [Cursor Physics](https://mysterypancake.github.io/Fun/html/cursorphysics)
-- [Cursor Trail](https://mysterypancake.github.io/Fun/html/cursortrail)
+### [Cursor Draw](https://mysterypancake.github.io/Fun/html/cursordraw)
+
+Draws a trail as you move the cursor around the page.
+
+<img src="./images/cursordraw.png" width="500">
+
+### [Cursor Particles](https://mysterypancake.github.io/Fun/html/cursorparticles)
+
+Spawns star particles as you move the cursor around the page.
+
+<img src="./images/cursorparticles.png" width="500">
+
+### [Cursor Physics](https://mysterypancake.github.io/Fun/html/cursorphysics)
+
+Spawns bouncing balls as you move the cursor around the page.
+
+<img src="./images/cursorphysics.png" width="500">
+
+### [Cursor Trail](https://mysterypancake.github.io/Fun/html/cursortrail)
+
+Spawns a trail of stars as you move the cursor around the page.
+
+<img src="./images/cursortrail.png" width="500">
 
 ### [Earrape](https://mysterypancake.github.io/Fun/html/earrape)
 
