@@ -110,6 +110,21 @@ This was originally designed for Cinema Sense, an app for blind people to experi
 - [Queue Simulator](https://mysterypancake.github.io/Fun/html/queuesimulator)
 - [Queue Visualiser](https://mysterypancake.github.io/Fun/html/queuevisualiser)
 - [Resampling Demo](https://mysterypancake.github.io/Fun/html/resamplingdemo)
-- [Resize Calculator](https://mysterypancake.github.io/Fun/html/resizecalculator)
-- [Sudoku Solver](https://mysterypancake.github.io/Fun/html/sudoku)
+
+## [Resize Calculator](https://mysterypancake.github.io/Fun/html/resizecalculator)
+
+Calculates how much an image needs to be shrunk to fit under a certain number of megapixels.
+
+I made this since Google Docs has an image size limit of 25 megapixels.
+
+<img src="./images/resizecalculator.png" width="500">
+
+## [Brute Force Sudoku Solver](https://mysterypancake.github.io/Fun/html/sudoku)
+
+Solves easy and medium Sudoku boards with brute force elimination based on the Sudoku rules.
+
+Made to cheat in daily Sudoku challenges, inspired by Ellen.
+
+<img src="./images/sudoku.png" width="500">
+
 - [UML to Java Converter](https://mysterypancake.github.io/Fun/html/umltojava)
