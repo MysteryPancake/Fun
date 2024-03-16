@@ -87,7 +87,15 @@ My old horribly broken method of smoothing with lerp. [For much better methods, 
 
 - [Porter Trail](https://mysterypancake.github.io/Fun/html/portertrail)
 - [PowerPoint](https://mysterypancake.github.io/Fun/html/powerpoint)
-- [Pulse Width Modulation](https://mysterypancake.github.io/Fun/html/pwm)
+
+## [Pulse Width Modulation](https://mysterypancake.github.io/Fun/html/pwm)
+
+Calculates interpolated windows of pulse width modulation, correcting the phase offset between windows.
+
+This was originally designed for Cinema Sense, an app for blind people to experience films through other senses (like vibration).
+
+<img src="./images/pwm.png" width="500">
+
 - [Queue Simulator](https://mysterypancake.github.io/Fun/html/queuesimulator)
 - [Queue Visualiser](https://mysterypancake.github.io/Fun/html/queuevisualiser)
 - [Resampling Demo](https://mysterypancake.github.io/Fun/html/resamplingdemo)
