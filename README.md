@@ -2,7 +2,15 @@
 Small fun scripts I like playing with.
 
 # Websites
-- [Arithmetic Sequence Calculator](https://mysterypancake.github.io/Fun/html/arithmetic)
+
+## [Arithmetic Sequence Calculator](https://mysterypancake.github.io/Fun/html/arithmetic)
+
+Calculates the formulas for an arithmetic sequence given 2 terms. In other words, it calculates a line through 2 points.
+
+These formulas are actually inverse lerp and lerp. [See here for more info!](https://github.com/MysteryPancake/Houdini-Fun/blob/main/Lerp.md)
+
+<img src="./images/arithmetic.png" width="500">
+
 - [Random Audio Splicer](https://mysterypancake.github.io/Fun/html/audiosplicer)
 - [Boolean Comparisons](https://mysterypancake.github.io/Fun/html/booleancomparisons)
 - [Caleb Fuzz](https://mysterypancake.github.io/Fun/html/calebfuzz)
@@ -15,13 +23,18 @@ Small fun scripts I like playing with.
 - [Earrape](https://mysterypancake.github.io/Fun/html/earrape)
 - [Fake Login](https://mysterypancake.github.io/Fun/html/fakelogin)
 - [Frog Drawer](https://mysterypancake.github.io/Fun/html/frogdrawer)
-- [Hair Blower](https://mysterypancake.github.io/Fun/html/hairblower)
+
+## [Hair Blower](https://mysterypancake.github.io/Fun/html/hairblower)
+
+Ultra realistic hair blowing simulation definitely not made in 5 minutes. Better than Vellum in Houdini?
+
+<img src="./images/hairblower.png" width="500">
 
 ## [Image to UML](https://mysterypancake.github.io/Fun/html/imagetouml)
 
 Converts an image to a UMLet diagram. It recreates the image using coloured rectangle nodes for each pixel.
 
-<img src="./images/imagetouml.png" width="600">
+<img src="./images/imagetouml.png" width="500">
 
 - [K-Nearest Neighbors](https://mysterypancake.github.io/Fun/html/knearestneighbors)
 - [Lerp Smoother](https://mysterypancake.github.io/Fun/html/lerpsmoother)
