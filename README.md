@@ -93,7 +93,11 @@ I think this is a form of [simple brownian motion](https://www.youtube.com/watch
 
 <img src="./images/portertrail.png" width="500">
 
-- [PowerPoint](https://mysterypancake.github.io/Fun/html/powerpoint)
+## [PowerPoint](https://mysterypancake.github.io/Fun/html/powerpoint)
+
+End of slide slow, click to exit. Great for trolling teachers.
+
+<img src="./images/powerpoint.png" width="500">
 
 ## [Pulse Width Modulation](https://mysterypancake.github.io/Fun/html/pwm)
 
