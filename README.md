@@ -33,7 +33,7 @@ The simplest form of audio distortion, designed by Caleb for a guitar pedal. It'
 
 ### [Text Corruption](https://mysterypancake.github.io/Fun/html/corrupt)
 
-Corrupts [TomJedi9's great gospel](https://www.youtube.com/watch?v=QLvFdsggaNQ) with horrible swear words and profanity. Not safe for work!
+Corrupts [TomJedi9's holy gospel](https://www.youtube.com/watch?v=QLvFdsggaNQ) with horrible swear words and profanity. Not safe for work!
 
 <img src="./images/corrupt.png" width="500">
 
