@@ -31,15 +31,33 @@ The simplest form of audio distortion, designed by Caleb for a guitar pedal. It'
 
 <img src="./images/calebfuzz.png" width="500">
 
-- [Text Corruption](https://mysterypancake.github.io/Fun/html/corrupt)
-- [CSS Programming](https://mysterypancake.github.io/Fun/html/cssprogram)
+## [Text Corruption](https://mysterypancake.github.io/Fun/html/corrupt)
+
+Corrupts [TomJedi9's great gospel](https://www.youtube.com/watch?v=QLvFdsggaNQ) with horrible swear words and profanity. Not safe for work!
+
+<img src="./images/corrupt.png" width="500">
+
+## [CSS Programming](https://mysterypancake.github.io/Fun/html/cssprogram)
+
+Did you know you can run simple code in CSS? Math totally works, just use `counter-reset`!
+
+<img src="./images/cssprogram.png" width="500">
+
 - [Cursor Draw](https://mysterypancake.github.io/Fun/html/cursordraw)
 - [Cursor Particles](https://mysterypancake.github.io/Fun/html/cursorparticles)
 - [Cursor Physics](https://mysterypancake.github.io/Fun/html/cursorphysics)
 - [Cursor Trail](https://mysterypancake.github.io/Fun/html/cursortrail)
 - [Earrape](https://mysterypancake.github.io/Fun/html/earrape)
 - [Fake Login](https://mysterypancake.github.io/Fun/html/fakelogin)
-- [Frog Drawer](https://mysterypancake.github.io/Fun/html/frogdrawer)
+
+## [Frog Drawer](https://mysterypancake.github.io/Fun/html/frogdrawer)
+
+The latest and greatest in frog drawing technology, made for Joseph Tonien's webdev class.
+
+<p align="left">
+  <img src="./images/frogdrawer.png" width="500">
+  <img src="./images/frogdrawer2.png" width="500">
+</p>
 
 ## [Hair Blower](https://mysterypancake.github.io/Fun/html/hairblower)
 
