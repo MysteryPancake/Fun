@@ -85,7 +85,14 @@ My old horribly broken method of smoothing with lerp. [For much better methods, 
 
 <img src="./images/lerpsmoother.png" width="500">
 
-- [Porter Trail](https://mysterypancake.github.io/Fun/html/portertrail)
+## [Porter Trail](https://mysterypancake.github.io/Fun/html/portertrail)
+
+Trails a point travelling in a random direction, similar to [Porter Robinson's music videos.](https://www.youtube.com/watch?v=ahEovqzpLeU)
+
+I think this is a form of [simple brownian motion](https://www.youtube.com/watch?v=ZNzoTGv_XiQ).
+
+<img src="./images/portertrail.png" width="500">
+
 - [PowerPoint](https://mysterypancake.github.io/Fun/html/powerpoint)
 
 ## [Pulse Width Modulation](https://mysterypancake.github.io/Fun/html/pwm)
