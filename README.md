@@ -107,8 +107,17 @@ This was originally designed for Cinema Sense, an app for blind people to experi
 
 <img src="./images/pwm.png" width="500">
 
-- [Queue Simulator](https://mysterypancake.github.io/Fun/html/queuesimulator)
-- [Queue Visualiser](https://mysterypancake.github.io/Fun/html/queuevisualiser)
+## [Queue Simulator](https://mysterypancake.github.io/Fun/html/queuesimulator)
+
+Dumb brute force discrete simulation of a queue of customers, made for a problem solving course at university.
+
+<img src="./images/queuesimulator.png" width="500">
+
+## [Queue Visualiser](https://mysterypancake.github.io/Fun/html/queuevisualiser)
+
+Smarter continuous simulation of a queue of customers, made for a problem solving course at university.
+
+<img src="./images/queuevisualiser.png" width="500">
 
 ## [Resampling Demo](https://mysterypancake.github.io/Fun/html/resamplingdemo)
 
