@@ -11,7 +11,12 @@ These formulas are actually inverse lerp and lerp. [See here for more info!](htt
 
 <img src="./images/arithmetic.png" width="500">
 
-- [Random Audio Splicer](https://mysterypancake.github.io/Fun/html/audiosplicer)
+## [Random Audio Splicer](https://mysterypancake.github.io/Fun/html/audiosplicer)
+
+Randomly slices up audio into segments and plays the result. Requested by Zoe Kelman (not sponsored)
+
+<img src="./images/audiosplicer.png" width="500">
+
 - [Boolean Comparisons](https://mysterypancake.github.io/Fun/html/booleancomparisons)
 - [Caleb Fuzz](https://mysterypancake.github.io/Fun/html/calebfuzz)
 - [Text Corruption](https://mysterypancake.github.io/Fun/html/corrupt)
@@ -36,7 +41,14 @@ Converts an image to a UMLet diagram. It recreates the image using coloured rect
 
 <img src="./images/imagetouml.png" width="500">
 
-- [K-Nearest Neighbors](https://mysterypancake.github.io/Fun/html/knearestneighbors)
+## [K-Nearest Neighbors](https://mysterypancake.github.io/Fun/html/knearestneighbors)
+
+Inspired by my machine learning class at university. Draws the result of running k-nearest neighbors on a few points, which looks like voronoi.
+
+Every pixel is drawn using an individual rectangle, so it's horribly slow. [Use WebGL for good performance.](https://www.shadertoy.com/view/MslGD8)
+
+<img src="./images/knearestneighbors.png" width="500">
+
 - [Lerp Smoother](https://mysterypancake.github.io/Fun/html/lerpsmoother)
 - [Porter Trail](https://mysterypancake.github.io/Fun/html/portertrail)
 - [PowerPoint](https://mysterypancake.github.io/Fun/html/powerpoint)
