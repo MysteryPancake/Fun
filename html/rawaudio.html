@@ -21,6 +21,10 @@
 			width: 100%;
 		}
 
+		input[type="range"] {
+			width: 12rem;
+		}
+
 		textarea {
 			resize: vertical;
 		}
@@ -44,7 +48,7 @@
 		}
 		</style>
 		<script>
-		let canvElem, canvCtx, leftElem, rightElem, sepElem, removeDC, normalize, volElem, pitchElem, rateElem, loopElem, downloadElem, dataLeft, dataRight;
+		let canvElem, canvCtx, leftElem, rightElem, sepElem, removeDC, normalize, volElem, pitchElem, rateElem, loopElem, downloadElem, dataLeft, dataRight, pitchLabel, volLabel;
 
 		function setup() {
 			canvElem = document.getElementById("canvElem");
@@ -77,8 +81,14 @@
 			volElem = document.getElementById("volume");
 			volElem.addEventListener("input", setVolume);
 
+			volLabel = document.getElementById("volumeLabel");
+			volLabel.textContent = `${Math.floor(parseFloat(volElem.value) * 100)}%`;
+
 			pitchElem = document.getElementById("pitch");
 			pitchElem.addEventListener("input", setPitch);
+
+			pitchLabel = document.getElementById("pitchLabel");
+			pitchLabel.textContent = `${pitchElem.value} cents`;
 
 			loopElem = document.getElementById("loop");
 			loopElem.addEventListener("change", toggleAudio);
@@ -312,12 +322,14 @@
 		}
 
 		function setVolume() {
-			if (!gainNode) return;
 			const volume = parseFloat(volElem.value);
+			volLabel.textContent = `${Math.floor(volume * 100)}%`;
+			if (!gainNode) return;
 			gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
 		}
 
 		function setPitch() {
+			pitchLabel.textContent = `${pitchElem.value} cents`;
 			if (!bufferSource) return;
 			const pitch = parseFloat(pitchElem.value);
 			bufferSource.detune.setValueAtTime(pitch, audioCtx.currentTime);
@@ -346,7 +358,7 @@
 			<div style="display: inline-block; width: 100%;">
 				<label for="rightElem">Right channel samples (optional)</label>
 				<div>
-				<textarea id="rightElem" rows="5"></textarea>
+					<textarea id="rightElem" rows="5"></textarea>
 				</div>
 			</div>
 		</div>
@@ -372,25 +384,28 @@
 			</a>
 		</div>
 		<canvas id="canvElem" width="512" height="256" style="margin-bottom: 0.5rem;"></canvas>
-		<div style="display: flex; column-gap: 1rem;">
+		<div style="margin-bottom: 0.5rem;">Preview Settings</div>
+		<div style="display: flex; column-gap: 0.5rem; user-select: none;">
 			<div>
 				<button id="play">Toggle Audio</button>
-				<div>
-					<input id="loop" type="checkbox" checked>
-					<label for="loop" checked>Loop</label>
-				</div>
 			</div>
 			<div>
 				<div>
-					<label for="volume">Volume</label>
+					<label for="volume">Volume:</label>
+					<span id="volumeLabel"></span>
 				</div>
 				<input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
 			</div>
 			<div>
 				<div>
-					<label for="pitch">Pitch</label>
+					<label for="pitch">Pitch Offset:</label>
+					<span id="pitchLabel"></span>
 				</div>
 				<input id="pitch" type="range" min="-10000" max="10000" step="1" value="-5000">
+			</div>
+			<div>
+				<input id="loop" type="checkbox" checked>
+				<label for="loop" checked>Loop</label>
 			</div>
 		</div>
 	</body>
