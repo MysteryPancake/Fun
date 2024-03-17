@@ -158,17 +158,20 @@
 
 		function readSamples(elem) {
 			let samples = [];
-			elem.value.split(sepElem.value).forEach((str) => {
-				str = str.trim();
-				if (str) {
-					const num = parseFloat(str);
-					if (isNaN(num)) {
-						window.alert(`Invalid number: ${str}`);
-						return;
-					}
-					samples.push(num);
+			const strings = elem.value.split(sepElem.value);
+			
+			for (let i = 0; i < strings.length; ++i) {
+				const str = strings[i].trim();
+				if (!str) continue;
+
+				const num = parseFloat(str);
+				if (isNaN(num)) {
+					window.alert(`Invalid number: ${str}`);
+					return;
 				}
-			});
+
+				samples.push(num);
+			};
 			return new Float32Array(samples);
 		}
 
