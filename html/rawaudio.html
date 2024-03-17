@@ -159,7 +159,7 @@
 		function readSamples(elem) {
 			let samples = [];
 			const strings = elem.value.split(sepElem.value);
-			
+
 			for (let i = 0; i < strings.length; ++i) {
 				const str = strings[i].trim();
 				if (!str) continue;
@@ -178,6 +178,7 @@
 		function updateData() {
 			dataLeft = readSamples(leftElem);
 			dataRight = readSamples(rightElem);
+			if (!dataLeft || !dataRight) return;
 
 			const hasRight = dataRight.length > 0;
 			if (hasRight && dataLeft.length !== dataRight.length) {
