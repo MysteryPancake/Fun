@@ -154,7 +154,7 @@ Plays an audio signal stored as a string of numbers.
 
 <img src="./images/rawaudio.png" width="500">
 
-### [Resampling Demo](https://mysterypancake.github.io/Fun/html/resamplingdemo)
+### [Resampling](https://mysterypancake.github.io/Fun/html/resampling)
 
 Draws and plays many signal interpolation methods. I made this for debugging while making an audio plugin.
 
