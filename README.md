@@ -160,7 +160,7 @@ Draws and plays many signal interpolation methods. I made this for debugging whi
 
 Sinc is the highest quality option for audio, but also the most expensive.
 
-<img src="./images/resamplingdemo.png" width="500">
+<img src="./images/resampling.png" width="500">
 
 ### [Resize Calculator](https://mysterypancake.github.io/Fun/html/resizecalculator)
 
