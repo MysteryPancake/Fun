@@ -148,13 +148,13 @@ Smarter continuous simulation of a queue of customers, made for a problem solvin
 
 <img src="./images/queuevisualiser.png" width="500">
 
-### [Raw Audio Player](https://mysterypancake.github.io/Fun/html/rawaudio)
+### [Raw Audio Player](https://mysterypancake.github.io/Houdini-Fun/tools/RawAudio)
 
 Plays an audio signal stored as a string of numbers.
 
 <img src="./images/rawaudio.png" width="500">
 
-### [Resampling](https://mysterypancake.github.io/Fun/html/resampling)
+### [Resampling](https://mysterypancake.github.io/Houdini-Fun/tools/Resampling)
 
 Draws and plays many signal interpolation methods. I made this for debugging while making an audio plugin.
 
