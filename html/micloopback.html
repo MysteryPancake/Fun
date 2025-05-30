@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Microphone Loopback</title>
+		<meta name="description" content="Play back your mic input for singing practice.">
+		<meta name="keywords" content="Microphone, Mic, Loopback, Compressor, Audio, Voice, Sound, Vocal, Singing">
+		<meta property="og:title" content="Microphone Loopback">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://mysterypancake.github.io/Fun/html/micloopback">
+		<meta property="og:site_name" content="Microphone Loopback">
+		<meta property="og:description" content="Play back your mic input for singing practice.">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+		* {
+			font-family: system-ui, Arial, Helvetica, sans-serif;
+			color: white;
+		}
+
+		html, body {
+			background-color: #272727;
+			padding: 8px;
+		}
+
+		h1 {
+			margin-top: 0;
+		}
+
+		input[type="button"] {
+			background-color: black;
+			font-weight: bold;
+			border-radius: 8px;
+			border: none;
+			color: white;
+			font-size: large;
+			padding: 12px;
+			cursor: pointer;
+			transition: 0.1s;
+		}
+
+		input[type="button"]:hover {
+			background-color: white;
+			color: black;
+		}
+
+		input[type="range"] {
+			width: 100%;
+		}
+
+		.controlBox {
+			background-color: black;
+			border-radius: 8px;
+			margin: 8px 0;
+			padding: 12px;
+		}
+
+		#controls {
+			display: none;
+		}
+		</style>
+		<script>
+			let audioCtx, micSource, compressor, splitter, gain;
+			let forceMono = true;
+			
+			function updateRouting() {
+				if (!audioCtx) return;
+
+				micSource.disconnect();
+				splitter.disconnect();
+
+				if (forceMono) {
+					micSource.connect(splitter, 0, 0);
+					splitter.connect(compressor);
+				} else {
+					micSource.connect(compressor);
+				}
+			}
+
+			function capitalize(val) {
+				return val.charAt(0).toUpperCase() + val.slice(1);
+			}
+
+			function updateCompressor(elem) {
+				if (!audioCtx) return;
+				compressor[elem.id].setValueAtTime(parseFloat(elem.value), audioCtx.currentTime);
+				const units = (elem.id === "attack" || elem.id === "release") ? "s" : "dB";
+				elem.labels[0].textContent = `${capitalize(elem.id)} (${elem.value}${units})`;
+			}
+
+			function updateVolume(elem) {
+				if (!audioCtx) return;
+				const val = parseFloat(elem.value);
+				gain.gain.setValueAtTime(val, audioCtx.currentTime);
+				elem.labels[0].textContent = `Volume (${Math.floor(val*100)}%)`;
+			}
+
+			function toggleMono(elem) {
+				forceMono = elem.checked;
+				updateRouting();
+			}
+
+			function setupMic() {
+				if (audioCtx) return;
+				audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+				navigator.mediaDevices.getUserMedia({
+					audio: {
+						echoCancellation: {
+							ideal: false
+						},
+						noiseSuppression: {
+							ideal: false
+						},
+						voiceIsolation: {
+							ideal: false
+						}
+					}
+				}).then((stream) => {
+
+					document.getElementById("start").style.display = "none";
+					document.getElementById("controls").style.display = "block";
+
+					micSource = audioCtx.createMediaStreamSource(stream);
+
+					compressor = audioCtx.createDynamicsCompressor();
+					compressor.threshold.setValueAtTime(-24, audioCtx.currentTime);
+					compressor.knee.setValueAtTime(30, audioCtx.currentTime);
+					compressor.ratio.setValueAtTime(9, audioCtx.currentTime);
+					compressor.attack.setValueAtTime(0.003, audioCtx.currentTime);
+					compressor.release.setValueAtTime(0.15, audioCtx.currentTime);
+
+					gain = audioCtx.createGain();
+					splitter = audioCtx.createChannelSplitter(2);
+
+					compressor.connect(gain);
+					gain.connect(audioCtx.destination);
+
+					updateRouting();
+
+				}).catch(console.log);
+			}
+		</script>
+	</head>
+	<body>
+		<h1>Mic Loopback</h1>
+		<input id="start" type="button" value="Start Microphone" onclick="setupMic();">
+		<div id="controls">
+			<div class="controlBox">
+				<input type="checkbox" id="forceMono" checked oninput="toggleMono(this);">
+				<label for="forceMono">Force Mono</label>
+			</div>
+			<div class="controlBox">
+				<div>
+					<label for="volume">Volume (100%)</label>
+				</div>
+				<div>
+					<input id="volume" type="range" min="0" max="24" value="1" step="0.01" oninput="updateVolume(this);">
+				</div>
+			</div>
+			<div class="controlBox">
+				<div>
+					<label for="threshold">Threshold (-48dB)</label>
+				</div>
+				<div>
+					<input id="threshold" type="range" min="-100" max="0" value="-48" oninput="updateCompressor(this);">
+				</div>
+			</div>
+			<div class="controlBox">
+				<div>
+					<label for="knee">Knee (30dB)</label>
+				</div>
+				<div>
+					<input id="knee" type="range" min="0" max="40" value="30" oninput="updateCompressor(this);">
+				</div>
+			</div>
+			<div class="controlBox">
+				<div>
+					<label for="ratio">Ratio (12dB)</label>
+				</div>
+				<div>
+					<input id="ratio" type="range" min="1" max="20" value="9" oninput="updateCompressor(this);">
+				</div>
+			</div>
+			<div class="controlBox">
+				<div>
+					<label for="attack">Attack (0.003s)</label>
+				</div>
+				<div>
+					<input id="attack" type="range" min="0" max="1" value="0.003" step="0.001" oninput="updateCompressor(this);">
+				</div>
+			</div>
+			<div class="controlBox">
+				<div>
+					<label for="release">Release (0.25s)</label>
+				</div>
+				<div>
+					<input id="release" type="range" min="0" max="1" value="0.15" step="0.001" oninput="updateCompressor(this);">
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
