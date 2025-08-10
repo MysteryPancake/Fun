@@ -302,11 +302,11 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec2 uv = (2.0*fragCoord-iResolution.xy) / iResolution.y;
 
     vec3 ro = vec3(0.0, 0.0, 4.0);
-    vec3 rd = normalize(vec3(uv, -1.6));
+    vec3 rd = normalize(vec3(uv, -2));
 
     // vertex deformation, from https://www.shadertoy.com/view/3dXGWs
     float time = iTime;
-    float amp = smoothstep(0.0,0.2,0.5-0.5*cos(6.2831*time/15.0));
+    float amp = 1.5 * smoothstep(0.0,0.2,0.5-0.5*cos(6.2831*time/15.0));
     for(int i = 0; i<8; i++)
     {
         vec3 p = vec3((ivec3(i)>>ivec3(0,1,2))&1)*2.0-1.0;
