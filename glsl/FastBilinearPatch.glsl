@@ -1,10 +1,11 @@
-// Available at https://www.shadertoy.com/view/W3GXR3
-
 // Forked from Inigo Quilez
 // https://www.shadertoy.com/view/3tjczm
 
 // Added a simple least squares approximation (method 2)
 // This approximation converges very fast with high accuracy
+
+// It seems to be exactly equivalent to vchizhov's 3rd method:
+// https://www.shadertoy.com/view/M32SDG
 
 // 0: hack
 // 1: newton
@@ -26,15 +27,15 @@
 
 float dot2( in vec3 v ) { return dot(v,v); }
 
-// Returns interpolated position based on barycentric UVW coordinates
+// Returns interpolated position based on barycentric UV coordinates
 vec3 barycentric( in vec3 p0, in vec3 p1, in vec3 p2, in vec3 p3, in vec2 uv )
 {
-    float u1 = 1.0 - uv.y;
-    float v1 = 1.0 - uv.x;
+    float u1 = 1.0 - uv.x;
+    float v1 = 1.0 - uv.y;
     return p0 * u1 * v1 
-         + p1 * u1 * uv.x
-         + p2 * uv.y * uv.x
-         + p3 * uv.y * v1;
+         + p1 * uv.x * v1
+         + p2 * uv.x * uv.y
+         + p3 * uv.y * u1;
 }
 
 vec3 sdBilinearPatch( in vec3 p,
@@ -58,8 +59,8 @@ vec3 sdBilinearPatch( in vec3 p,
         float u = float(i)/15.0;
         vec3 ba = mix( B,p2-p1,u);
         vec3 pa = mix(-D,p -p1,u);
-		float v = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
-		float t = dot2(pa-ba*v);
+        float v = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+        float t = dot2(pa-ba*v);
         if( t<d ) { d=t; uv=vec2(u,v); }
     }
     //return vec3(sqrt(d),uv);
@@ -79,7 +80,7 @@ vec3 sdBilinearPatch( in vec3 p,
     }
     vec3 pq = D+uv.x*A+uv.y*B+uv.x*uv.y*C;
     vec3 nor = cross(A+uv.y*C,B+uv.x*C); // normal
-	return vec3( length(pq), uv );
+    return vec3( length(pq), uv );
 #endif
     
 #if METHOD==1
@@ -108,7 +109,7 @@ vec3 sdBilinearPatch( in vec3 p,
         uv = clamp(uv,0.0,1.0);
     }
     vec3 nor = cross(A+uv.y*C,B+uv.x*C); // normal
-	return vec3( length(D+uv.x*A+uv.y*B+uv.x*uv.y*C), uv );
+    return vec3( length(D+uv.x*A+uv.y*B+uv.x*uv.y*C), uv );
 #endif
 
 #if METHOD==2
@@ -174,13 +175,13 @@ vec3 map( in vec3 p )
 // https://iquilezles.org/articles/intersectors
 vec2 iSphere( in vec3 ro, in vec3 rd, in vec4 sph )
 {
-	vec3 oc = ro - sph.xyz;
-	float b = dot( oc, rd );
-	float c = dot( oc, oc ) - sph.w*sph.w;
-	float h = b*b - c;
-	if( h<0.0 ) return vec2(-1.0);
+    vec3 oc = ro - sph.xyz;
+    float b = dot( oc, rd );
+    float c = dot( oc, oc ) - sph.w*sph.w;
+    float h = b*b - c;
+    if( h<0.0 ) return vec2(-1.0);
     h = sqrt(h);
-	return vec2(-b-h,-b+h);
+    return vec2(-b-h,-b+h);
 }
 
 int raycast( in vec3 ro, in vec3 rd, out vec3 oUVT)
@@ -205,7 +206,7 @@ int raycast( in vec3 ro, in vec3 rd, out vec3 oUVT)
         
         // rayamarch cube
         float t = tmin;
-        for( int i=0; i<256; i++ )	
+        for( int i=0; i<256; i++ )  
         {
             vec3 pos = ro + t*rd;
             vec3 duv = map(pos);
@@ -261,9 +262,9 @@ vec3 calcNormal( in vec3 pos )
 #if 0
     vec2 e = vec2(1.0,-1.0)*0.5773*0.0005;
     return normalize( e.xyy*map( pos + e.xyy ).x + 
-					  e.yyx*map( pos + e.yyx ).x + 
-					  e.yxy*map( pos + e.yxy ).x + 
-					  e.xxx*map( pos + e.xxx ).x );
+                      e.yyx*map( pos + e.yyx ).x + 
+                      e.yxy*map( pos + e.yxy ).x + 
+                      e.xxx*map( pos + e.xxx ).x );
 #else
     // inspired by tdhooper and klems - a way to prevent the compiler from inlining map() 4 times
     vec3 n = vec3(0.0);
@@ -284,10 +285,10 @@ vec2 rot( vec2 p, float an )
 const float N = 32.0;
 float gridTexture( in vec2 p )
 {
-	// filter kernel
+    // filter kernel
     vec2 w = fwidth(p) + 0.01;
 
-	// analytic (box) filtering
+    // analytic (box) filtering
     vec2 a = p + 0.5*w;                        
     vec2 b = p - 0.5*w;           
     vec2 i = (floor(a)+min(fract(a)*N,1.0)-
@@ -327,21 +328,21 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     {
         float t = uvt.z;
         vec3 pos = ro + t*rd;
-    	vec3 nor = vec3(0.0,1.0,0.0);
+        vec3 nor = vec3(0.0,1.0,0.0);
         vec2 uv = pos.xz*0.25;
         #ifdef SHADOWS
-    	if( obj==2 )
+        if( obj==2 )
         #endif
         {
             uv = uvt.xy;
-        	nor = calcNormal(pos);
+            nor = calcNormal(pos);
         }
 
         // shade and illuminate (oldscool way)
         vec3 tex = texture(iChannel0,uv).xyz;
-    	//tex *= gridTexture(4.0*uv);
+        //tex *= gridTexture(4.0*uv);
         
-    	vec3  lig = normalize(vec3(6, 5,-1));
+        vec3  lig = normalize(vec3(6, 5,-1));
         vec3  hal = normalize(lig-rd);
         float dif = clamp(dot(nor,lig),0.0,1.0);
         float spe = pow(max(0.0, dot(nor,hal)), 16.0);
@@ -351,7 +352,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
         #ifdef SHADOWS
         if( dif>0.0 )
         {
-    		dif *= calcSoftshadow(pos+0.01*nor, lig);
+            dif *= calcSoftshadow(pos+0.01*nor, lig);
         }
         #endif
 
@@ -365,7 +366,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     
     // gain
     col = col*2.0/(1.0+col);
-	// gamma
+    // gamma
     col = pow(col,vec3(0.4545));
     
     // grade
