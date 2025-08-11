@@ -1,3 +1,5 @@
+// Available at https://www.shadertoy.com/view/W3GXR3
+
 // Forked from Inigo Quilez
 // https://www.shadertoy.com/view/3tjczm
 
