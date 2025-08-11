@@ -1,16 +1,26 @@
 // Forked from Inigo Quilez
 // https://www.shadertoy.com/view/3tjczm
 
-// Added a simple least squares approximation (method 2)
+// Finds the closest point on a bilinear patch, as well as the distance and UV coordinates
+// For some reason there's no papers written about this :(
+
+// I added a simple least squares approximation (method 2)
 // This approximation converges very fast with high accuracy
 
-// It seems to be exactly equivalent to vchizhov's 3rd method:
+// It seems exactly equivalent to vchizhov's method (method 3)
 // https://www.shadertoy.com/view/M32SDG
 
-// 0: hack
-// 1: newton
+// For intersecting a bilinear patch, see "Ray Bilinear Patch Intersections" by Shaun D. Ramsey (2004)
+
+// 0: hack (iq)
+// 1: newton (iq)
 // 2: least squares (my method)
+// 3: vchizhov's method (equivalent)
 #define METHOD 2
+
+// Accuracy of least squares approximation
+#define ITERATIONS 3
+#define TOLERANCE 1e-6
 
 // 0: middle      ---> fast but bad
 // 1: line scans  ---> much better, but slower
@@ -18,10 +28,6 @@
 
 // enable SHADOWS and floor plane if you have a fast machine
 #define SHADOWS
-
-// Accuracy of least squares approximation
-#define ITERATIONS 4
-#define TOLERANCE 1e-8
 
 //-------------------------------------------------------
 
@@ -51,8 +57,9 @@ vec3 sdBilinearPatch( in vec3 p,
 #if INITIAL==0
     vec2 uv = vec2(0.5);
 #endif
+
 #if INITIAL==1
-    vec2 uv = vec2(0.0,0.0);
+    vec2 uv = vec2(0.0);
     float d = dot2(p-p0);
     for( int i=0; i<16; i++ )
     {
@@ -63,7 +70,6 @@ vec3 sdBilinearPatch( in vec3 p,
         float t = dot2(pa-ba*v);
         if( t<d ) { d=t; uv=vec2(u,v); }
     }
-    //return vec3(sqrt(d),uv);
 #endif
     
     // find roots
@@ -113,32 +119,57 @@ vec3 sdBilinearPatch( in vec3 p,
 #endif
 
 #if METHOD==2
-    vec3 E = p2 - p1;
-    vec3 F = p2 - p3;
-
-    for (int i = 0; i < ITERATIONS; i++)
+    // Least squares (my method)
+    // Rewritten to match vchizhov's style
+    for (int i = 0; i < ITERATIONS; ++i)
     {
-        vec3 r = barycentric(p0, p1, p2, p3, uv) - p;
-        if (dot(r, r) < TOLERANCE) break;
-
-        vec3 dP_du = mix(B, E, uv.x);
-        vec3 dP_dv = mix(A, F, uv.y);
+        // Tangent vectors
+        vec3 dPdu = A + uv.y * C;
+        vec3 dPdv = B + uv.x * C;
         
-        float A11 = dot(dP_du, dP_du);
-        float A12 = dot(dP_du, dP_dv);
-        float A22 = dot(dP_dv, dP_dv);
-        
-        vec2 grad = vec2(dot(dP_du, r), dot(dP_dv, r));
-        if (dot(grad, grad) < TOLERANCE) break;
-
-        float det = A11 * A22 - A12 * A12;
+        // Metric tensor
+        float m = -dot(dPdu, dPdv);
+        mat2 metric = mat2(dot(dPdv, dPdv), m, m, dot(dPdu, dPdu));
+        float det = determinant(metric);
         if (abs(det) < TOLERANCE) break;
+        
+        // Gradient in UV space
+        vec3 dEdp = barycentric(p0, p1, p2, p3, uv) - p;
+        vec2 dEduv = vec2(dot(dPdu, dEdp), dot(dPdv, dEdp));
+        if (dot(dEduv, dEduv) < TOLERANCE) break;
 
-        uv = clamp(uv - vec2(grad.y * A11 - grad.x * A12,
-                             grad.x * A22 - grad.y * A12) / det, 0.0, 1.0);
+        // Descent
+        uv = clamp(uv - dEduv * metric / det, 0.0, 1.0);
     }
 
-    return vec3(length(p - barycentric(p0, p1, p2, p3, uv)), uv);
+    return vec3(length(barycentric(p0, p1, p2, p3, uv) - p), uv);
+#endif
+
+#if METHOD==3
+    // Gradient descent on manifold (vchizhov's method)
+    // From https://www.shadertoy.com/view/M32SDG
+    for (int i = 0; i < ITERATIONS; ++i)
+    {
+        // Tangent vectors of p(u,v) = D + uA + vB + uvC
+        vec3 dPdu = A + uv.y * C;
+        vec3 dPdv = B + uv.x * C;
+
+        // Metric tensor (symmetric)
+        float G1 = dot(dPdu, dPdv);
+        mat2 G = mat2(dot(dPdu, dPdu), G1, G1, dot(dPdv, dPdv));
+        if (abs(determinant(G)) < TOLERANCE) break;
+
+        // Derivative in R^3 of 1/2 ||p-q||^2
+        vec3 dEdp = D + uv.x * A + uv.y * B + uv.x * uv.y * C;
+
+        // Gradient in uv space
+        vec2 dEduv = vec2(dot(dPdu, dEdp), dot(dPdv, dEdp));
+        if (dot(dEduv, dEduv) < TOLERANCE) break;
+
+        // Descent
+        uv = clamp(uv - inverse(G) * dEduv, 0.0, 1.0);
+    }
+    return vec3(length(D + uv.x * A + uv.y * B + uv.x * uv.y * C), uv);
 #endif
 }
 
