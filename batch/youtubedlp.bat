@@ -41,7 +41,7 @@ goto loop
 
 :OPTION3
 :: YOUTUBE MP4 BAD QUALITY
-yt-dlp -f best --add-metadata "%link%"
+yt-dlp -f b --add-metadata "%link%"
 goto loop
 
 :OPTION4
@@ -66,7 +66,7 @@ goto loop
 
 :OPTION8
 :: YOUTUBE MP4 BAD QUALITY WITH DATA
-yt-dlp -f best --write-thumbnail --write-description --write-info-json --write-annotations --add-metadata "%link%"
+yt-dlp -f b --write-thumbnail --write-description --write-info-json --write-annotations --add-metadata "%link%"
 goto loop
 
 :INVALID
