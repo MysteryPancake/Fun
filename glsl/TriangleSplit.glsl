@@ -5,7 +5,7 @@
 #define T cos(iTime)
 #define L(a) length(a)
 
-// Nguyen2007 version, 546 chars
+// Nguyen2007 + mla version, 545 chars
 // https://www.shadertoy.com/view/w3jBWt
 float t(vec2 p, vec2 A, vec2 C) {
     vec2 d = A - C, r = p - C;
@@ -29,14 +29,13 @@ void mainImage(out vec4 O, vec2 u) {
          q = (p - B - c).yx * r * dot(A, C.yx * r);
 
     O *= 0.;
-
-    O[ dot(c, q) > 0. && dot(C - c, q) > 0. ? 0 :
-       dot(A - c, q) > 0. ? 1 : 2 ] = 1.;
-
+    
+    O[dot(c, q) > 0. && dot(C - c, q) > 0. ? 0 : dot(A - c, q) > 0. ? 1 : 2]++;
+    
     O += .01 / t(p - B, A, C); // Pass original triangle verts to t()
 }
 
-// Original Jake Rice 2D version, 666 chars
+// Original Jake Rice version, 666 chars
 /*float t(vec2 p, vec2 A, vec2 B, vec2 C) {
     vec2 e0 = B-A, e1 = C-B, e2 = A-C,
          v0 = p-A, v1 = p-B, v2 = p-C;
