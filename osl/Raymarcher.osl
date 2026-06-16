@@ -1,0 +1,141 @@
+// Distance to hit and object ID used for material
+struct Hit {
+    float dist;
+    int id;
+};
+
+// From https://iquilezles.org/articles/distfunctions/
+float sdSphere(point p, float s) {
+    return length(p) - s;
+}
+
+Hit opUnion(Hit hit1, Hit hit2) {
+    if (hit1.dist < hit2.dist) {
+        return hit1;
+    } else {
+        return hit2;
+    }
+}
+
+Hit map(point p) {
+    point pos = p + vector(0.0, 0.0, 1.0);
+    pos.x = mod(pos.x, 4.0) - 2.0;
+    pos.y = mod(pos.y, 4.0) - 2.0;
+
+    float sphereDist = sdSphere(pos, 1.0);
+    Hit sphere = {sphereDist, 0};
+
+    float planeDist = abs(p.z);
+    Hit floorPlane = opUnion(sphere, {planeDist, 1});
+
+    return floorPlane;
+}
+
+// From https://iquilezles.org/articles/normalsSDF/
+normal calcNormal(point p) {
+    float eps = 0.0001;
+    vector xyy = vector(1, -1, -1);
+    vector yyx = vector(-1, -1, 1);
+    vector yxy = vector(-1, 1, -1);
+    Hit a = map(p + xyy * eps);
+    Hit b = map(p + yyx * eps);
+    Hit c = map(p + yxy * eps);
+    Hit d = map(p + eps);
+    return normalize(xyy * a.dist +
+        yyx * b.dist +
+        yxy * c.dist +
+        d.dist);
+}
+
+// From https://iquilezles.org/articles/rmshadows/
+float calcSoftshadow(point ro, vector rd, float tmin, float tmax, float w) {
+    float res = 1.0;
+    float t = tmin;
+    for (int i = 0; i < 256 && t < tmax; i++) {
+        Hit h = map(ro + t * rd);
+        res = min(res, h.dist / (w * t));
+        t += clamp(h.dist, 0.005, 0.50);
+        if (res < -1.0 || t > tmax) break;
+    }
+    res = max(res, -1.0);
+    return 0.25 * (1.0 + res) * (1.0 + res) * (2.0 - res);
+}
+
+shader Raymarcher(
+    int Iterations = 1024,
+    float Max_Distance = 4096.0
+        [[ string label = "Max Distance" ]],
+    vector Position_Offset = 0.0
+        [[ string label = "Position" ]],
+    color Background_Color = color(0.4, 0.5, 0.8)
+        [[ string label = "Background Color" ]],
+    color Ambient_Color = color(0.05, 0.05, 0.1)
+        [[ string label = "Ambient Color" ]],
+    color Specular_Color = 1.0
+        [[ string label = "Specular Color" ]],
+    float Specular_Mix = 0.5
+        [[ string label = "Specular Mix" ]],
+    float Specular_Roughness = 1.0
+        [[ string label = "Specular Roughness" ]],
+    vector Light_Direction = vector(0.0, 0.0, -1.0)
+        [[ string label = "Light Direction" ]],
+    float Light_Softness = 0.2
+        [[ string label = "Light Softness" ]],
+    output color Color = Background_Color,
+    output point Position = 0.0,
+    output normal Normal = 0.0,
+    output float Depth = Max_Distance,
+    output int Hit_Mask = 0
+        [[ string label = "Hit Mask" ]],
+) {
+    // Ray origin, ray direction and distance travelled (depth)
+    point ro = Position_Offset;
+    vector rd = I;
+
+    //if (raytype("camera")) {
+        ro -= point("camera", 0, 0, 0);
+    //}
+
+    float t = 1.0;
+
+    // The more iterations, the further you travel and less edge distortion you get
+    for (int i = 0; i < Iterations && t < Max_Distance; i++) {
+        // Calculate distance to closest object at current location
+        Hit hit = map(ro + rd * t);
+        // We can travel forward by at least that distance
+        t += hit.dist;
+        // We are very close to an object, stop raymarching
+        if (abs(hit.dist) < 0.0001 * t) {
+
+            point p = ro + rd * t;
+            vector lightDir = normalize(Light_Direction);
+
+            // Shadow
+            float shadow = calcSoftshadow(p, lightDir, 0.001, 6.0, Light_Softness);
+
+            // Normal
+            normal n = calcNormal(p);
+
+            // Specular
+            float dotRV = clamp(dot(reflect(lightDir, n), rd), 0.0, 1.0);
+            color specularColor = color(1.0, 1.0, 1.0);
+            float sharpness = 10.0 / Specular_Roughness;
+            color specular = Specular_Mix * pow(dotRV, sharpness) * Specular_Color * shadow;
+
+            // Diffuse
+            color diffuseColor = 1.0;
+            if (hit.id == 0) {
+                diffuseColor = cellnoise(p * 0.25);
+            } else if (hit.id == 1) {
+                diffuseColor = noise(p) * 0.5;
+            }
+
+            Color = mix(Ambient_Color, diffuseColor, shadow) + specular;
+            Position = p;
+            Normal = n;
+            Depth = t;
+            Hit_Mask = 1;
+            break;
+        }
+    }
+}

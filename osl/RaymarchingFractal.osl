@@ -1,0 +1,119 @@
+struct vec4 {
+    float x, y, z, w;
+};
+vec4 __operator__add__ (vec4 a, vec4 b) {
+    return vec4(a.x+b.x, a.y+b.y, a.z+b.z, a.w+b.w);
+}
+vec4 __operator__sub__ (vec4 a, vec4 b) {
+    return vec4(a.x-b.x, a.y-b.y, a.z-b.z, a.w-b.w);
+}
+vec4 __operator__div__ (vec4 a, vec4 b) {
+    return vec4(a.x/b.x, a.y/b.y, a.z/b.z, a.w/b.w);
+}
+vec4 __operator__mul__ (vec4 a, vec4 b) {
+    return vec4(a.x*b.x, a.y*b.y, a.z*b.z, a.w*b.w);
+}
+vec4 __operator__mul__ (vec4 a, float b) {
+    return vec4(a.x*b, a.y*b, a.z*b, a.w*b);
+}
+vec4 vec4f(vector a, float b) {
+    return vec4(a[0], a[1], a[2], b);
+}
+
+vec4 floor(vec4 x) {
+    vec4 res = x;
+    res.x = floor(res.x);
+    res.y = floor(res.y);
+    res.z = floor(res.z);
+    res.w = floor(res.w);
+    return res;
+}
+
+vec4 fract(vec4 x) {
+    return x - floor(x);
+}
+
+vector fract(vector x) {
+    return x - floor(x);
+}
+
+float fract(float x) {
+    return x - floor(x);
+}
+
+vec4 min(vec4 a, vec4 b) {
+    return vec4(min(a.x, b.x),
+                min(a.y, b.y),
+                min(a.z, b.z),
+                min(a.w, b.w));
+}
+
+// Translated from https://www.shadertoy.com/view/4ds3zn
+float map(vector p, float s, int steps) {
+	float scale = 1.0;
+	vec4 orb = vec4(1000.0, 1000.0, 1000.0, 1000.0); 
+	for (int i = 0; i < steps; i++) {
+		p = -1.0 + 2.0 * fract(0.5 * p + 0.5);
+		float r2 = dot(p, p);
+        orb = min(orb, vec4f(abs(p), r2));
+		float k = s / r2;
+		p *= k;
+		scale *= k;
+	}
+	return 0.25 * abs(p.y) / scale;
+}
+
+// From https://iquilezles.org/articles/normalsSDF/
+normal calcNormal(point p, float x, int steps) {
+    float eps = 0.0001;
+    vector xyy = vector(1, -1, -1);
+    vector yyx = vector(-1, -1, 1);
+    vector yxy = vector(-1, 1, -1);
+    normal n = normalize(xyy * map(p + xyy * eps, x, steps) +
+                yyx * map(p + yyx * eps, x, steps) +
+                yxy * map(p + yxy * eps, x, steps) +
+                map(p + eps, x, steps));
+    return n;
+}
+
+shader RaymarchingFractal(
+    int Iterations = 128,
+    int Steps = 2,
+    float Offset = 1.1,
+    float Max_Distance = 64.0
+        [[ string label = "Max Distance" ]],
+    vector Position_Offset = 0.0
+        [[ string label = "Position" ]],
+    color Background_Color = 1.0
+        [[ string label = "Background Color" ]],
+    output color Diffuse_Color = Background_Color
+        [[ string label = "Diffuse Color" ]],
+    output point Position = 0.0,
+    output normal Normal = 0.0,
+    output float Depth = Max_Distance,
+    output int Hit_Mask = 0
+        [[ string label = "Hit Mask" ]],
+) {
+    // Ray origin, ray direction and distance travelled (depth)
+    point ro = -point("camera", 0, 0, 0) + Position_Offset;
+    vector rd = I;
+    float t = 1.0;
+
+    // The more iterations, the further you travel and less edge distortion you get
+    for (int i = 0; i < Iterations && t < Max_Distance; i++) {
+        // Calculate distance to closest object at current location
+        float dist = map(ro + rd * t, Offset, Steps);
+        // We can travel forward by at least that distance
+        t += dist;
+        // We are very close to an object, stop raymarching
+        if (abs(dist) < 0.0001 * t) {
+            point p = ro + rd * t;
+            Diffuse_Color = (p + 1.0) * t * 0.0002;
+            Position = p;
+            Normal = calcNormal(p, Offset, Steps);
+            Depth = t;
+            Hit_Mask = 1;
+            break;
+        }
+    }
+}

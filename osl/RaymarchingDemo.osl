@@ -1,0 +1,74 @@
+// From https://iquilezles.org/articles/distfunctions/
+float sdSphere(point p, float s) {
+  return length(p) - s;
+}
+
+float map(point p) {
+    point pos = p;
+    pos.y = max(p.y, -1);
+    pos = mod(pos, 0.2) - 0.1;
+    float dist = sdSphere(pos, 0.035);
+    return dist;
+}
+
+// From https://iquilezles.org/articles/normalsSDF/
+normal calcNormal(point p) {
+    float eps = 0.0001;
+    vector xyy = vector(1, -1, -1);
+    vector yyx = vector(-1, -1, 1);
+    vector yxy = vector(-1, 1, -1);
+    normal n = normalize(xyy * map(p + xyy * eps) +
+                yyx * map(p + yyx * eps) +
+                yxy * map(p + yxy * eps) +
+                map(p + eps));
+    return n;
+}
+
+shader RaymarchingDemo(
+    int Iterations = 128,
+    float Max_Distance = 64.0
+        [[ string label = "Max Distance" ]],
+    vector Position_Offset = 0.0
+        [[ string label = "Position" ]],
+    color Background_Color = 1.0
+        [[ string label = "Background Color" ]],
+    output color Diffuse_Color = Background_Color
+        [[ string label = "Diffuse Color" ]],
+    output point Position = 0.0,
+    output normal Normal = 0.0,
+    output float Depth = Max_Distance,
+    output int Hit_Mask = 0
+        [[ string label = "Hit Mask" ]],
+) {
+    // Ray origin, ray direction and distance travelled (depth)
+    point ro = -point("camera", 0, 0, 0) + Position_Offset;
+    vector rd = I;
+    float t = 1.0;
+
+    // The more iterations, the further you travel and less edge distortion you get
+    for (int i = 0; i < Iterations && t < Max_Distance; i++) {
+        // Calculate distance to closest object at current location
+        float dist = map(ro + rd * t);
+        // We can travel forward by at least that distance
+        t += dist;
+        // We are very close to an object, stop raymarching
+        if (abs(dist) < 0.0001 * t) {
+            point p = ro + rd * t;
+
+            // Fog from https://iquilezles.org/articles/fog/
+            float b = 0.03;
+            color fogColor = 1.0;
+            float fogAmount = 1.0 - exp(-t * b);
+            float lightness = noise(p * 32.0);
+            float hue = fmod(min(p[2] * 0.4, p[1] * 1.2), 1.0);
+            color baseColor = color("hsv", hue, 1, lightness);
+            Diffuse_Color = mix(baseColor, Background_Color, fogAmount);
+
+            Position = p;
+            Normal = calcNormal(p);
+            Depth = t;
+            Hit_Mask = 1;
+            break;
+        }
+    }
+}

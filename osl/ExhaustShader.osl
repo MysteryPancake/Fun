@@ -1,0 +1,52 @@
+shader ExhaustShader(
+	float s = 0.0,
+	float t = 0.0,
+	int Outer_Layer = 0
+		[[ string label = "Outer Layer",
+		string widget = "checkBox" ]],
+	float Offset = 0.0,
+	vector Noise_Scale = vector(64.0, 1.0, 1.0)
+		[[ string label = "Noise Scale" ]],
+	float Core_Brightness = 20.0
+		[[ string label = "Core Brightness" ]],
+	float Trail_Brightness = 2.0
+		[[ string label = "Trail Brightness" ]],
+	float Core_Length = 0.2
+		[[ string label = "Core Length",
+		float min = 0.0,
+		float max = 1.0 ]],
+	float Contrast = 16.0,
+	color Core_Color = 1.0
+		[[ string label = "Core Color" ]],
+	color Start_Color = color(0.1, 1.0, 1.0)
+		[[ string label = "Start Color" ]],
+	color End_Color = color(0.1, 0.0, 1.0)
+		[[ string label = "End Color" ]],
+	output color Emit_Color = color(1.0, 0.0, 0.0)
+		[[ string label = "Emit Color" ]],
+	output float Emit_Strength = 1.0
+		[[ string label = "Emit Strength" ]]
+) {
+	// Read S and T from geometry (regular UV coordinates)
+	//float s = 0.0, t = 0.0;
+	//getattribute("s", s);
+	//getattribute("t", t);
+
+	float clampedS = clamp(s, 0.0, 1.0);
+	float coreRamp = min(clampedS / Core_Length, 1);
+	float ramp = (1 - clampedS) * Trail_Brightness + (1 - coreRamp) * Core_Brightness;
+
+	// Color gradient from start to end along UV
+	color startEndMix = mix(Start_Color, End_Color, clampedS);
+
+	// Mix with core color
+	Emit_Color = mix(Core_Color, startEndMix, coreRamp);
+
+	// Scale and offset noise position
+	point noisePos = Noise_Scale;
+	noisePos *= Outer_Layer == 0 ? point(t, s, s) : point(s, t, t);
+	noisePos -= point(0, Offset, 0);
+
+	float noiseFactor = clamp((noise(noisePos) - 0.5) * Contrast, 0.0, 1.0);
+	Emit_Strength = noiseFactor * ramp;
+}

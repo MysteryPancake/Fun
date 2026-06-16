@@ -1,0 +1,12 @@
+surface BootlegST(
+	output color ST_Color = color(0.0, 0.0, 1.0)
+		[[ string label = "ST Color" ]]
+) {
+	// Read ST coordinates from geometry
+	float s = 0.0, t = 0.0;
+	getattribute("s", s);
+	getattribute("t", t);
+
+	// Output ST to RG, leave B empty
+	ST_Color = color(s, t, 0.0);
+}
