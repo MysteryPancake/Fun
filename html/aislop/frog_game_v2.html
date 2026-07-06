@@ -134,6 +134,10 @@
           <label for="ai-count-input">AI opponents:</label>
           <input type="number" id="ai-count-input" min="1" step="1" value="1">
         </div>
+        <div class="option-row">
+          <label for="ai-decision-input">AI decision time (seconds):</label>
+          <input type="number" id="ai-decision-input" min="0.05" step="0.05" value="0.3">
+        </div>
         <button id="btn-ai">Play vs AI</button>
       </div>
       <div class="hint">2 Players: local multiplayer, Player 2 uses Arrow keys<br>Play vs AI: you (WASD) vs any number of AI-controlled frogs<br>or press 1 for 2 Players, 2 / 3 / 4 for 1 / 2 / 3 AI opponents</div>
@@ -150,10 +154,9 @@
   const MIN_GRID = 5;
   const MAX_GRID = 30;
 
-  // AI players decide roughly this often (a bit slower than a snap reaction,
-  // but still quicker than the original 350-650ms window).
-  const AI_DECISION_MIN = 230;
-  const AI_DECISION_RANGE = 200;
+  // AI players decide this often, in ms — overridden by the AI decision-time
+  // input when a vs-AI game starts. Constant (not randomized) per request.
+  let AI_DECISION_TIME = 300;
   // Chance an AI uses a shift-style double jump on a given move, for extra speed.
   const AI_DOUBLE_JUMP_CHANCE = 0.12;
 
@@ -352,7 +355,7 @@
       armed: false,
       isAI: false,
       lastDecision: 0,
-      decisionInterval: AI_DECISION_MIN + Math.random() * AI_DECISION_RANGE
+      decisionInterval: AI_DECISION_TIME
     };
   }
 
@@ -487,6 +490,20 @@
     return aliveTiles[Math.floor(Math.random() * aliveTiles.length)];
   }
 
+  // An AI can deliberately jump onto an adjacent opponent's lilypad instead
+  // of an empty one (tryMove itself has no occupancy check, so this just
+  // requires picking that direction on purpose). The two frogs share the pad
+  // until the AI hops off again, which sinks it and drowns whoever's left.
+  function tryPounceOnto(ai, target) {
+    if (target.jumping || target.dead) return false;
+    const dx = target.gx - ai.gx, dy = target.gy - ai.gy;
+    const aligned = (dx === 0 && Math.abs(dy) === 1) || (dy === 0 && Math.abs(dx) === 1);
+    if (!aligned) return false;
+    if (!inBounds(target.gx, target.gy) || !grid[target.gy][target.gx].alive) return false;
+    tryMove(ai, dx === 0 ? 0 : Math.sign(dx), dy === 0 ? 0 : Math.sign(dy), 1);
+    return true;
+  }
+
   // ---- Movement ----
   function tryMove(player, dx, dy, distance) {
     if (player.jumping || player.dead) return;
@@ -496,7 +513,7 @@
     const origin = grid[player.gy][player.gx];
     const ownTrap = origin.trap && origin.trapOwner === player.id;
     if (!ownTrap) {
-      sinkCell(player.gx, player.gy, player.id);
+      sinkCell(player.gx, player.gy, player.id, player.id);
     }
 
     if (distance === 2) {
@@ -992,9 +1009,27 @@
     if (!ai.isAI || ai.dead || ai.jumping) return;
     if (now - ai.lastDecision < ai.decisionInterval) return;
     ai.lastDecision = now;
-    ai.decisionInterval = AI_DECISION_MIN + Math.random() * AI_DECISION_RANGE;
+    ai.decisionInterval = AI_DECISION_TIME;
 
     const others = players.filter(p => p.id !== ai.id && !p.dead);
+
+    // If we're sharing a lilypad with a live opponent (from having pounced onto
+    // their pad — see below), the best move is to hop off immediately: leaving
+    // sinks the shared pad and drowns whoever's still standing on it, which
+    // credits us with the kill.
+    const cohabitant = others.find(o => !o.jumping && o.gx === ai.gx && o.gy === ai.gy);
+    if (cohabitant) {
+      const escapeDirs = [{ dx: 0, dy: -1 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }, { dx: 1, dy: 0 }];
+      const safe = escapeDirs.filter(d => {
+        const tx = ai.gx + d.dx, ty = ai.gy + d.dy;
+        return inBounds(tx, ty) && grid[ty][tx].alive && !occupiedByOtherPlayer(ai, tx, ty);
+      });
+      const pick = safe.length
+        ? safe[Math.floor(Math.random() * safe.length)]
+        : escapeDirs[Math.floor(Math.random() * escapeDirs.length)];
+      tryMove(ai, pick.dx, pick.dy, 1);
+      return;
+    }
 
     // Traps don't need aiming — place immediately.
     if (ai.powerup === 'trap') {
@@ -1019,6 +1054,14 @@
           return;
         }
       }
+    }
+
+    // No weapon shot available this turn — if an opponent's lilypad is right
+    // next to ours, hop straight onto it (sharing the pad for a moment).
+    // Next decision tick the cohabitant check above will make us hop off
+    // again, sinking the shared pad and drowning them if they're still there.
+    for (const opponent of others) {
+      if (tryPounceOnto(ai, opponent)) return;
     }
 
     // Find the nearest other player to drift toward when there's no powerup nearby.
@@ -1155,6 +1198,12 @@
     respawnSeconds = Math.max(1, Math.min(300, respawnSeconds));
     RESPAWN_TIME = respawnSeconds * 1000;
 
+    const decisionInput = document.getElementById('ai-decision-input');
+    let decisionSeconds = Number(decisionInput.value);
+    if (Number.isNaN(decisionSeconds)) decisionSeconds = 0.3;
+    decisionSeconds = Math.max(0.05, Math.min(10, decisionSeconds));
+    AI_DECISION_TIME = decisionSeconds * 1000;
+
     document.getElementById('menu-overlay').style.display = 'none';
     initGame(numAI);
   }
@@ -1171,6 +1220,9 @@
     startGame(numAI);
   });
   document.getElementById('ai-count-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('btn-ai').click();
+  });
+  document.getElementById('ai-decision-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') document.getElementById('btn-ai').click();
   });
   document.getElementById('respawn-input').addEventListener('keydown', (e) => {
