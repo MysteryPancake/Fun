@@ -1099,12 +1099,6 @@
         tryMove(ai, escape.dx, escape.dy, 2);
         return;
       }
-
-      // No lilypad reachable even with a shift-jump — nothing left to do but
-      // hop into the water (tryMove/completeJump handle the resulting death).
-      const desperate = dirs[Math.floor(Math.random() * dirs.length)];
-      tryMove(ai, desperate.dx, desperate.dy, 1);
-      return;
     }
 
     let choice = valid.find(d => {
