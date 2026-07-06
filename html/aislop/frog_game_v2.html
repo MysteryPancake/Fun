@@ -8,6 +8,7 @@
   html, body {
     margin: 0;
     height: 100%;
+    overflow: hidden;
     background: #0d3b52;
     display: flex;
     align-items: center;
@@ -24,14 +25,21 @@
   }
   #hud {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     width: 100%;
     font-size: 16px;
     font-weight: 600;
     letter-spacing: 0.3px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 18px;
+    padding-bottom: 6px;
   }
-  #hud { flex-wrap: wrap; row-gap: 8px; }
-  .hud-player { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; text-align: left; }
+  #hud::-webkit-scrollbar { height: 6px; }
+  #hud::-webkit-scrollbar-thumb { background: #2b8ca8; border-radius: 4px; }
+  #hud::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+  .hud-player { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; text-align: left; flex: 0 0 auto; white-space: nowrap; }
   .hud-player .powerup { font-size: 20px; }
   .hud-player .controls { font-size: 11px; font-weight: 400; opacity: 0.65; letter-spacing: 0.2px; }
   canvas {
@@ -133,7 +141,7 @@
 (function () {
   const CELL = 60;
   const MARGIN = 1; // tiles of open water surrounding the play grid
-  const RESPAWN_TIME = 20000; // ms
+  const RESPAWN_TIME = 10000; // ms
   const JUMP_BASE_DURATION = 90; // ms
   const MIN_GRID = 5;
   const MAX_GRID = 30;
@@ -149,7 +157,7 @@
   // AI players get a color spread around the hue wheel using the golden
   // angle, so any number of them stay visually distinct from each other.
   function colorForPlayer(index, numAI) {
-    if (index === 0) return '#8be28b'; // Player 1
+    if (index === 0) return '#ffffff'; // Player 1
     if (numAI === 0 && index === 1) return '#7fd0ff'; // Player 2 (human, 2P mode)
     const aiIndex = index - 1; // 0-based among AI players
     const hue = (25 + aiIndex * 137.508) % 360;
@@ -212,8 +220,10 @@
 
   function computeDimensions() {
     const hudHeight = document.getElementById('hud').getBoundingClientRect().height || 60;
+    const CONTAINER_GAP = 10; // matches #game-container's flex `gap`
+    const SAFETY_MARGIN = 12; // small buffer against rounding/scrollbar edge cases
     const availW = window.innerWidth - 32;
-    const availH = window.innerHeight - hudHeight - 60;
+    const availH = window.innerHeight - hudHeight - CONTAINER_GAP - SAFETY_MARGIN;
 
     const totalTilesW = Math.floor(Math.max(200, availW) / CELL);
     const totalTilesH = Math.floor(Math.max(200, availH) / CELL);
@@ -236,6 +246,41 @@
   const POWERUP_ICONS = { sword: '🗡️', grenade: '💣', fireball: '🔥', trap: '🪤' };
   const POWERUP_RESPAWN_CHANCE = 0.05;
   const POWERUP_TYPES = ['sword', 'grenade', 'fireball', 'trap'];
+
+  // Lilypads all look identical and only differ by position, so they're
+  // rendered once to an offscreen canvas and blitted with drawImage from then
+  // on. This avoids redoing several arc/stroke calls (with per-spoke sin/cos)
+  // for every tile on the board, every single frame — the biggest perf win
+  // since most of the board is lilypads at any given time.
+  function buildLilypadSprite() {
+    const pad = 6; // room for the stroke width so it isn't clipped
+    const size = Math.ceil(CELL * 0.38 * 2 + pad * 2);
+    const off = document.createElement('canvas');
+    off.width = size;
+    off.height = size;
+    const octx = off.getContext('2d');
+    const cx = size / 2, cy = size / 2;
+    octx.beginPath();
+    octx.arc(cx, cy, CELL * 0.38, 0.35, Math.PI * 2 - 0.35);
+    octx.closePath();
+    octx.fillStyle = '#1f4d2e';
+    octx.fill();
+    octx.strokeStyle = '#123018';
+    octx.lineWidth = 3;
+    octx.stroke();
+    octx.strokeStyle = 'rgba(255,255,255,0.22)';
+    octx.lineWidth = 1.5;
+    const spokeCount = 8;
+    for (let i = 0; i < spokeCount; i++) {
+      const angle = (Math.PI * 2 * i) / spokeCount;
+      octx.beginPath();
+      octx.moveTo(cx, cy);
+      octx.lineTo(cx + Math.cos(angle) * CELL * 0.36, cy + Math.sin(angle) * CELL * 0.36);
+      octx.stroke();
+    }
+    return off;
+  }
+  const lilypadSprite = buildLilypadSprite();
 
   let grid, players, ripples, effects, projectiles, bombs, sinkFades, lastTime;
 
@@ -315,17 +360,13 @@
     if (numAI === undefined) numAI = pendingNumAI;
     pendingNumAI = numAI;
 
-    grid = makeGrid();
-    ripples = [];
-    effects = [];
-    projectiles = [];
-    bombs = [];
-    sinkFades = [];
-
     const totalPlayers = numAI === 0 ? 2 : numAI + 1;
     const ids = Array.from({ length: totalPlayers }, (_, i) => 'p' + (i + 1));
-    const spawns = generateSpawnPoints(totalPlayers);
 
+    // Create the players first (spawn position filled in below, once the
+    // board size is known) so the HUD can be built and measured *before* we
+    // size the canvas. Measuring after the HUD has real content avoids a
+    // stale height guess leaving a leftover vertical scrollbar.
     players = ids.map((id, i) => {
       const isHumanP2 = numAI === 0 && i === 1;
       return makePlayer({
@@ -338,16 +379,37 @@
           ? { up: 'w', down: 's', left: 'a', right: 'd' }
           : (isHumanP2 ? { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' } : null),
         shiftCode: i === 0 ? 'ShiftLeft' : (isHumanP2 ? 'ShiftRight' : null),
-        spawnX: spawns[i].x, spawnY: spawns[i].y
+        spawnX: 0, spawnY: 0
       });
     });
 
     players.forEach((p, i) => { p.isAI = !(i === 0 || (numAI === 0 && i === 1)); });
 
-    spawnInitialPowerups(spawns);
     buildHud();
     players.forEach(updateHud);
+
+    // Now that the HUD reflects its real content, measure its actual height
+    // and size the canvas to whatever space is left in the window.
+    computeDimensions();
+
+    grid = makeGrid();
+    ripples = [];
+    effects = [];
+    projectiles = [];
+    bombs = [];
+    sinkFades = [];
+
+    const spawns = generateSpawnPoints(totalPlayers);
+    players.forEach((p, i) => {
+      p.spawnX = spawns[i].x;
+      p.spawnY = spawns[i].y;
+      p.gx = spawns[i].x;
+      p.gy = spawns[i].y;
+    });
+
+    spawnInitialPowerups(spawns);
   }
+
 
   function buildHud() {
     const hud = document.getElementById('hud');
@@ -694,9 +756,9 @@
     ctx.strokeStyle = 'rgba(255,255,255,0.05)';
     ctx.lineWidth = 2;
     const waveOffset = (time / 1000) % (Math.PI * 2);
-    for (let i = 0; i < canvas.height; i += 16) {
+    for (let i = 0; i < canvas.height; i += 28) {
       ctx.beginPath();
-      for (let x = 0; x <= canvas.width; x += 10) {
+      for (let x = 0; x <= canvas.width; x += 22) {
         const y = i + Math.sin(x * 0.03 + waveOffset + i) * 3;
         if (x === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
@@ -707,27 +769,15 @@
 
   function drawLilypad(gx, gy, alpha, cell) {
     const { x, y } = cellCenter(gx, gy);
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.beginPath();
-    ctx.arc(x, y, CELL * 0.38, 0.35, Math.PI * 2 - 0.35);
-    ctx.closePath();
-    ctx.fillStyle = '#1f4d2e';
-    ctx.fill();
-    ctx.strokeStyle = '#123018';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
-    ctx.lineWidth = 1.5;
-    const spokeCount = 8;
-    for (let i = 0; i < spokeCount; i++) {
-      const angle = (Math.PI * 2 * i) / spokeCount;
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + Math.cos(angle) * CELL * 0.36, y + Math.sin(angle) * CELL * 0.36);
-      ctx.stroke();
+    const size = lilypadSprite.width;
+    if (alpha < 1) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(lilypadSprite, x - size / 2, y - size / 2);
+      ctx.restore();
+    } else {
+      ctx.drawImage(lilypadSprite, x - size / 2, y - size / 2);
     }
-    ctx.restore();
   }
 
   function drawPowerupIcon(gx, gy, type) {
