@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lilypad Hop</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #0d3b52;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #eafff0;
+  }
+  #game-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  #hud {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  #hud { flex-wrap: wrap; row-gap: 8px; }
+  .hud-player { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; text-align: left; }
+  .hud-player .powerup { font-size: 20px; }
+  .hud-player .controls { font-size: 11px; font-weight: 400; opacity: 0.65; letter-spacing: 0.2px; }
+  canvas {
+    background: #0d3b52;
+    display: block;
+  }
+  #menu-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(13, 59, 82, 0.94);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    z-index: 10;
+  }
+  #menu-overlay .title {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  #menu-overlay .ai-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 2px solid #2b8ca8;
+    border-radius: 12px;
+    background: rgba(20, 88, 111, 0.4);
+  }
+  #menu-overlay .ai-count-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  #menu-overlay input[type="number"] {
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    color: #eafff0;
+    background: #14586f;
+    border: 2px solid #2b8ca8;
+    border-radius: 8px;
+    width: 64px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+  #menu-overlay input[type="number"]:focus {
+    outline: none;
+    border-color: #7fd0ff;
+  }
+  #menu-overlay button {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    color: #eafff0;
+    background: #14586f;
+    border: 2px solid #2b8ca8;
+    border-radius: 10px;
+    padding: 14px 26px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  #menu-overlay button:hover {
+    background: #1c7690;
+    transform: translateY(-1px);
+  }
+  #menu-overlay .hint {
+    font-size: 12px;
+    opacity: 0.6;
+    text-align: center;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="hud"></div>
+    <canvas id="gameCanvas"></canvas>
+    <div id="menu-overlay">
+      <div class="title">🐸 Choose Game Mode</div>
+      <button id="btn-2p">2 Players</button>
+      <div class="ai-row">
+        <div class="ai-count-row">
+          <label for="ai-count-input">AI opponents:</label>
+          <input type="number" id="ai-count-input" min="1" step="1" value="1">
+        </div>
+        <button id="btn-ai">Play vs AI</button>
+      </div>
+      <div class="hint">2 Players: local multiplayer, Player 2 uses Arrow keys<br>Play vs AI: you (WASD) vs any number of AI-controlled frogs<br>or press 1 for 2 Players, 2 / 3 / 4 for 1 / 2 / 3 AI opponents</div>
+    </div>
+  </div>
+
+
+<script>
+(function () {
+  const CELL = 60;
+  const MARGIN = 1; // tiles of open water surrounding the play grid
+  const RESPAWN_TIME = 20000; // ms
+  const JUMP_BASE_DURATION = 90; // ms
+  const MIN_GRID = 5;
+  const MAX_GRID = 30;
+
+  // AI players decide roughly this often (a bit slower than a snap reaction,
+  // but still quicker than the original 350-650ms window).
+  const AI_DECISION_MIN = 230;
+  const AI_DECISION_RANGE = 200;
+  // Chance an AI uses a shift-style double jump on a given move, for extra speed.
+  const AI_DOUBLE_JUMP_CHANCE = 0.12;
+
+  // Player 1 and (in 2-player mode) Player 2 keep fixed colors; any further
+  // AI players get a color spread around the hue wheel using the golden
+  // angle, so any number of them stay visually distinct from each other.
+  function colorForPlayer(index, numAI) {
+    if (index === 0) return '#8be28b'; // Player 1
+    if (numAI === 0 && index === 1) return '#7fd0ff'; // Player 2 (human, 2P mode)
+    const aiIndex = index - 1; // 0-based among AI players
+    const hue = (25 + aiIndex * 137.508) % 360;
+    return `hsl(${hue.toFixed(0)}, 72%, 62%)`;
+  }
+
+  function labelForPlayer(index, numAI) {
+    if (index === 0) return 'Player 1';
+    if (numAI === 0 && index === 1) return 'Player 2';
+    return 'AI ' + index; // p2 -> AI 1, p3 -> AI 2, ...
+  }
+
+  // Builds concentric rings from the outside of the grid inward, so spawn
+  // points can be spread evenly around the whole board no matter how many
+  // players there are.
+  function buildRings() {
+    const rings = [];
+    let l = 0, r = GRID_W - 1, t = 0, b = GRID_H - 1;
+    while (l <= r && t <= b) {
+      const ring = [];
+      for (let x = l; x <= r; x++) ring.push({ x, y: t });
+      if (t !== b) for (let y = t + 1; y <= b; y++) ring.push({ x: r, y });
+      if (l !== r && t !== b) for (let x = r - 1; x >= l; x--) ring.push({ x, y: b });
+      if (l !== r && t !== b) for (let y = b - 1; y > t; y--) ring.push({ x: l, y });
+      const seen = new Set();
+      const dedup = [];
+      ring.forEach(p => {
+        const key = p.x + ',' + p.y;
+        if (!seen.has(key)) { seen.add(key); dedup.push(p); }
+      });
+      rings.push(dedup);
+      l++; r--; t++; b--;
+    }
+    return rings;
+  }
+
+  function generateSpawnPoints(count) {
+    const flat = [].concat(...buildRings());
+    const n = flat.length;
+    if (n === 0) return Array.from({ length: count }, () => ({ x: 0, y: 0 }));
+
+    const points = [];
+    const used = new Set();
+    const take = Math.min(count, n);
+    for (let i = 0; i < take; i++) {
+      let idx = Math.floor((i * n) / take);
+      while (used.has(idx)) idx = (idx + 1) % n;
+      used.add(idx);
+      points.push(flat[idx]);
+    }
+    // If there are more players than free tiles on the board, wrap around
+    // and double up rather than erroring out.
+    for (let i = take; i < count; i++) points.push(flat[i % n]);
+    return points;
+  }
+
+  let GRID_W, GRID_H, OFFSET, CANVAS_WIDTH, CANVAS_HEIGHT;
+
+  const canvas = document.getElementById('gameCanvas');
+
+  function computeDimensions() {
+    const hudHeight = document.getElementById('hud').getBoundingClientRect().height || 60;
+    const availW = window.innerWidth - 32;
+    const availH = window.innerHeight - hudHeight - 60;
+
+    const totalTilesW = Math.floor(Math.max(200, availW) / CELL);
+    const totalTilesH = Math.floor(Math.max(200, availH) / CELL);
+
+    GRID_W = Math.max(MIN_GRID, Math.min(MAX_GRID, totalTilesW - MARGIN * 2));
+    GRID_H = Math.max(MIN_GRID, Math.min(MAX_GRID, totalTilesH - MARGIN * 2));
+
+    OFFSET = MARGIN * CELL;
+    CANVAS_WIDTH = (GRID_W + MARGIN * 2) * CELL;
+    CANVAS_HEIGHT = (GRID_H + MARGIN * 2) * CELL;
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
+    document.getElementById('game-container').style.width = CANVAS_WIDTH + 'px';
+  }
+
+  computeDimensions();
+
+  const ctx = canvas.getContext('2d');
+
+  const POWERUP_ICONS = { sword: '🗡️', grenade: '💣', fireball: '🔥', trap: '🪤' };
+  const POWERUP_RESPAWN_CHANCE = 0.05;
+  const POWERUP_TYPES = ['sword', 'grenade', 'fireball', 'trap'];
+
+  let grid, players, ripples, effects, projectiles, bombs, sinkFades, lastTime;
+
+  function localGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function localSet(key, val) { try { localStorage.setItem(key, val); } catch (e) { /* ignore */ } }
+
+  function makeGrid() {
+    const g = [];
+    for (let y = 0; y < GRID_H; y++) {
+      const row = [];
+      for (let x = 0; x < GRID_W; x++) {
+        row.push({ alive: true, timer: 0, powerup: null, trap: false, trapOwner: null });
+      }
+      g.push(row);
+    }
+    return g;
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function spawnInitialPowerups(excludeCells) {
+    const candidates = [];
+    for (let y = 0; y < GRID_H; y++) {
+      for (let x = 0; x < GRID_W; x++) {
+        const excluded = excludeCells.some(c => c.x === x && c.y === y);
+        if (!excluded) candidates.push({ x, y });
+      }
+    }
+    shuffle(candidates);
+    const chosen = candidates.slice(0, POWERUP_TYPES.length);
+    chosen.forEach((cell, i) => {
+      grid[cell.y][cell.x].powerup = POWERUP_TYPES[i];
+    });
+  }
+
+  function makePlayer(config) {
+    return {
+      id: config.id,
+      emoji: config.emoji,
+      color: config.color,
+      label: config.label,
+      keys: config.keys,
+      shiftCode: config.shiftCode,
+      hudPrefix: config.hudPrefix,
+      spawnX: config.spawnX,
+      spawnY: config.spawnY,
+      gx: config.spawnX,
+      gy: config.spawnY,
+      jumping: false,
+      jumpFrom: null,
+      jumpTo: null,
+      jumpStart: 0,
+      jumpDuration: 0,
+      dead: false,
+      deathStart: 0,
+      score: 0,
+      best: Number(localGet('lilypad-best-' + config.id)) || 0,
+      powerup: null,
+      armed: false,
+      isAI: false,
+      lastDecision: 0,
+      decisionInterval: AI_DECISION_MIN + Math.random() * AI_DECISION_RANGE
+    };
+  }
+
+  // numAI: 0 = classic 2-human-player mode; any number 1+ = one human (p1)
+  // plus that many AI-controlled frogs, spread evenly around the board.
+  let pendingNumAI = 0;
+
+  function initGame(numAI) {
+    if (numAI === undefined) numAI = pendingNumAI;
+    pendingNumAI = numAI;
+
+    grid = makeGrid();
+    ripples = [];
+    effects = [];
+    projectiles = [];
+    bombs = [];
+    sinkFades = [];
+
+    const totalPlayers = numAI === 0 ? 2 : numAI + 1;
+    const ids = Array.from({ length: totalPlayers }, (_, i) => 'p' + (i + 1));
+    const spawns = generateSpawnPoints(totalPlayers);
+
+    players = ids.map((id, i) => {
+      const isHumanP2 = numAI === 0 && i === 1;
+      return makePlayer({
+        id,
+        emoji: '🐸',
+        color: colorForPlayer(i, numAI),
+        label: labelForPlayer(i, numAI),
+        hudPrefix: id,
+        keys: i === 0
+          ? { up: 'w', down: 's', left: 'a', right: 'd' }
+          : (isHumanP2 ? { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' } : null),
+        shiftCode: i === 0 ? 'ShiftLeft' : (isHumanP2 ? 'ShiftRight' : null),
+        spawnX: spawns[i].x, spawnY: spawns[i].y
+      });
+    });
+
+    players.forEach((p, i) => { p.isAI = !(i === 0 || (numAI === 0 && i === 1)); });
+
+    spawnInitialPowerups(spawns);
+    buildHud();
+    players.forEach(updateHud);
+  }
+
+  function buildHud() {
+    const hud = document.getElementById('hud');
+    hud.innerHTML = '';
+    players.forEach(player => {
+      const div = document.createElement('div');
+      div.className = 'hud-player';
+      div.style.color = player.color;
+
+      const controls = player.id === 'p1'
+        ? 'WASD move · E to arm, then WASD to throw'
+        : (player.isAI ? 'Controlled by AI' : 'Arrows move · Ctrl to arm, then Arrows to throw');
+
+      div.innerHTML =
+        '<div>🐸 ' + player.label + ' — Kills: <span class="score">0</span> (Best <span class="best">0</span>)</div>' +
+        '<div class="powerup">Powerup: <span class="powerup-val">—</span></div>' +
+        '<div class="controls">' + controls + '</div>';
+      hud.appendChild(div);
+      player._hudEl = div;
+    });
+  }
+
+  function updateHud(player) {
+    if (!player._hudEl) return;
+    player._hudEl.querySelector('.score').textContent = player.score;
+    player._hudEl.querySelector('.best').textContent = player.best;
+    player._hudEl.querySelector('.powerup-val').textContent =
+      player.powerup ? POWERUP_ICONS[player.powerup] + (player.armed ? ' (ready — press a direction)' : '') : '—';
+  }
+
+  function addRipple(gx, gy) {
+    ripples.push({ x: gx, y: gy, start: performance.now() });
+  }
+
+  function addSinkFade(gx, gy) {
+    sinkFades.push({ x: gx, y: gy, start: performance.now() });
+  }
+
+  function cellCenter(gx, gy) {
+    return { x: OFFSET + gx * CELL + CELL / 2, y: OFFSET + gy * CELL + CELL / 2 };
+  }
+
+  function inBounds(x, y) {
+    return x >= 0 && x < GRID_W && y >= 0 && y < GRID_H;
+  }
+
+  function randomPowerupType() {
+    return POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
+  }
+
+  function occupiedByOtherPlayer(player, x, y) {
+    return players.some(p => {
+      if (p.id === player.id || p.dead) return false;
+      const px = p.jumping ? p.jumpTo.x : p.gx;
+      const py = p.jumping ? p.jumpTo.y : p.gy;
+      return px === x && py === y;
+    });
+  }
+
+  function pickRespawnTile(player) {
+    if (grid[player.spawnY][player.spawnX].alive && !occupiedByOtherPlayer(player, player.spawnX, player.spawnY)) {
+      return { x: player.spawnX, y: player.spawnY };
+    }
+    const aliveTiles = [];
+    for (let y = 0; y < GRID_H; y++) {
+      for (let x = 0; x < GRID_W; x++) {
+        if (grid[y][x].alive && !occupiedByOtherPlayer(player, x, y)) aliveTiles.push({ x, y });
+      }
+    }
+    if (aliveTiles.length === 0) return { x: player.spawnX, y: player.spawnY };
+    return aliveTiles[Math.floor(Math.random() * aliveTiles.length)];
+  }
+
+  // ---- Movement ----
+  function tryMove(player, dx, dy, distance) {
+    if (player.jumping || player.dead) return;
+    const targetX = player.gx + dx * distance;
+    const targetY = player.gy + dy * distance;
+
+    const origin = grid[player.gy][player.gx];
+    const ownTrap = origin.trap && origin.trapOwner === player.id;
+    if (!ownTrap) {
+      sinkCell(player.gx, player.gy, player.id);
+    }
+
+    if (distance === 2) {
+      // A shift-jump smashes through the lilypad it leaps over.
+      const midX = player.gx + dx;
+      const midY = player.gy + dy;
+      sinkTile(midX, midY, player.id);
+    }
+
+    player.jumping = true;
+    player.jumpFrom = { x: player.gx, y: player.gy };
+    player.jumpTo = { x: targetX, y: targetY };
+    player.jumpStart = performance.now();
+    player.jumpDuration = JUMP_BASE_DURATION * (0.5 + distance * 0.5);
+  }
+
+  function completeJump(player) {
+    const tx = player.jumpTo.x, ty = player.jumpTo.y;
+    player.gx = tx;
+    player.gy = ty;
+    player.jumping = false;
+
+    if (!inBounds(tx, ty)) { startDeath(player); return; }
+
+    const cell = grid[ty][tx];
+    if (cell.trap && cell.alive && cell.trapOwner !== player.id) {
+      addSinkFade(tx, ty);
+      sinkCell(tx, ty, player.id);
+      awardKill(cell.trapOwner);
+      startDeath(player);
+      return;
+    }
+    if (!cell.alive) { startDeath(player); return; }
+
+    // safe landing
+    if (cell.powerup) {
+      player.powerup = cell.powerup;
+      cell.powerup = null;
+    }
+    updateHud(player);
+  }
+
+  function startDeath(player) {
+    player.dead = true;
+    player.armed = false;
+    player.deathStart = performance.now();
+    addRipple(player.gx, player.gy);
+  }
+
+  function finishDeath(player) {
+    if (player.score > player.best) {
+      player.best = player.score;
+      localSet('lilypad-best-' + player.id, String(player.best));
+    }
+    const tile = pickRespawnTile(player);
+    player.gx = tile.x;
+    player.gy = tile.y;
+    player.powerup = null;
+    player.armed = false;
+    player.dead = false;
+    player.jumping = false;
+    addRipple(player.gx, player.gy);
+    updateHud(player);
+  }
+
+  function awardKill(killerId) {
+    if (!killerId) return;
+    const killer = players.find(p => p.id === killerId);
+    if (killer) {
+      killer.score++;
+      if (killer.score > killer.best) {
+        killer.best = killer.score;
+        localSet('lilypad-best-' + killer.id, String(killer.best));
+      }
+      updateHud(killer);
+    }
+  }
+
+  // ---- Weapons ----
+  function sinkCell(x, y, excludeId, killerId) {
+    if (!inBounds(x, y)) return;
+    const cell = grid[y][x];
+    cell.alive = false;
+    cell.timer = RESPAWN_TIME;
+    cell.trap = false;
+    cell.trapOwner = null;
+    addRipple(x, y);
+    players.forEach(pl => {
+      if (pl.id === excludeId) return;
+      if (!pl.jumping && !pl.dead && pl.gx === x && pl.gy === y) {
+        startDeath(pl);
+        if (killerId && killerId !== pl.id) awardKill(killerId);
+      }
+    });
+  }
+
+  function sinkTile(x, y, killerId) {
+    sinkCell(x, y, null, killerId);
+  }
+
+  function useSword(player, dir) {
+    const perp = { dx: -dir.dy, dy: dir.dx };
+    const targets = [-1, 0, 1].map(off => ({
+      x: player.gx + dir.dx + perp.dx * off,
+      y: player.gy + dir.dy + perp.dy * off
+    }));
+    const c = cellCenter(player.gx, player.gy);
+    const baseAngle = Math.atan2(dir.dy, dir.dx);
+    effects.push({
+      type: 'arcSlash',
+      cx: c.x, cy: c.y,
+      radius: CELL * 0.95,
+      startAngle: baseAngle - Math.PI / 4,
+      endAngle: baseAngle + Math.PI / 4,
+      start: performance.now()
+    });
+    targets.forEach(t => sinkTile(t.x, t.y, player.id));
+  }
+
+  function useFireball(player, dir) {
+    projectiles.push({
+      ownerId: player.id,
+      dir,
+      x: player.gx + dir.dx,
+      y: player.gy + dir.dy,
+      hitCells: new Set()
+    });
+  }
+
+  function useGrenade(player, dir) {
+    const BOMB_RANGE = 5;
+    const targetX = player.gx + dir.dx * BOMB_RANGE;
+    const targetY = player.gy + dir.dy * BOMB_RANGE;
+    const from = cellCenter(player.gx, player.gy);
+    const to = cellCenter(targetX, targetY);
+    bombs.push({
+      ownerId: player.id,
+      x1: from.x, y1: from.y,
+      x2: to.x, y2: to.y,
+      targetX, targetY,
+      start: performance.now(),
+      duration: 220 + BOMB_RANGE * 45
+    });
+  }
+
+  function resolveBomb(b) {
+    const tx = b.targetX, ty = b.targetY;
+    for (let y = ty - 1; y <= ty + 1; y++) {
+      for (let x = tx - 1; x <= tx + 1; x++) {
+        const d = Math.hypot(x - tx, y - ty);
+        if (d <= 1.5) sinkTile(x, y, b.ownerId);
+      }
+    }
+    const c = cellCenter(tx, ty);
+    effects.push({ type: 'explosion', x: c.x, y: c.y, start: performance.now() });
+  }
+
+  function updateBombs() {
+    const now = performance.now();
+    for (let i = bombs.length - 1; i >= 0; i--) {
+      const b = bombs[i];
+      if (now - b.start >= b.duration) {
+        resolveBomb(b);
+        bombs.splice(i, 1);
+      }
+    }
+  }
+
+  function useTrap(player) {
+    // Traps can only be set on the lilypad the player is currently standing on.
+    const x = player.gx, y = player.gy;
+    if (inBounds(x, y)) {
+      grid[y][x].trap = true;
+      grid[y][x].trapOwner = player.id;
+      grid[y][x].powerup = null;
+    }
+  }
+
+  function useWeapon(player, dir) {
+    if (!player.powerup || player.dead) return;
+    const type = player.powerup;
+    player.powerup = null;
+    player.armed = false;
+    updateHud(player);
+    if (type === 'sword') useSword(player, dir);
+    else if (type === 'fireball') useFireball(player, dir);
+    else if (type === 'grenade') useGrenade(player, dir);
+    else if (type === 'trap') useTrap(player);
+  }
+
+  // ---- Input ----
+  // Arm key per player: p1 uses 'e', p2 uses 'Control'. Arming a powerup means
+  // the next WASD/Arrow press for that player fires the item in that direction
+  // instead of moving.
+  const ARM_KEYS = { p1: 'e', p2: 'Control' };
+
+  // Shift-jump distance is tied to a specific side: left shift for the WASD
+  // player, right shift for the arrow-key player.
+  const shiftState = { ShiftLeft: false, ShiftRight: false };
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') shiftState[e.code] = true;
+  });
+  window.addEventListener('keyup', (e) => {
+    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') shiftState[e.code] = false;
+  });
+
+  window.addEventListener('keydown', (e) => {
+    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+
+    if (!gameStarted) {
+      if (e.target && e.target.tagName === 'INPUT') return;
+      if (key === '1') startGame(0);
+      else if (key === '2') startGame(1);
+      else if (key === '3') startGame(2);
+      else if (key === '4') startGame(3);
+      return;
+    }
+
+    let handled = false;
+
+    players.forEach(player => {
+      if (player.isAI) return;
+      if (key === ARM_KEYS[player.id] && !player.dead && player.powerup && !player.armed) {
+        if (player.powerup === 'trap') {
+          // Traps don't need a direction — place it right away.
+          useWeapon(player, { dx: 0, dy: 0 });
+        } else {
+          player.armed = true;
+          updateHud(player);
+        }
+        handled = true;
+      }
+    });
+
+    players.forEach(player => {
+      if (player.isAI) return;
+      const k = player.keys;
+      let dir = null;
+      if (key === k.up) dir = { dx: 0, dy: -1 };
+      else if (key === k.down) dir = { dx: 0, dy: 1 };
+      else if (key === k.left) dir = { dx: -1, dy: 0 };
+      else if (key === k.right) dir = { dx: 1, dy: 0 };
+      if (dir) {
+        handled = true;
+        if (player.armed && player.powerup && !player.dead) {
+          useWeapon(player, dir);
+        } else {
+          const distance = shiftState[player.shiftCode] ? 2 : 1;
+          tryMove(player, dir.dx, dir.dy, distance);
+        }
+      }
+    });
+
+    if (handled) e.preventDefault();
+  });
+
+  // ---- Drawing ----
+  function drawWater(time) {
+    ctx.fillStyle = '#0d3b52';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 2;
+    const waveOffset = (time / 1000) % (Math.PI * 2);
+    for (let i = 0; i < canvas.height; i += 16) {
+      ctx.beginPath();
+      for (let x = 0; x <= canvas.width; x += 10) {
+        const y = i + Math.sin(x * 0.03 + waveOffset + i) * 3;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+  }
+
+  function drawLilypad(gx, gy, alpha, cell) {
+    const { x, y } = cellCenter(gx, gy);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.arc(x, y, CELL * 0.38, 0.35, Math.PI * 2 - 0.35);
+    ctx.closePath();
+    ctx.fillStyle = '#1f4d2e';
+    ctx.fill();
+    ctx.strokeStyle = '#123018';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+    ctx.lineWidth = 1.5;
+    const spokeCount = 8;
+    for (let i = 0; i < spokeCount; i++) {
+      const angle = (Math.PI * 2 * i) / spokeCount;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + Math.cos(angle) * CELL * 0.36, y + Math.sin(angle) * CELL * 0.36);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawPowerupIcon(gx, gy, type) {
+    const { x, y } = cellCenter(gx, gy);
+    ctx.save();
+    ctx.font = `${CELL * 0.4}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(POWERUP_ICONS[type], x, y);
+    ctx.restore();
+  }
+
+  function drawRipples(time) {
+    ripples = ripples.filter(r => time - r.start < 700);
+    for (const r of ripples) {
+      const t = (time - r.start) / 700;
+      const { x, y } = cellCenter(r.x, r.y);
+      ctx.save();
+      ctx.globalAlpha = 1 - t;
+      ctx.beginPath();
+      ctx.arc(x, y, CELL * 0.15 + t * CELL * 0.5, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function drawSinkFades(time) {
+    const DURATION = 500;
+    sinkFades = sinkFades.filter(f => time - f.start < DURATION);
+    for (const f of sinkFades) {
+      const t = (time - f.start) / DURATION;
+      const { x, y } = cellCenter(f.x, f.y);
+      const scale = 1 - t * 0.25;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, 1 - t);
+      ctx.beginPath();
+      ctx.arc(x, y, CELL * 0.38 * scale, 0.35, Math.PI * 2 - 0.35);
+      ctx.closePath();
+      ctx.fillStyle = '#ff8a3d';
+      ctx.fill();
+      ctx.strokeStyle = '#b85a1e';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function drawEffects(time) {
+    effects = effects.filter(fx => time - fx.start < 450);
+    for (const fx of effects) {
+      const t = (time - fx.start) / 450;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, 1 - t);
+      if (fx.type === 'arcSlash') {
+        const SWEEP_DURATION = 130; // ms to complete the swipe itself
+        const elapsed = time - fx.start;
+        const sweepT = Math.min(1, elapsed / SWEEP_DURATION);
+        const eased = 1 - Math.pow(1 - sweepT, 2); // ease-out for a snappy swipe
+        const currentEndAngle = fx.startAngle + (fx.endAngle - fx.startAngle) * eased;
+
+        // fade only kicks in once the swipe has finished
+        const fadeT = elapsed < SWEEP_DURATION ? 0 : (elapsed - SWEEP_DURATION) / (450 - SWEEP_DURATION);
+        ctx.globalAlpha = Math.max(0, 1 - fadeT);
+
+        ctx.strokeStyle = '#fffbe0';
+        ctx.lineCap = 'round';
+        ctx.lineWidth = 8 * (1 - fadeT) + 3; // thicker mid-swing, thins as it fades
+        ctx.shadowColor = '#fffbe0';
+        ctx.shadowBlur = 12 * (1 - fadeT);
+        ctx.beginPath();
+        ctx.arc(fx.cx, fx.cy, fx.radius, fx.startAngle, currentEndAngle);
+        ctx.stroke();
+
+        // bright tip at the leading edge while the blade is still swinging
+        if (sweepT < 1) {
+          const tipX = fx.cx + Math.cos(currentEndAngle) * fx.radius;
+          const tipY = fx.cy + Math.sin(currentEndAngle) * fx.radius;
+          ctx.save();
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = '#fffbe0';
+          ctx.shadowBlur = 14;
+          ctx.beginPath();
+          ctx.arc(tipX, tipY, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      } else if (fx.type === 'explosion') {
+        ctx.beginPath();
+        ctx.arc(fx.x, fx.y, CELL * 0.3 + t * CELL * 1.6, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ff8a3d';
+        ctx.lineWidth = 6 * (1 - t) + 1;
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255,138,61,0.25)';
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+
+  function drawProjectiles() {
+    for (const p of projectiles) {
+      const { x, y } = cellCenter(p.x, p.y);
+      ctx.save();
+      ctx.shadowColor = '#ff6a00';
+      ctx.shadowBlur = 18;
+      ctx.font = `${CELL * 0.55}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🔥', x, y);
+      ctx.restore();
+    }
+  }
+
+  function drawBombs(time) {
+    for (const b of bombs) {
+      const t = Math.min(1, (time - b.start) / b.duration);
+      const x = b.x1 + (b.x2 - b.x1) * t;
+      const y = b.y1 + (b.y2 - b.y1) * t;
+      const dist = Math.hypot(b.x2 - b.x1, b.y2 - b.y1);
+      const arcHeight = Math.min(CELL * 1.8, dist * 0.45 + CELL * 0.3);
+      const lift = Math.sin(t * Math.PI) * arcHeight;
+      const scale = 1 + Math.sin(t * Math.PI) * 0.25;
+
+      // shadow on the water shows how high the bomb currently is
+      ctx.save();
+      ctx.globalAlpha = 0.35 * (1 - Math.sin(t * Math.PI) * 0.6);
+      ctx.beginPath();
+      ctx.ellipse(x, y, CELL * 0.18, CELL * 0.08, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#000';
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(x, y - lift);
+      ctx.rotate(t * Math.PI * 3);
+      ctx.font = `${CELL * 0.5 * scale}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('💣', 0, 0);
+      ctx.restore();
+    }
+  }
+
+  function drawPlayer(player, time) {
+    let rx, ry, hop = 0, alpha = 1;
+
+    if (player.jumping) {
+      const t = Math.min(1, (time - player.jumpStart) / player.jumpDuration);
+      const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+      rx = player.jumpFrom.x + (player.jumpTo.x - player.jumpFrom.x) * eased;
+      ry = player.jumpFrom.y + (player.jumpTo.y - player.jumpFrom.y) * eased;
+      hop = Math.sin(t * Math.PI) * -18;
+      if (t >= 1) completeJump(player);
+    } else {
+      rx = player.gx;
+      ry = player.gy;
+    }
+
+    if (player.dead) {
+      const t = Math.min(1, (time - player.deathStart) / 500);
+      alpha = 1 - t;
+      hop = t * 10;
+      if (t >= 1) finishDeath(player);
+    }
+
+    const { x, y } = cellCenter(rx, ry);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    if (player.color) {
+      ctx.beginPath();
+      ctx.arc(x, y + hop, CELL * 0.33, 0, Math.PI * 2);
+      ctx.strokeStyle = player.color;
+      ctx.lineWidth = 3;
+      ctx.shadowColor = player.color;
+      ctx.shadowBlur = 8;
+      ctx.stroke();
+    }
+    ctx.font = `${CELL * 0.6}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(player.emoji, x, y + hop);
+    ctx.restore();
+  }
+
+  function updateProjectiles(dt) {
+    const TILES_PER_MS = 0.007;
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+      const p = projectiles[i];
+      p.x += p.dir.dx * TILES_PER_MS * dt;
+      p.y += p.dir.dy * TILES_PER_MS * dt;
+      const gx = Math.round(p.x), gy = Math.round(p.y);
+      const key = gx + ',' + gy;
+      if (!p.hitCells.has(key)) {
+        p.hitCells.add(key);
+        sinkTile(gx, gy, p.ownerId);
+      }
+      if (gx < -MARGIN - 2 || gx > GRID_W + MARGIN + 1 || gy < -MARGIN - 2 || gy > GRID_H + MARGIN + 1) {
+        projectiles.splice(i, 1);
+      }
+    }
+  }
+
+  // ---- Simple AI ----
+  function aiDecide(ai, now) {
+    if (!ai.isAI || ai.dead || ai.jumping) return;
+    if (now - ai.lastDecision < ai.decisionInterval) return;
+    ai.lastDecision = now;
+    ai.decisionInterval = AI_DECISION_MIN + Math.random() * AI_DECISION_RANGE;
+
+    const others = players.filter(p => p.id !== ai.id && !p.dead);
+
+    // Traps don't need aiming — place immediately.
+    if (ai.powerup === 'trap') {
+      useWeapon(ai, { dx: 0, dy: 0 });
+      return;
+    }
+
+    // Attack whichever other player (human or AI) we're lined up with and in range of.
+    if (ai.powerup && others.length) {
+      for (const opponent of others) {
+        const dx = opponent.gx - ai.gx, dy = opponent.gy - ai.gy;
+        const aligned = (dx === 0 && dy !== 0) || (dy === 0 && dx !== 0);
+        if (!aligned) continue;
+        const dist = Math.abs(dx) + Math.abs(dy);
+        const inRange =
+          (ai.powerup === 'sword' && dist === 1) ||
+          (ai.powerup === 'fireball' && dist <= 10) ||
+          (ai.powerup === 'grenade' && dist <= 6);
+        if (inRange) {
+          const dir = dx === 0 ? { dx: 0, dy: dy > 0 ? 1 : -1 } : { dx: dx > 0 ? 1 : -1, dy: 0 };
+          useWeapon(ai, dir);
+          return;
+        }
+      }
+    }
+
+    // Find the nearest other player to drift toward when there's no powerup nearby.
+    let nearest = null, nearestDist = Infinity;
+    for (const o of others) {
+      const d = Math.abs(o.gx - ai.gx) + Math.abs(o.gy - ai.gy);
+      if (d < nearestDist) { nearestDist = d; nearest = o; }
+    }
+
+    // Otherwise, move: prefer a nearby powerup, else drift toward the nearest player, else wander.
+    const dirs = [{ dx: 0, dy: -1 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }, { dx: 1, dy: 0 }];
+    const valid = dirs.filter(d => {
+      const tx = ai.gx + d.dx, ty = ai.gy + d.dy;
+      return inBounds(tx, ty) && grid[ty][tx].alive && !occupiedByOtherPlayer(ai, tx, ty);
+    });
+    if (valid.length === 0) {
+      // Stranded: every adjacent lilypad is gone or blocked. Try a shift-jump
+      // two tiles over first — that move ignores the (sunk) tile in between,
+      // so it can reach a safe lilypad the AI otherwise couldn't step onto.
+      const valid2 = dirs.filter(d => {
+        const tx = ai.gx + d.dx * 2, ty = ai.gy + d.dy * 2;
+        return inBounds(tx, ty) && grid[ty][tx].alive && !occupiedByOtherPlayer(ai, tx, ty);
+      });
+
+      if (valid2.length > 0) {
+        let escape = null;
+        if (nearest && Math.random() < 0.55) {
+          const dx = nearest.gx - ai.gx, dy = nearest.gy - ai.gy;
+          const preferred = Math.abs(dx) > Math.abs(dy)
+            ? [{ dx: dx > 0 ? 1 : -1, dy: 0 }, { dx: 0, dy: dy > 0 ? 1 : (dy < 0 ? -1 : 0) }]
+            : [{ dx: 0, dy: dy > 0 ? 1 : -1 }, { dx: dx > 0 ? 1 : (dx < 0 ? -1 : 0), dy: 0 }];
+          escape = preferred.find(p => valid2.some(v => v.dx === p.dx && v.dy === p.dy));
+        }
+        if (!escape) escape = valid2[Math.floor(Math.random() * valid2.length)];
+        tryMove(ai, escape.dx, escape.dy, 2);
+        return;
+      }
+
+      // No lilypad reachable even with a shift-jump — nothing left to do but
+      // hop into the water (tryMove/completeJump handle the resulting death).
+      const desperate = dirs[Math.floor(Math.random() * dirs.length)];
+      tryMove(ai, desperate.dx, desperate.dy, 1);
+      return;
+    }
+
+    let choice = valid.find(d => {
+      const tx = ai.gx + d.dx, ty = ai.gy + d.dy;
+      return grid[ty][tx].powerup;
+    });
+
+    if (!choice && nearest && Math.random() < 0.55) {
+      const dx = nearest.gx - ai.gx, dy = nearest.gy - ai.gy;
+      const preferred = Math.abs(dx) > Math.abs(dy)
+        ? [{ dx: dx > 0 ? 1 : -1, dy: 0 }, { dx: 0, dy: dy > 0 ? 1 : (dy < 0 ? -1 : 0) }]
+        : [{ dx: 0, dy: dy > 0 ? 1 : -1 }, { dx: dx > 0 ? 1 : (dx < 0 ? -1 : 0), dy: 0 }];
+      choice = preferred.find(p => valid.some(v => v.dx === p.dx && v.dy === p.dy));
+    }
+
+    if (!choice) choice = valid[Math.floor(Math.random() * valid.length)];
+
+    // Occasionally double-jump (like a shift-jump) for a burst of extra speed,
+    // as long as the tile two steps away is in bounds (tryMove/completeJump
+    // already handle death if it happens to be unsafe, same as a human shift-jump).
+    let distance = 1;
+    if (Math.random() < AI_DOUBLE_JUMP_CHANCE) {
+      const farX = ai.gx + choice.dx * 2, farY = ai.gy + choice.dy * 2;
+      if (inBounds(farX, farY) && !occupiedByOtherPlayer(ai, farX, farY)) distance = 2;
+    }
+
+    tryMove(ai, choice.dx, choice.dy, distance);
+  }
+
+  function update(dt, time) {
+    updateProjectiles(dt);
+    updateBombs();
+    if (gameStarted) {
+      players.forEach(p => { if (p.isAI) aiDecide(p, time); });
+    }
+    for (let y = 0; y < GRID_H; y++) {
+      for (let x = 0; x < GRID_W; x++) {
+        const cell = grid[y][x];
+        if (!cell.alive) {
+          cell.timer -= dt;
+          if (cell.timer <= 0) {
+            cell.alive = true;
+            cell.timer = 0;
+            if (!cell.powerup && !cell.trap && Math.random() < POWERUP_RESPAWN_CHANCE) {
+              cell.powerup = randomPowerupType();
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function render(time) {
+    drawWater(time);
+    for (let y = 0; y < GRID_H; y++) {
+      for (let x = 0; x < GRID_W; x++) {
+        const cell = grid[y][x];
+        if (cell.alive) {
+          drawLilypad(x, y, 1, cell);
+          if (cell.powerup) drawPowerupIcon(x, y, cell.powerup);
+        }
+      }
+    }
+    drawSinkFades(time);
+    drawRipples(time);
+    drawEffects(time);
+    drawProjectiles();
+    drawBombs(time);
+    players.forEach(p => drawPlayer(p, time));
+  }
+
+  function loop(time) {
+    if (lastTime === undefined) lastTime = time;
+    const dt = time - lastTime;
+    lastTime = time;
+    update(dt, time);
+    render(time);
+    requestAnimationFrame(loop);
+  }
+
+  // ---- Game mode selection ----
+  let gameStarted = false;
+
+  function startGame(numAI) {
+    if (gameStarted) return;
+    gameStarted = true;
+    document.getElementById('menu-overlay').style.display = 'none';
+    initGame(numAI);
+  }
+
+  document.getElementById('btn-2p').addEventListener('click', () => startGame(0));
+
+  document.getElementById('btn-ai').addEventListener('click', () => {
+    const input = document.getElementById('ai-count-input');
+    let numAI = Math.round(Number(input.value));
+    if (Number.isNaN(numAI)) numAI = 1;
+    // No real cap on how many AI opponents you can have — just guard against
+    // an accidental huge number (e.g. a stray extra digit) locking up the tab.
+    numAI = Math.max(1, Math.min(500, numAI));
+    startGame(numAI);
+  });
+  document.getElementById('ai-count-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('btn-ai').click();
+  });
+
+  initGame();
+  requestAnimationFrame(loop);
+
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      computeDimensions();
+      initGame();
+    }, 200);
+  });
+})();
+</script>
+</body>
+</html>
