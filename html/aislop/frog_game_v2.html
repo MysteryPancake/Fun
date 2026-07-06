@@ -71,7 +71,7 @@
     border-radius: 12px;
     background: rgba(20, 88, 111, 0.4);
   }
-  #menu-overlay .ai-count-row {
+  #menu-overlay .option-row {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -124,9 +124,13 @@
     <canvas id="gameCanvas"></canvas>
     <div id="menu-overlay">
       <div class="title">🐸 Choose Game Mode</div>
+      <div class="option-row">
+        <label for="respawn-input">Lilypad respawn (seconds):</label>
+        <input type="number" id="respawn-input" min="1" step="1" value="10">
+      </div>
       <button id="btn-2p">2 Players</button>
       <div class="ai-row">
-        <div class="ai-count-row">
+        <div class="option-row">
           <label for="ai-count-input">AI opponents:</label>
           <input type="number" id="ai-count-input" min="1" step="1" value="1">
         </div>
@@ -141,7 +145,7 @@
 (function () {
   const CELL = 60;
   const MARGIN = 1; // tiles of open water surrounding the play grid
-  const RESPAWN_TIME = 10000; // ms
+  let RESPAWN_TIME = 10000; // ms — overridden by the respawn-time input when a game starts
   const JUMP_BASE_DURATION = 90; // ms
   const MIN_GRID = 5;
   const MAX_GRID = 30;
@@ -950,13 +954,13 @@
     ctx.save();
     ctx.globalAlpha = alpha;
     if (player.color) {
+      const dotY = y + hop - CELL * 0.45;
       ctx.beginPath();
-      ctx.arc(x, y + hop, CELL * 0.33, 0, Math.PI * 2);
-      ctx.strokeStyle = player.color;
-      ctx.lineWidth = 3;
+      ctx.arc(x, dotY, CELL * 0.09, 0, Math.PI * 2);
+      ctx.fillStyle = player.color;
       ctx.shadowColor = player.color;
       ctx.shadowBlur = 8;
-      ctx.stroke();
+      ctx.fill();
     }
     ctx.font = `${CELL * 0.6}px serif`;
     ctx.textAlign = 'center';
@@ -1144,6 +1148,13 @@
   function startGame(numAI) {
     if (gameStarted) return;
     gameStarted = true;
+
+    const respawnInput = document.getElementById('respawn-input');
+    let respawnSeconds = Number(respawnInput.value);
+    if (Number.isNaN(respawnSeconds)) respawnSeconds = 10;
+    respawnSeconds = Math.max(1, Math.min(300, respawnSeconds));
+    RESPAWN_TIME = respawnSeconds * 1000;
+
     document.getElementById('menu-overlay').style.display = 'none';
     initGame(numAI);
   }
@@ -1161,6 +1172,9 @@
   });
   document.getElementById('ai-count-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') document.getElementById('btn-ai').click();
+  });
+  document.getElementById('respawn-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('btn-2p').click();
   });
 
   initGame();
