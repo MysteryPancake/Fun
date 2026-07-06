@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lilypad Hop</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #0d3b52;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #eafff0;
+  }
+  #game-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  #hud {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .hud-player { display: flex; flex-direction: column; gap: 2px; }
+  .hud-player.p1 { color: #8be28b; align-items: flex-start; text-align: left; }
+  .hud-player.p2 { color: #7fd0ff; align-items: flex-end; text-align: right; }
+  .hud-player .powerup { font-size: 20px; }
+  .hud-player .controls { font-size: 11px; font-weight: 400; opacity: 0.65; letter-spacing: 0.2px; }
+  canvas {
+    background: #0d3b52;
+    display: block;
+    cursor: crosshair;
+  }
+</style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="hud">
+      <div class="hud-player p1">
+        <div>🐸 Player 1 — Score: <span id="score1">0</span> (Best <span id="best1">0</span>)</div>
+        <div class="powerup">Powerup: <span id="powerup1">—</span></div>
+        <div class="controls">WASD move · Left Click use</div>
+      </div>
+      <div class="hud-player p2">
+        <div>🐸 Player 2 — Score: <span id="score2">0</span> (Best <span id="best2">0</span>)</div>
+        <div class="powerup">Powerup: <span id="powerup2">—</span></div>
+        <div class="controls">Arrows move · Right Click use</div>
+      </div>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+  </div>
+
+<script>
+(function () {
+  const CELL = 60;
+  const MARGIN = 1; // tiles of open water surrounding the play grid
+  const RESPAWN_TIME = 20000; // ms
+  const JUMP_BASE_DURATION = 90; // ms
+  const MIN_GRID = 5;
+  const MAX_GRID = 30;
+
+  let GRID_W, GRID_H, OFFSET, CANVAS_WIDTH, CANVAS_HEIGHT;
+
+  const canvas = document.getElementById('gameCanvas');
+
+  function computeDimensions() {
+    const hudHeight = document.getElementById('hud').getBoundingClientRect().height || 60;
+    const availW = window.innerWidth - 32;
+    const availH = window.innerHeight - hudHeight - 60;
+
+    const totalTilesW = Math.floor(Math.max(200, availW) / CELL);
+    const totalTilesH = Math.floor(Math.max(200, availH) / CELL);
+
+    GRID_W = Math.max(MIN_GRID, Math.min(MAX_GRID, totalTilesW - MARGIN * 2));
+    GRID_H = Math.max(MIN_GRID, Math.min(MAX_GRID, totalTilesH - MARGIN * 2));
+
+    OFFSET = MARGIN * CELL;
+    CANVAS_WIDTH = (GRID_W + MARGIN * 2) * CELL;
+    CANVAS_HEIGHT = (GRID_H + MARGIN * 2) * CELL;
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
+    document.getElementById('game-container').style.width = CANVAS_WIDTH + 'px';
+  }
+
+  computeDimensions();
+
+  const ctx = canvas.getContext('2d');
+
+  const POWERUP_ICONS = { sword: '🗡️', grenade: '💣', laser: '🔴', trap: '🪤' };
+  const POWERUP_RESPAWN_CHANCE = 0.05;
+  const POWERUP_TYPES = ['sword', 'grenade', 'laser', 'trap'];
+
+  let grid, players, ripples, effects, lastTime;
+
+  function localGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function localSet(key, val) { try { localStorage.setItem(key, val); } catch (e) { /* ignore */ } }
+
+  function makeGrid() {
+    const g = [];
+    for (let y = 0; y < GRID_H; y++) {
+      const row = [];
+      for (let x = 0; x < GRID_W; x++) {
+        row.push({ alive: true, timer: 0, powerup: null, trap: false, trapOwner: null });
+      }
+      g.push(row);
+    }
+    return g;
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function spawnInitialPowerups(excludeCells) {
+    const candidates = [];
+    for (let y = 0; y < GRID_H; y++) {
+      for (let x = 0; x < GRID_W; x++) {
+        const excluded = excludeCells.some(c => c.x === x && c.y === y);
+        if (!excluded) candidates.push({ x, y });
+      }
+    }
+    shuffle(candidates);
+    const chosen = candidates.slice(0, POWERUP_TYPES.length);
+    chosen.forEach((cell, i) => {
+      grid[cell.y][cell.x].powerup = POWERUP_TYPES[i];
+    });
+  }
+
+  function makePlayer(config) {
+    return {
+      id: config.id,
+      emoji: config.emoji,
+      keys: config.keys,
+      hudPrefix: config.hudPrefix,
+      spawnX: config.spawnX,
+      spawnY: config.spawnY,
+      gx: config.spawnX,
+      gy: config.spawnY,
+      jumping: false,
+      jumpFrom: null,
+      jumpTo: null,
+      jumpStart: 0,
+      jumpDuration: 0,
+      dead: false,
+      deathStart: 0,
+      score: 0,
+      best: Number(localGet('lilypad-best-' + config.id)) || 0,
+      powerup: null
+    };
+  }
+
+  function initGame() {
+    grid = makeGrid();
+    ripples = [];
+    effects = [];
+
+    const p1Spawn = { x: 1, y: 1 };
+    const p2Spawn = { x: GRID_W - 2, y: GRID_H - 2 };
+
+    players = [
+      makePlayer({
+        id: 'p1', emoji: '🐸', hudPrefix: 'p1',
+        keys: { up: 'w', down: 's', left: 'a', right: 'd' },
+        spawnX: p1Spawn.x, spawnY: p1Spawn.y
+      }),
+      makePlayer({
+        id: 'p2', emoji: '🐸', hudPrefix: 'p2',
+        keys: { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' },
+        spawnX: p2Spawn.x, spawnY: p2Spawn.y
+      })
+    ];
+
+    spawnInitialPowerups([p1Spawn, p2Spawn]);
+    updateHud(players[0]);
+    updateHud(players[1]);
+  }
+
+  function updateHud(player) {
+    document.getElementById('score' + (player.id === 'p1' ? '1' : '2')).textContent = player.score;
+    document.getElementById('best' + (player.id === 'p1' ? '1' : '2')).textContent = player.best;
+    document.getElementById('powerup' + (player.id === 'p1' ? '1' : '2')).textContent =
+      player.powerup ? POWERUP_ICONS[player.powerup] : '—';
+  }
+
+  function addRipple(gx, gy) {
+    ripples.push({ x: gx, y: gy, start: performance.now() });
+  }
+
+  function cellCenter(gx, gy) {
+    return { x: OFFSET + gx * CELL + CELL / 2, y: OFFSET + gy * CELL + CELL / 2 };
+  }
+
+  function inBounds(x, y) {
+    return x >= 0 && x < GRID_W && y >= 0 && y < GRID_H;
+  }
+
+  function randomPowerupType() {
+    return POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
+  }
+
+  function occupiedByOtherPlayer(player, x, y) {
+    return players.some(p => {
+      if (p.id === player.id || p.dead) return false;
+      const px = p.jumping ? p.jumpTo.x : p.gx;
+      const py = p.jumping ? p.jumpTo.y : p.gy;
+      return px === x && py === y;
+    });
+  }
+
+  function pickRespawnTile(player) {
+    if (grid[player.spawnY][player.spawnX].alive && !occupiedByOtherPlayer(player, player.spawnX, player.spawnY)) {
+      return { x: player.spawnX, y: player.spawnY };
+    }
+    const aliveTiles = [];
+    for (let y = 0; y < GRID_H; y++) {
+      for (let x = 0; x < GRID_W; x++) {
+        if (grid[y][x].alive && !occupiedByOtherPlayer(player, x, y)) aliveTiles.push({ x, y });
+      }
+    }
+    if (aliveTiles.length === 0) return { x: player.spawnX, y: player.spawnY };
+    return aliveTiles[Math.floor(Math.random() * aliveTiles.length)];
+  }
+
+  function pixelToGrid(px, py) {
+    return { x: Math.floor((px - OFFSET) / CELL), y: Math.floor((py - OFFSET) / CELL) };
+  }
+
+  // ---- Movement ----
+  function tryMove(player, dx, dy, distance) {
+    if (player.jumping || player.dead) return;
+    const targetX = player.gx + dx * distance;
+    const targetY = player.gy + dy * distance;
+
+    const origin = grid[player.gy][player.gx];
+    const ownTrap = origin.trap && origin.trapOwner === player.id;
+    if (!ownTrap) {
+      sinkCell(player.gx, player.gy, player.id);
+    }
+
+    player.jumping = true;
+    player.jumpFrom = { x: player.gx, y: player.gy };
+    player.jumpTo = { x: targetX, y: targetY };
+    player.jumpStart = performance.now();
+    player.jumpDuration = JUMP_BASE_DURATION * (0.5 + distance * 0.5);
+  }
+
+  function completeJump(player) {
+    const tx = player.jumpTo.x, ty = player.jumpTo.y;
+    player.gx = tx;
+    player.gy = ty;
+    player.jumping = false;
+
+    if (!inBounds(tx, ty)) { startDeath(player); return; }
+
+    const cell = grid[ty][tx];
+    if (cell.trap && cell.alive && cell.trapOwner !== player.id) {
+      sinkCell(tx, ty, player.id);
+      startDeath(player);
+      return;
+    }
+    if (!cell.alive) { startDeath(player); return; }
+
+    // safe landing
+    player.score++;
+    if (cell.powerup) {
+      player.powerup = cell.powerup;
+      cell.powerup = null;
+    }
+    updateHud(player);
+  }
+
+  function startDeath(player) {
+    player.dead = true;
+    player.deathStart = performance.now();
+    addRipple(player.gx, player.gy);
+  }
+
+  function finishDeath(player) {
+    if (player.score > player.best) {
+      player.best = player.score;
+      localSet('lilypad-best-' + player.id, String(player.best));
+    }
+    const tile = pickRespawnTile(player);
+    player.gx = tile.x;
+    player.gy = tile.y;
+    player.score = 0;
+    player.powerup = null;
+    player.dead = false;
+    player.jumping = false;
+    addRipple(player.gx, player.gy);
+    updateHud(player);
+  }
+
+  // ---- Weapons ----
+  function sinkCell(x, y, excludeId) {
+    if (!inBounds(x, y)) return;
+    const cell = grid[y][x];
+    cell.alive = false;
+    cell.timer = RESPAWN_TIME;
+    cell.trap = false;
+    cell.trapOwner = null;
+    addRipple(x, y);
+    players.forEach(pl => {
+      if (pl.id === excludeId) return;
+      if (!pl.jumping && !pl.dead && pl.gx === x && pl.gy === y) startDeath(pl);
+    });
+  }
+
+  function sinkTile(x, y) {
+    sinkCell(x, y, null);
+  }
+
+  function snapDirection(player, clickX, clickY) {
+    const c = cellCenter(player.gx, player.gy);
+    const dx = clickX - c.x, dy = clickY - c.y;
+    const angle = Math.atan2(dy, dx);
+    const dirs = [
+      { dx: 1, dy: 0 }, { dx: 1, dy: 1 }, { dx: 0, dy: 1 }, { dx: -1, dy: 1 },
+      { dx: -1, dy: 0 }, { dx: -1, dy: -1 }, { dx: 0, dy: -1 }, { dx: 1, dy: -1 }
+    ];
+    let idx = Math.round(angle / (Math.PI / 4)) % 8;
+    if (idx < 0) idx += 8;
+    return dirs[idx];
+  }
+
+  function useSword(player, clickX, clickY) {
+    const dir = snapDirection(player, clickX, clickY);
+    const c = cellCenter(player.gx, player.gy);
+    const endX = c.x + dir.dx * CELL * 2;
+    const endY = c.y + dir.dy * CELL * 2;
+    effects.push({ type: 'slash', x1: c.x, y1: c.y, x2: endX, y2: endY, start: performance.now() });
+    for (let dist = 1; dist <= 2; dist++) {
+      sinkTile(player.gx + dir.dx * dist, player.gy + dir.dy * dist);
+    }
+  }
+
+  function useLaser(player, clickX, clickY) {
+    const dir = snapDirection(player, clickX, clickY);
+    const c = cellCenter(player.gx, player.gy);
+    let dist = 1;
+    while (inBounds(player.gx + dir.dx * dist, player.gy + dir.dy * dist)) {
+      sinkTile(player.gx + dir.dx * dist, player.gy + dir.dy * dist);
+      dist++;
+    }
+    // visual beam shoots far past the grid edge, off the visible canvas
+    const farDist = Math.max(CANVAS_WIDTH, CANVAS_HEIGHT) * 2;
+    const endX = c.x + dir.dx * farDist;
+    const endY = c.y + dir.dy * farDist;
+    effects.push({ type: 'beam', x1: c.x, y1: c.y, x2: endX, y2: endY, start: performance.now() });
+  }
+
+  function useGrenade(player, clickX, clickY) {
+    const target = pixelToGrid(clickX, clickY);
+    for (let y = target.y - 1; y <= target.y + 1; y++) {
+      for (let x = target.x - 1; x <= target.x + 1; x++) {
+        const d = Math.hypot(x - target.x, y - target.y);
+        if (d <= 1.5) sinkTile(x, y);
+      }
+    }
+    const c = cellCenter(target.x, target.y);
+    effects.push({ type: 'explosion', x: c.x, y: c.y, start: performance.now() });
+  }
+
+  function useTrap(player) {
+    // Traps can only be set on the lilypad the player is currently standing on.
+    const x = player.gx, y = player.gy;
+    if (inBounds(x, y)) {
+      grid[y][x].trap = true;
+      grid[y][x].trapOwner = player.id;
+      grid[y][x].powerup = null;
+    }
+  }
+
+  function useWeapon(player, clickX, clickY) {
+    if (!player.powerup || player.dead) return;
+    const type = player.powerup;
+    player.powerup = null;
+    updateHud(player);
+    if (type === 'sword') useSword(player, clickX, clickY);
+    else if (type === 'laser') useLaser(player, clickX, clickY);
+    else if (type === 'grenade') useGrenade(player, clickX, clickY);
+    else if (type === 'trap') useTrap(player);
+  }
+
+  // ---- Input ----
+  window.addEventListener('keydown', (e) => {
+    let handled = false;
+    players.forEach(player => {
+      const k = player.keys;
+      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      let dir = null;
+      if (key === k.up) dir = [0, -1];
+      else if (key === k.down) dir = [0, 1];
+      else if (key === k.left) dir = [-1, 0];
+      else if (key === k.right) dir = [1, 0];
+      if (dir) {
+        handled = true;
+        const distance = e.shiftKey ? 2 : 1;
+        tryMove(player, dir[0], dir[1], distance);
+      }
+    });
+    if (handled) e.preventDefault();
+  });
+
+  canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  canvas.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const clickX = (e.clientX - rect.left) * scaleX;
+    const clickY = (e.clientY - rect.top) * scaleY;
+    if (e.button === 0) useWeapon(players[0], clickX, clickY);
+    else if (e.button === 2) useWeapon(players[1], clickX, clickY);
+  });
+
+  // ---- Drawing ----
+  function drawWater(time) {
+    ctx.fillStyle = '#0d3b52';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 2;
+    const waveOffset = (time / 1000) % (Math.PI * 2);
+    for (let i = 0; i < canvas.height; i += 16) {
+      ctx.beginPath();
+      for (let x = 0; x <= canvas.width; x += 10) {
+        const y = i + Math.sin(x * 0.03 + waveOffset + i) * 3;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+  }
+
+  const TRAP_COLORS = {
+    p1: { fill: '#8f6b3f', stroke: '#5c4322' },
+    p2: { fill: '#8f4f6b', stroke: '#5c2e42' }
+  };
+
+  function drawLilypad(gx, gy, alpha, cell) {
+    const { x, y } = cellCenter(gx, gy);
+    const trapped = cell && cell.trap;
+    const trapColor = trapped ? (TRAP_COLORS[cell.trapOwner] || TRAP_COLORS.p1) : null;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.arc(x, y, CELL * 0.38, 0.35, Math.PI * 2 - 0.35);
+    ctx.closePath();
+    ctx.fillStyle = trapped ? trapColor.fill : '#1f4d2e';
+    ctx.fill();
+    ctx.strokeStyle = trapped ? trapColor.stroke : '#123018';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.strokeStyle = trapped ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.22)';
+    ctx.lineWidth = 1.5;
+    const spokeCount = 8;
+    for (let i = 0; i < spokeCount; i++) {
+      const angle = (Math.PI * 2 * i) / spokeCount;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + Math.cos(angle) * CELL * 0.36, y + Math.sin(angle) * CELL * 0.36);
+      ctx.stroke();
+    }
+    ctx.restore();
+    if (trapped) drawPowerupIcon(gx, gy, 'trap');
+  }
+
+  function drawPowerupIcon(gx, gy, type) {
+    const { x, y } = cellCenter(gx, gy);
+    ctx.save();
+    ctx.font = `${CELL * 0.4}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(POWERUP_ICONS[type], x, y);
+    ctx.restore();
+  }
+
+  function drawRipples(time) {
+    ripples = ripples.filter(r => time - r.start < 700);
+    for (const r of ripples) {
+      const t = (time - r.start) / 700;
+      const { x, y } = cellCenter(r.x, r.y);
+      ctx.save();
+      ctx.globalAlpha = 1 - t;
+      ctx.beginPath();
+      ctx.arc(x, y, CELL * 0.15 + t * CELL * 0.5, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function drawEffects(time) {
+    effects = effects.filter(fx => time - fx.start < 450);
+    for (const fx of effects) {
+      const t = (time - fx.start) / 450;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, 1 - t);
+      if (fx.type === 'slash') {
+        ctx.strokeStyle = '#fffbe0';
+        ctx.lineWidth = 6 * (1 - t) + 2;
+        ctx.beginPath();
+        ctx.moveTo(fx.x1, fx.y1);
+        ctx.lineTo(fx.x2, fx.y2);
+        ctx.stroke();
+      } else if (fx.type === 'beam') {
+        ctx.strokeStyle = '#ff2d2d';
+        ctx.shadowColor = '#ff2d2d';
+        ctx.shadowBlur = 14;
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(fx.x1, fx.y1);
+        ctx.lineTo(fx.x2, fx.y2);
+        ctx.stroke();
+      } else if (fx.type === 'explosion') {
+        ctx.beginPath();
+        ctx.arc(fx.x, fx.y, CELL * 0.3 + t * CELL * 1.6, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ff8a3d';
+        ctx.lineWidth = 6 * (1 - t) + 1;
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255,138,61,0.25)';
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+
+  function drawPlayer(player, time) {
+    let rx, ry, hop = 0, alpha = 1;
+
+    if (player.jumping) {
+      const t = Math.min(1, (time - player.jumpStart) / player.jumpDuration);
+      const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+      rx = player.jumpFrom.x + (player.jumpTo.x - player.jumpFrom.x) * eased;
+      ry = player.jumpFrom.y + (player.jumpTo.y - player.jumpFrom.y) * eased;
+      hop = Math.sin(t * Math.PI) * -18;
+      if (t >= 1) completeJump(player);
+    } else {
+      rx = player.gx;
+      ry = player.gy;
+    }
+
+    if (player.dead) {
+      const t = Math.min(1, (time - player.deathStart) / 500);
+      alpha = 1 - t;
+      hop = t * 10;
+      if (t >= 1) finishDeath(player);
+    }
+
+    const { x, y } = cellCenter(rx, ry);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.font = `${CELL * 0.6}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(player.emoji, x, y + hop);
+    ctx.restore();
+  }
+
+  function update(dt) {
+    for (let y = 0; y < GRID_H; y++) {
+      for (let x = 0; x < GRID_W; x++) {
+        const cell = grid[y][x];
+        if (!cell.alive) {
+          cell.timer -= dt;
+          if (cell.timer <= 0) {
+            cell.alive = true;
+            cell.timer = 0;
+            if (!cell.powerup && !cell.trap && Math.random() < POWERUP_RESPAWN_CHANCE) {
+              cell.powerup = randomPowerupType();
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function render(time) {
+    drawWater(time);
+    for (let y = 0; y < GRID_H; y++) {
+      for (let x = 0; x < GRID_W; x++) {
+        const cell = grid[y][x];
+        if (cell.alive) {
+          drawLilypad(x, y, 1, cell);
+          if (cell.powerup) drawPowerupIcon(x, y, cell.powerup);
+        }
+      }
+    }
+    drawRipples(time);
+    drawEffects(time);
+    players.forEach(p => drawPlayer(p, time));
+  }
+
+  function loop(time) {
+    if (lastTime === undefined) lastTime = time;
+    const dt = time - lastTime;
+    lastTime = time;
+    update(dt);
+    render(time);
+    requestAnimationFrame(loop);
+  }
+
+  initGame();
+  requestAnimationFrame(loop);
+
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      computeDimensions();
+      initGame();
+    }, 200);
+  });
+})();
+</script>
+</body>
+</html>
