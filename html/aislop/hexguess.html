@@ -101,18 +101,9 @@
 		border-radius: 0.4rem;
 		padding: 2.2rem 2rem;
 	}
-
-	.eyebrow {
-		font-size: 0.72rem;
-		letter-spacing: 0.18em;
-		text-transform: uppercase;
-		color: var(--ink-soft);
-		margin: 0 0 0.4rem 0;
-		display: flex;
-		justify-content: space-between;
-	}
-
+	
 	.title-lockup {
+		text-align: center;
 		font-size: 2.1rem;
 		line-height: 1.05;
 		margin: 0 0 0.6rem 0;
@@ -169,6 +160,7 @@
 	.checkbox-row {
 		display: flex;
 		align-items: center;
+		justify-content: center;
 		gap: 0.55rem;
 		font-size: 0.85rem;
 		color: var(--ink-soft);
@@ -434,7 +426,6 @@
 		flex-direction: column;
 		gap: 0.6rem;
 		padding: 0.9rem 0;
-		margin-bottom: 1.8rem;
 	}
 
 	.tear-chip {
@@ -511,9 +502,7 @@
 	<!-- REVEAL SCREEN -->
 	<div id="revealScreen" class="screen">
 		<div class="panel">
-			<p class="eyebrow"><span id="revealRoundTag">Round 1 of 5</span><span>Result</span></p>
-			<h2 class="title-lockup display" style="font-size:1.5rem;">How'd you do</h2>
-
+			<h2 class="title-lockup display" id="revealRoundTag" style="font-size:1.5rem;">Final score</h2>
 			<div class="compare-wrap">
 				<div class="compare-pair" id="revealCompare">
 					<div class="cc-split-group">
@@ -533,17 +522,16 @@
 			<div class="score-block">
 				<div class="score-label">Score</div>
 				<div class="score-num" id="roundScoreValue">0</div>
-				<div class="total-line">Total so far: <b id="runningTotal">0</b></div>
+				<div class="total-line">Total: <b id="runningTotal">0</b></div>
 			</div>
 
-			<button class="stamp-btn" id="nextBtn">Next round</button>
+			<button class="stamp-btn" id="nextBtn">Next</button>
 		</div>
 	</div>
 
 	<!-- FINAL SCREEN -->
 	<div id="finalScreen" class="screen">
 		<div class="panel">
-			<p class="eyebrow"><span>Final card</span><span id="finalRoundsTag">5 rounds</span></p>
 			<h2 class="title-lockup display" style="font-size:1.5rem;">Final score</h2>
 			<div class="final-total" id="finalTotal">0</div>
 			<div class="final-sub" id="finalAvg">avg 0 pts / round</div>
@@ -842,7 +830,7 @@
 			score: roundScore,
 		});
 
-		revealRoundTag.textContent = `Round ${currentRound} of ${totalRounds}`;
+		revealRoundTag.textContent = `Round ${currentRound}/${totalRounds}`;
 
 		renderComparePair(revealCompare, guessColor, chosenColor);
 		guessHexLabel.textContent = rgbToHex(guessColor);
@@ -851,7 +839,7 @@
 		animateNumber(roundScoreValue, 0, roundScore, 700);
 		animateNumber(runningTotal, previousTotal, totalScore, 700);
 
-		nextBtn.textContent = currentRound >= totalRounds ? "See final score" : "Next round";
+		nextBtn.textContent = currentRound >= totalRounds ? "See final score" : "Next";
 
 		showScreen("reveal");
 	}
@@ -861,14 +849,12 @@
 	// ---- final screen ----
 	const finalTotal = document.getElementById("finalTotal");
 	const finalAvg = document.getElementById("finalAvg");
-	const finalRoundsTag = document.getElementById("finalRoundsTag");
 	const tearStrip = document.getElementById("tearStrip");
 	const playAgainBtn = document.getElementById("playAgainBtn");
 
 	function showFinal() {
 		finalTotal.textContent = totalScore;
 		finalAvg.textContent = `avg ${Math.round(totalScore / totalRounds)} pts / round`;
-		finalRoundsTag.textContent = `${totalRounds} rounds`;
 
 		tearStrip.innerHTML = "";
 		roundResults.forEach((r) => {
