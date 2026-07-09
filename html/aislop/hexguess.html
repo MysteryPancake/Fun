@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hex Guess</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+	:root {
+		--ink: #2B2A28;
+		--ink-soft: #5B5748;
+		--card: #DCD3C1;
+		--card-alt: #CBBFA5;
+		--card-deep: #B7AA8C;
+		--stamp: #C1440E;
+		--stamp-dark: #93340A;
+		--paper-line: #B7AA8C;
+		--white-chip: #F4EFE3;
+	}
+
+	* {
+		box-sizing: border-box;
+		font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+	}
+
+	.display {
+		font-family: "Archivo Black", system-ui, sans-serif;
+	}
+
+	html, body {
+		margin: 0;
+		padding: 0;
+		background: var(--card);
+		color: var(--ink);
+		height: 100%;
+		overscroll-behavior: none;
+		transition: background-color 0.6s ease;
+	}
+
+	body {
+		min-height: 100vh;
+	}
+
+	button {
+		cursor: pointer;
+		border: none;
+	}
+
+	:focus-visible {
+		outline: none;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		* {
+			animation: none !important;
+			transition: none !important;
+		}
+	}
+
+	.screen {
+		display: none;
+		min-height: 100vh;
+		width: 100%;
+		align-items: center;
+		justify-content: center;
+		padding: 6vmin 5vw;
+	}
+
+	.screen.active {
+		display: flex;
+	}
+
+	/* ---------- screen transition animation ---------- */
+
+	@keyframes screenFadeOut {
+		from { opacity: 1; }
+		to { opacity: 0; }
+	}
+
+	@keyframes screenFadeIn {
+		from { opacity: 0; }
+		to { opacity: 1; }
+	}
+
+	.screen.screen-out {
+		animation: screenFadeOut 0.2s ease forwards;
+	}
+
+	.screen.screen-in {
+		animation: screenFadeIn 0.24s ease forwards;
+	}
+
+	/* ---------- shared card chrome ---------- */
+
+	.panel {
+		width: 100%;
+		max-width: 30rem;
+		background: var(--white-chip);
+		border-radius: 0.4rem;
+		padding: 2.2rem 2rem;
+	}
+
+	.eyebrow {
+		font-size: 0.72rem;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--ink-soft);
+		margin: 0 0 0.4rem 0;
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.title-lockup {
+		font-size: 2.1rem;
+		line-height: 1.05;
+		margin: 0 0 0.6rem 0;
+		letter-spacing: -0.01em;
+	}
+
+	.sub {
+		color: var(--ink-soft);
+		font-size: 0.95rem;
+		line-height: 1.5;
+		margin: 0 0 1.8rem 0;
+	}
+
+	.stamp-btn {
+		display: block;
+		width: 100%;
+		background: var(--stamp);
+		color: var(--white-chip);
+		border: none;
+		border-radius: 0.3rem;
+		padding: 0.85rem 1rem;
+		font-family: "Archivo Black", sans-serif;
+		font-size: 1rem;
+		letter-spacing: 0.02em;
+		transition: transform 0.08s ease, filter 0.08s ease;
+	}
+
+	.stamp-btn:hover { filter: brightness(1.04); }
+	.stamp-btn:active {
+		transform: translateY(0.1rem);
+		filter: brightness(0.96);
+	}
+
+	.mode-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.9rem;
+	}
+
+	.mode-card {
+		background: var(--card);
+		border-radius: 0.3rem;
+		padding: 1.1rem 0.8rem;
+		text-align: center;
+		transition: transform 0.08s ease, background 0.12s ease;
+	}
+
+	.mode-card:hover {
+		background: var(--card-alt);
+	}
+
+	.mode-card:active { transform: translateY(0.12rem); }
+
+	.checkbox-row {
+		display: flex;
+		align-items: center;
+		gap: 0.55rem;
+		font-size: 0.85rem;
+		color: var(--ink-soft);
+		margin: 1.1rem 0 0 0;
+		cursor: pointer;
+		user-select: none;
+	}
+
+	.checkbox-row input[type="checkbox"] {
+		width: 1.1rem;
+		height: 1.1rem;
+		accent-color: var(--stamp);
+		cursor: pointer;
+	}
+
+	.checkbox-hint {
+		color: var(--card-deep);
+	}
+
+	.mode-num {
+		font-family: "Archivo Black", sans-serif;
+		font-size: 2.1rem;
+		display: block;
+		line-height: 1;
+	}
+
+	.mode-label {
+		font-size: 0.7rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--ink-soft);
+		display: block;
+		margin-top: 0.35rem;
+	}
+
+	/* ---------- game (full-bleed color) screen ---------- */
+
+	#gameScreen {
+		padding: 0;
+		position: relative;
+		height: 100vh;
+		overflow: hidden;
+	}
+
+	.hud {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 1.4rem 1.2rem;
+		background: rgba(20,18,15,0.62);
+		backdrop-filter: blur(2px);
+		color: var(--white-chip);
+		font-size: 0.95rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+
+	.hud span.value {
+		font-family: "Archivo Black", sans-serif;
+		font-size: 2.6rem;
+		text-transform: none;
+		letter-spacing: 0;
+		display: block;
+	}
+
+	#timerBadge {
+		text-align: center;
+	}
+
+	#timerBadge.urgent .value {
+		color: #FFCFAE;
+	}
+
+	.guess-bar {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background: rgba(20,18,15,0.62);
+		backdrop-filter: blur(2px);
+		padding: 2.2rem 1rem 2.6rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.9rem;
+	}
+
+	.guess-row {
+		display: flex;
+		align-items: center;
+		gap: 0.3rem;
+	}
+
+	.hash {
+		color: var(--white-chip);
+		font-family: "Archivo Black", sans-serif;
+		font-size: 1.8rem;
+	}
+
+	#hexInput {
+		border-radius: 0.25rem;
+		border: none;
+		color: var(--ink);
+		background: var(--white-chip);
+		outline: none;
+		padding: 0.5rem 0.6rem;
+		width: 7.5em;
+		font-size: 1.8rem;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		font-family: "IBM Plex Mono", monospace;
+		font-weight: 600;
+	}
+
+	/* ---------- reveal screen ---------- */
+
+	.compare-wrap {
+		margin: 1.4rem 0 1.8rem;
+		padding: 1.4rem 1.2rem;
+		background: var(--card);
+		border-radius: 0.5rem;
+		text-align: center;
+	}
+
+	.compare-pair {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1.1rem;
+	}
+
+	.cc-split,
+	.cc-grid {
+		height: 6.5rem;
+		border-radius: 0.4rem;
+		overflow: hidden;
+		border: 1px solid var(--card-deep);
+		flex: none;
+	}
+
+	.cc-split {
+		aspect-ratio: 1;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.cc-top, .cc-bottom {
+		flex: 1 1 50%;
+	}
+
+	.cc-grid {
+		aspect-ratio: 3 / 2;
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		grid-template-rows: repeat(2, 1fr);
+	}
+
+	.compare-pair.mini .cc-split,
+	.compare-pair.mini .cc-grid {
+		height: 4.5rem;
+	}
+
+	.cc-split-group {
+		display: flex;
+		align-items: stretch;
+		gap: 0.7rem;
+	}
+
+	.cc-split-labels {
+		display: flex;
+		flex-direction: column;
+		height: 6.5rem;
+		min-width: 5.6rem;
+		text-align: left;
+	}
+
+	.cc-split-label {
+		flex: 1 1 50%;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 0.2rem;
+		font-size: 0.68rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ink-soft);
+	}
+
+	.cc-split-label b {
+		color: var(--ink);
+		font-size: 1rem;
+		font-weight: 600;
+		letter-spacing: 0;
+		text-transform: none;
+	}
+
+	.compare-caption {
+		display: flex;
+		justify-content: center;
+		gap: 1.4rem;
+		font-size: 0.78rem;
+		color: var(--ink-soft);
+	}
+
+	.compare-caption b {
+		color: var(--ink);
+		font-weight: 600;
+	}
+
+	.score-block {
+		text-align: center;
+		margin: 1.8rem 0 1.6rem;
+	}
+
+	.score-label {
+		font-size: 0.7rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--ink-soft);
+	}
+
+	.score-num {
+		font-family: "Archivo Black", sans-serif;
+		font-size: 2.6rem;
+		color: var(--stamp);
+		line-height: 1.1;
+	}
+
+	.total-line {
+		font-size: 0.85rem;
+		color: var(--ink-soft);
+		margin-top: 0.2rem;
+	}
+
+	.total-line b {
+		color: var(--ink);
+	}
+
+	/* ---------- final screen ---------- */
+
+	.final-total {
+		font-family: "Archivo Black", sans-serif;
+		font-size: 3.4rem;
+		color: var(--stamp);
+		text-align: center;
+		line-height: 1;
+		margin: 0.3rem 0 0.2rem;
+	}
+
+	.final-sub {
+		text-align: center;
+		color: var(--ink-soft);
+		font-size: 0.85rem;
+		margin-bottom: 1.6rem;
+	}
+
+	.tear-strip {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+		padding: 0.9rem 0;
+		margin-bottom: 1.8rem;
+	}
+
+	.tear-chip {
+		display: flex;
+		align-items: center;
+		gap: 0.8rem;
+		background: var(--card);
+		border-radius: 0.3rem;
+		padding: 0.5rem 0.7rem;
+	}
+
+	.tear-chip .compare-pair {
+		margin: 0;
+		flex: none;
+	}
+
+	.tear-chip-info {
+		text-align: left;
+	}
+
+	.tear-round {
+		font-size: 0.62rem;
+		color: var(--ink-soft);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		margin-bottom: 0.15rem;
+	}
+
+	.tear-score {
+		font-size: 0.78rem;
+		font-weight: 600;
+	}
+</style>
+</head>
+<body>
+
+	<!-- START SCREEN -->
+	<div id="startScreen" class="screen active">
+		<div class="panel">
+			<h1 class="title-lockup display">HEX GUESS</h1>
+			<p class="sub">A color flashes on screen. Type its hex code before the clock runs out. The closer you land, the more points you take.</p>
+			<div class="mode-grid">
+				<button class="mode-card round-card" data-rounds="5">
+					<span class="mode-num display">5</span>
+					<span class="mode-label">Rounds</span>
+				</button>
+				<button class="mode-card round-card" data-rounds="10">
+					<span class="mode-num display">10</span>
+					<span class="mode-label">Rounds</span>
+				</button>
+			</div>
+			<label class="checkbox-row">
+				<input type="checkbox" id="digitToggle">
+				<span>3-digit mode <span class="checkbox-hint">(#RGB)</span></span>
+			</label>
+		</div>
+	</div>
+
+	<!-- GAME SCREEN -->
+	<div id="gameScreen" class="screen">
+		<div class="hud">
+			<div id="timerBadge">
+				<span class="value" id="timerValue">00:00</span>
+			</div>
+		</div>
+		<div class="guess-bar">
+			<div class="guess-row">
+				<span class="hash">#</span>
+				<input id="hexInput" type="text" maxlength="6" placeholder="000000" pattern="[a-fA-F0-9]+" autocomplete="off" autofocus>
+			</div>
+		</div>
+	</div>
+
+	<!-- REVEAL SCREEN -->
+	<div id="revealScreen" class="screen">
+		<div class="panel">
+			<p class="eyebrow"><span id="revealRoundTag">Round 1 of 5</span><span>Result</span></p>
+			<h2 class="title-lockup display" style="font-size:1.5rem;">How'd you do</h2>
+
+			<div class="compare-wrap">
+				<div class="compare-pair" id="revealCompare">
+					<div class="cc-split-group">
+						<div class="cc-split-labels">
+							<div class="cc-split-label">Your guess <b id="guessHexLabel">#000000</b></div>
+							<div class="cc-split-label">Answer <b id="answerHexLabel">#000000</b></div>
+						</div>
+						<div class="cc-split">
+							<div class="cc-top"></div>
+							<div class="cc-bottom"></div>
+						</div>
+					</div>
+					<div class="cc-grid"></div>
+				</div>
+			</div>
+
+			<div class="score-block">
+				<div class="score-label">Score</div>
+				<div class="score-num" id="roundScoreValue">0</div>
+				<div class="total-line">Total so far: <b id="runningTotal">0</b></div>
+			</div>
+
+			<button class="stamp-btn" id="nextBtn">Next round</button>
+		</div>
+	</div>
+
+	<!-- FINAL SCREEN -->
+	<div id="finalScreen" class="screen">
+		<div class="panel">
+			<p class="eyebrow"><span>Final card</span><span id="finalRoundsTag">5 rounds</span></p>
+			<h2 class="title-lockup display" style="font-size:1.5rem;">Final score</h2>
+			<div class="final-total" id="finalTotal">0</div>
+			<div class="final-sub" id="finalAvg">avg 0 pts / round</div>
+
+			<div class="tear-strip" id="tearStrip"></div>
+
+			<button class="stamp-btn" id="playAgainBtn">Play again</button>
+		</div>
+	</div>
+
+<script>
+(function () {
+	"use strict";
+
+	const requestFrame = window.requestAnimationFrame || function (cb) { return window.setTimeout(cb, 1000 / 60); };
+	const ROUND_TIME_MS = 20000;
+	const MAX_SCORE = 5000;
+	const RGB_MAX_DIST = Math.sqrt(3 * 255 * 255);
+
+	// ---- state ----
+	let totalRounds = 5;
+	let hexDigits = 6;
+	let currentRound = 0;
+	let totalScore = 0;
+	let roundResults = [];
+	let chosenColor = null;
+	let countdownEnd = 0;
+	let timerRunning = false;
+
+	// ---- elements ----
+	const screens = {
+		start: document.getElementById("startScreen"),
+		game: document.getElementById("gameScreen"),
+		reveal: document.getElementById("revealScreen"),
+		final: document.getElementById("finalScreen"),
+	};
+
+	const prefersReducedMotion = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+	// ---- focus management ----
+	// Whenever a screen becomes active, focus its primary control.
+	function focusScreen(name) {
+		requestFrame(() => {
+			if (name === "game") hexInput.focus();
+			else if (name === "reveal") nextBtn.focus();
+			else if (name === "final") playAgainBtn.focus();
+		});
+	}
+
+	function showScreen(name) {
+		const next = screens[name];
+		const current = Object.values(screens).find((el) => el.classList.contains("active"));
+
+		if (!current || current === next || prefersReducedMotion) {
+			Object.values(screens).forEach((el) => el.classList.remove("active", "screen-out", "screen-in"));
+			next.classList.add("active");
+			focusScreen(name);
+			return;
+		}
+
+		current.classList.add("screen-out");
+		const onOutEnd = () => {
+			current.removeEventListener("animationend", onOutEnd);
+			current.classList.remove("active", "screen-out");
+			next.classList.add("active", "screen-in");
+			focusScreen(name);
+			const onInEnd = () => {
+				next.removeEventListener("animationend", onInEnd);
+				next.classList.remove("screen-in");
+			};
+			next.addEventListener("animationend", onInEnd);
+		};
+		current.addEventListener("animationend", onOutEnd);
+	}
+
+	// ---- Enter key always advances past reveal/final screens ----
+	document.addEventListener("keydown", (e) => {
+		if (e.key !== "Enter") return;
+		if (screens.reveal.classList.contains("active")) {
+			e.preventDefault();
+			nextBtn.click();
+		} else if (screens.final.classList.contains("active")) {
+			e.preventDefault();
+			playAgainBtn.click();
+		}
+	});
+
+	// ---- color helpers ----
+	function randomColor() {
+		if (hexDigits === 3) {
+			const nibble = () => Math.floor(Math.random() * 16) * 17;
+			return { r: nibble(), g: nibble(), b: nibble() };
+		}
+		return {
+			r: Math.floor(Math.random() * 256),
+			g: Math.floor(Math.random() * 256),
+			b: Math.floor(Math.random() * 256),
+		};
+	}
+
+	function rgbString(c) {
+		return `rgb(${c.r}, ${c.g}, ${c.b})`;
+	}
+
+	function toHexChannel(n) {
+		return n.toString(16).padStart(2, "0");
+	}
+
+	function rgbToHex(c) {
+		if (hexDigits === 3) {
+			const nibble = (n) => Math.round(n / 17).toString(16);
+			return `#${nibble(c.r)}${nibble(c.g)}${nibble(c.b)}`.toUpperCase();
+		}
+		return `#${toHexChannel(c.r)}${toHexChannel(c.g)}${toHexChannel(c.b)}`.toUpperCase();
+	}
+
+	function parseHexInput(raw) {
+		let s = (raw || "").trim().replace(/^#/, "");
+		s = s.replace(/[^a-fA-F0-9]/g, "");
+		if (hexDigits === 3) {
+			s = (s + "000").slice(0, 3);
+			s = s.split("").map((ch) => ch + ch).join("");
+		} else {
+			s = (s + "000000").slice(0, 6);
+		}
+		return {
+			r: parseInt(s.slice(0, 2), 16),
+			g: parseInt(s.slice(2, 4), 16),
+			b: parseInt(s.slice(4, 6), 16),
+		};
+	}
+
+	function colorDistance(a, b) {
+		return Math.sqrt((a.r - b.r) ** 2 + (a.g - b.g) ** 2 + (a.b - b.b) ** 2);
+	}
+
+	function scoreFromDistance(dist) {
+		const score = MAX_SCORE * Math.exp((-3 * dist) / RGB_MAX_DIST);
+		return Math.round(score);
+	}
+
+	// ---- color compare pair (split square + 3x2 channel grid, shown side by side) ----
+	function renderComparePair(container, guessColor, answerColor) {
+		const split = container.querySelector(".cc-split");
+		const grid = container.querySelector(".cc-grid");
+		const [top, bottom] = split.children;
+		top.style.background = rgbString(guessColor);
+		bottom.style.background = rgbString(answerColor);
+
+		grid.innerHTML = "";
+		const channelColors = [
+			`rgb(${guessColor.r},0,0)`,
+			`rgb(0,${guessColor.g},0)`,
+			`rgb(0,0,${guessColor.b})`,
+			`rgb(${answerColor.r},0,0)`,
+			`rgb(0,${answerColor.g},0)`,
+			`rgb(0,0,${answerColor.b})`,
+		];
+		channelColors.forEach((bg) => {
+			const cell = document.createElement("div");
+			cell.className = "cc-cell";
+			cell.style.background = bg;
+			grid.appendChild(cell);
+		});
+	}
+
+	function createComparePair(guessColor, answerColor, mini) {
+		const container = document.createElement("div");
+		container.className = "compare-pair" + (mini ? " mini" : "");
+		container.innerHTML = `
+			<div class="cc-split">
+				<div class="cc-top"></div>
+				<div class="cc-bottom"></div>
+			</div>
+			<div class="cc-grid"></div>
+		`;
+		renderComparePair(container, guessColor, answerColor);
+		return container;
+	}
+
+	// ---- start screen ----
+	const digitToggle = document.getElementById("digitToggle");
+	digitToggle.addEventListener("change", () => {
+		hexDigits = digitToggle.checked ? 3 : 6;
+	});
+
+	document.querySelectorAll(".round-card").forEach((btn) => {
+		btn.addEventListener("click", () => {
+			totalRounds = parseInt(btn.dataset.rounds, 10);
+			startGame();
+		});
+	});
+
+	function startGame() {
+		currentRound = 0;
+		totalScore = 0;
+		roundResults = [];
+		hexInput.maxLength = hexDigits;
+		hexInput.placeholder = hexDigits === 3 ? "000" : "000000";
+		nextRound();
+	}
+
+	// ---- game screen ----
+	const colorDiv = document.body;
+	const hexInput = document.getElementById("hexInput");
+	const timerValue = document.getElementById("timerValue");
+	const timerBadge = document.getElementById("timerBadge");
+
+	screens.game.addEventListener("mousedown", (e) => {
+		if (e.target !== hexInput) {
+			e.preventDefault();
+			hexInput.focus();
+		}
+	});
+
+	function nextRound() {
+		currentRound += 1;
+		if (currentRound > totalRounds) {
+			showFinal();
+			return;
+		}
+		chosenColor = randomColor();
+		colorDiv.style.backgroundColor = rgbString(chosenColor);
+		hexInput.value = "";
+		showScreen("game");
+		startTimer();
+	}
+
+	function startTimer() {
+		countdownEnd = Date.now() + ROUND_TIME_MS;
+		timerRunning = true;
+		timerBadge.classList.remove("urgent");
+		requestFrame(updateTimer);
+	}
+
+	function updateTimer() {
+		if (!timerRunning) return;
+		const millis = countdownEnd - Date.now();
+		if (millis > 0) {
+			const secs = Math.ceil(millis / 1000);
+			timerValue.textContent = `00:${secs.toString().padStart(2, "0")}`;
+			if (millis < 5000) timerBadge.classList.add("urgent");
+			requestFrame(updateTimer);
+		} else {
+			timerValue.textContent = "00:00";
+			submitGuess();
+		}
+	}
+
+	hexInput.addEventListener("input", () => {
+		hexInput.value = hexInput.value.replace(/[^a-fA-F0-9]/g, "").toUpperCase();
+	});
+
+	hexInput.addEventListener("keydown", (e) => {
+		if (e.key === "Enter") submitGuess();
+	});
+
+	function submitGuess() {
+		if (!timerRunning) return;
+		timerRunning = false;
+		const guessColor = parseHexInput(hexInput.value);
+		showReveal(guessColor);
+	}
+
+	// ---- reveal screen ----
+	const revealRoundTag = document.getElementById("revealRoundTag");
+	const revealCompare = document.getElementById("revealCompare");
+	const guessHexLabel = document.getElementById("guessHexLabel");
+	const answerHexLabel = document.getElementById("answerHexLabel");
+	const roundScoreValue = document.getElementById("roundScoreValue");
+	const runningTotal = document.getElementById("runningTotal");
+	const nextBtn = document.getElementById("nextBtn");
+
+	function animateNumber(el, from, to, duration) {
+		const startTime = performance.now();
+		function tick(now) {
+			const t = Math.min(1, (now - startTime) / duration);
+			const eased = 1 - Math.pow(1 - t, 3);
+			el.textContent = Math.round(from + (to - from) * eased);
+			if (t < 1) requestFrame(tick);
+		}
+		requestFrame(tick);
+	}
+
+	function showReveal(guessColor) {
+		const dist = colorDistance(guessColor, chosenColor);
+		const roundScore = scoreFromDistance(dist);
+		const previousTotal = totalScore;
+		totalScore += roundScore;
+
+		roundResults.push({
+			round: currentRound,
+			guess: guessColor,
+			answer: { ...chosenColor },
+			distance: dist,
+			score: roundScore,
+		});
+
+		revealRoundTag.textContent = `Round ${currentRound} of ${totalRounds}`;
+
+		renderComparePair(revealCompare, guessColor, chosenColor);
+		guessHexLabel.textContent = rgbToHex(guessColor);
+		answerHexLabel.textContent = rgbToHex(chosenColor);
+
+		animateNumber(roundScoreValue, 0, roundScore, 700);
+		animateNumber(runningTotal, previousTotal, totalScore, 700);
+
+		nextBtn.textContent = currentRound >= totalRounds ? "See final score" : "Next round";
+
+		showScreen("reveal");
+	}
+
+	nextBtn.addEventListener("click", nextRound);
+
+	// ---- final screen ----
+	const finalTotal = document.getElementById("finalTotal");
+	const finalAvg = document.getElementById("finalAvg");
+	const finalRoundsTag = document.getElementById("finalRoundsTag");
+	const tearStrip = document.getElementById("tearStrip");
+	const playAgainBtn = document.getElementById("playAgainBtn");
+
+	function showFinal() {
+		finalTotal.textContent = totalScore;
+		finalAvg.textContent = `avg ${Math.round(totalScore / totalRounds)} pts / round`;
+		finalRoundsTag.textContent = `${totalRounds} rounds`;
+
+		tearStrip.innerHTML = "";
+		roundResults.forEach((r) => {
+			const chip = document.createElement("div");
+			chip.className = "tear-chip";
+
+			const roundLabel = document.createElement("div");
+			roundLabel.className = "tear-round";
+			roundLabel.textContent = `Round ${r.round}`;
+
+			const scoreLabel = document.createElement("div");
+			scoreLabel.className = "tear-score";
+			scoreLabel.textContent = r.score;
+
+			const info = document.createElement("div");
+			info.className = "tear-chip-info";
+			info.appendChild(roundLabel);
+			info.appendChild(scoreLabel);
+
+			chip.appendChild(createComparePair(r.guess, r.answer, true));
+			chip.appendChild(info);
+			tearStrip.appendChild(chip);
+		});
+
+		showScreen("final");
+	}
+
+	playAgainBtn.addEventListener("click", () => {
+		showScreen("start");
+	});
+})();
+</script>
+</body>
+</html>
