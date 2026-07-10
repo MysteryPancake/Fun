@@ -15,8 +15,6 @@
 		--card-alt: #CBBFA5;
 		--card-deep: #B7AA8C;
 		--stamp: #C1440E;
-		--stamp-dark: #93340A;
-		--paper-line: #B7AA8C;
 		--white-chip: #F4EFE3;
 	}
 
@@ -34,7 +32,7 @@
 		padding: 0;
 		background: var(--card);
 		color: var(--ink);
-		height: 100%;
+		min-height: 100%;
 		overscroll-behavior: none;
 		transition: background-color 0.6s ease;
 	}
@@ -63,13 +61,12 @@
 		display: none;
 		min-height: 100vh;
 		width: 100%;
-		align-items: center;
-		justify-content: center;
 		padding: 6vmin 5vw;
 	}
 
 	.screen.active {
 		display: flex;
+		flex-direction: column;
 	}
 
 	/* ---------- screen transition animation ---------- */
@@ -97,6 +94,7 @@
 	.panel {
 		width: 100%;
 		max-width: 30rem;
+		margin: auto;
 		background: var(--white-chip);
 		border-radius: 0.4rem;
 		padding: 2.2rem 2rem;
@@ -201,15 +199,14 @@
 	#gameScreen {
 		padding: 0;
 		position: relative;
-		height: 100vh;
-		overflow: hidden;
+		min-height: 100vh;
+		flex-direction: column;
+		align-items: stretch;
+		justify-content: flex-start;
 	}
 
 	.hud {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
+		flex: 0 0 auto;
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -239,10 +236,8 @@
 	}
 
 	.guess-bar {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
+		flex: 0 0 auto;
+		margin-top: auto;
 		background: rgba(20,18,15,0.62);
 		backdrop-filter: blur(2px);
 		padding: 2.2rem 1rem 2.6rem;
@@ -359,19 +354,6 @@
 		font-weight: 600;
 		letter-spacing: 0;
 		text-transform: none;
-	}
-
-	.compare-caption {
-		display: flex;
-		justify-content: center;
-		gap: 1.4rem;
-		font-size: 0.78rem;
-		color: var(--ink-soft);
-	}
-
-	.compare-caption b {
-		color: var(--ink);
-		font-weight: 600;
 	}
 
 	.score-block {
