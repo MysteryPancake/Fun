@@ -298,6 +298,33 @@
 		gap: 0.3rem;
 	}
 
+	.swatch-bar {
+		display: flex;
+		width: 100%;
+		max-width: 36rem;
+		gap: 0;
+	}
+
+	.swatch-box {
+		flex: 1 1 0;
+		aspect-ratio: 1;
+		height: auto;
+		border-radius: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.68rem;
+		font-weight: 600;
+		border: none;
+		transition: transform 0.08s ease, filter 0.08s ease;
+	}
+
+	.swatch-bar .swatch-box:first-child { border-top-left-radius: 0.2rem; border-bottom-left-radius: 0.2rem; }
+	.swatch-bar .swatch-box:last-child { border-top-right-radius: 0.2rem; border-bottom-right-radius: 0.2rem; }
+
+	.swatch-box:hover { filter: brightness(1.12); }
+	.swatch-box:active { transform: translateY(0.08rem); }
+
 	.hash {
 		color: var(--white-chip);
 		font-family: "Archivo Black", sans-serif;
@@ -530,6 +557,7 @@
 			<div class="color-area-half" id="colorTop"></div>
 		</div>
 		<div class="guess-bar">
+			<div class="swatch-bar" id="swatchBar"></div>
 			<div class="guess-row">
 				<span class="hash">#</span>
 				<input id="hexInput" type="text" maxlength="6" placeholder="000000" pattern="[a-fA-F0-9]+" autocomplete="off" autofocus>
@@ -803,12 +831,41 @@
 		}
 	});
 
+	// ---- practice mode swatch bar (0-F shade boxes) ----
+	const swatchBar = document.getElementById("swatchBar");
+	const HEX_CHARS = "0123456789ABCDEF";
+
+	function insertHexChar(ch) {
+		const start = hexInput.selectionStart ?? hexInput.value.length;
+		const end = hexInput.selectionEnd ?? hexInput.value.length;
+		let newValue = hexInput.value.slice(0, start) + ch + hexInput.value.slice(end);
+		const maxLen = hexInput.maxLength;
+		if (maxLen > 0 && newValue.length > maxLen) newValue = newValue.slice(0, maxLen);
+		hexInput.value = newValue;
+		const newPos = Math.min(start + 1, newValue.length);
+		hexInput.focus();
+		hexInput.setSelectionRange(newPos, newPos);
+		hexInput.dispatchEvent(new Event("input"));
+	}
+
+	HEX_CHARS.split("").forEach((ch, i) => {
+		const shade = Math.round((i / (HEX_CHARS.length - 1)) * 255);
+		const box = document.createElement("button");
+		box.type = "button";
+		box.className = "swatch-box";
+		box.style.background = `rgb(${shade}, ${shade}, ${shade})`;
+		box.style.color = i < HEX_CHARS.length / 2 ? "var(--white-chip)" : "var(--ink)";
+		box.textContent = ch;
+		box.addEventListener("click", () => insertHexChar(ch));
+		swatchBar.appendChild(box);
+	});
+
 	function updatePracticeUI() {
 		if (!practiceMode) return;
 		const guessColor = parseHexInput(hexInput.value);
 		colorTop.style.background = rgbString(guessColor);
 		const dist = colorDistance(guessColor, chosenColor);
-		timerValue.textContent = scoreFromDistance(dist);
+		timerValue.textContent = `${scoreFromDistance(dist)} points`;
 	}
 
 	function nextRound() {
@@ -943,7 +1000,7 @@
 
 			const scoreLabel = document.createElement("div");
 			scoreLabel.className = "tear-score";
-			scoreLabel.textContent = r.score;
+			scoreLabel.textContent = `${r.score} points`;
 
 			const info = document.createElement("div");
 			info.className = "tear-chip-info";
