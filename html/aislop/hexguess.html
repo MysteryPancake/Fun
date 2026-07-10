@@ -178,6 +178,27 @@
 		color: var(--card-deep);
 	}
 
+	#timerInput {
+		border: none;
+		border-radius: 0.25rem;
+		background: var(--card);
+		color: var(--ink);
+		font-size: 0.85rem;
+		padding: 0.25rem 0.4rem;
+		width: 5em;
+		text-align: center;
+	}
+
+	#timerInput::-webkit-inner-spin-button,
+	#timerInput::-webkit-outer-spin-button {
+		opacity: 1;
+	}
+
+	.checkbox-row.disabled {
+		opacity: 0.45;
+		pointer-events: none;
+	}
+
 	.mode-num {
 		font-family: "Archivo Black", sans-serif;
 		font-size: 2.1rem;
@@ -199,6 +220,7 @@
 	#gameScreen {
 		padding: 0;
 		position: relative;
+		z-index: 0;
 		min-height: 100vh;
 		flex-direction: column;
 		align-items: stretch;
@@ -217,6 +239,29 @@
 		font-size: 0.95rem;
 		letter-spacing: 0.06em;
 		text-transform: uppercase;
+	}
+
+	.color-area {
+		display: none;
+		position: fixed;
+		inset: 0;
+		z-index: -1;
+	}
+
+	#gameScreen.practice .color-area {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.color-area::after {
+		content: "";
+		flex: 1 1 0;
+		order: 1;
+	}
+
+	.color-area-half {
+		flex: 1 1 0;
+		order: 2;
 	}
 
 	.hud span.value {
@@ -460,8 +505,16 @@
 				</button>
 			</div>
 			<label class="checkbox-row">
-				<input type="checkbox" id="digitToggle">
+				<input type="checkbox" id="digitToggle" checked>
 				<span>3-digit mode <span class="checkbox-hint">(#RGB)</span></span>
+			</label>
+			<label class="checkbox-row">
+				<input type="checkbox" id="practiceToggle">
+				<span>Practice mode <span class="checkbox-hint">(no timer)</span></span>
+			</label>
+			<label class="checkbox-row" id="timerRow">
+				<span>Timer duration</span>
+				<input type="number" id="timerInput" value="20" min="1" step="1"> <span class="checkbox-hint">sec</span>
 			</label>
 		</div>
 	</div>
@@ -472,6 +525,9 @@
 			<div id="timerBadge">
 				<span class="value" id="timerValue">00:00</span>
 			</div>
+		</div>
+		<div class="color-area" id="colorArea">
+			<div class="color-area-half" id="colorTop"></div>
 		</div>
 		<div class="guess-bar">
 			<div class="guess-row">
@@ -516,7 +572,6 @@
 		<div class="panel">
 			<h2 class="title-lockup display" style="font-size:1.5rem;">Final score</h2>
 			<div class="final-total" id="finalTotal">0</div>
-			<div class="final-sub" id="finalAvg">avg 0 pts / round</div>
 
 			<div class="tear-strip" id="tearStrip"></div>
 
@@ -529,19 +584,21 @@
 	"use strict";
 
 	const requestFrame = window.requestAnimationFrame || function (cb) { return window.setTimeout(cb, 1000 / 60); };
-	const ROUND_TIME_MS = 20000;
+	let ROUND_TIME_MS = 20000;
 	const MAX_SCORE = 5000;
 	const RGB_MAX_DIST = Math.sqrt(3 * 255 * 255);
 
 	// ---- state ----
 	let totalRounds = 5;
-	let hexDigits = 6;
+	let hexDigits = 3;
+	let practiceMode = false;
 	let currentRound = 0;
 	let totalScore = 0;
 	let roundResults = [];
 	let chosenColor = null;
 	let countdownEnd = 0;
 	let timerRunning = false;
+	let roundActive = false;
 
 	// ---- elements ----
 	const screens = {
@@ -700,6 +757,22 @@
 		hexDigits = digitToggle.checked ? 3 : 6;
 	});
 
+	const practiceToggle = document.getElementById("practiceToggle");
+	const timerRow = document.getElementById("timerRow");
+	practiceToggle.addEventListener("change", () => {
+		practiceMode = practiceToggle.checked;
+		timerRow.classList.toggle("disabled", practiceMode);
+	});
+
+	const timerInput = document.getElementById("timerInput");
+	timerInput.addEventListener("change", () => {
+		let secs = parseInt(timerInput.value, 10);
+		if (isNaN(secs)) secs = 20;
+		secs = Math.max(1, secs);
+		timerInput.value = secs;
+		ROUND_TIME_MS = secs * 1000;
+	});
+
 	document.querySelectorAll(".round-card").forEach((btn) => {
 		btn.addEventListener("click", () => {
 			totalRounds = parseInt(btn.dataset.rounds, 10);
@@ -721,6 +794,7 @@
 	const hexInput = document.getElementById("hexInput");
 	const timerValue = document.getElementById("timerValue");
 	const timerBadge = document.getElementById("timerBadge");
+	const colorTop = document.getElementById("colorTop");
 
 	screens.game.addEventListener("mousedown", (e) => {
 		if (e.target !== hexInput) {
@@ -728,6 +802,14 @@
 			hexInput.focus();
 		}
 	});
+
+	function updatePracticeUI() {
+		if (!practiceMode) return;
+		const guessColor = parseHexInput(hexInput.value);
+		colorTop.style.background = rgbString(guessColor);
+		const dist = colorDistance(guessColor, chosenColor);
+		timerValue.textContent = scoreFromDistance(dist);
+	}
 
 	function nextRound() {
 		currentRound += 1;
@@ -738,8 +820,14 @@
 		chosenColor = randomColor();
 		colorDiv.style.backgroundColor = rgbString(chosenColor);
 		hexInput.value = "";
+		roundActive = true;
+		screens.game.classList.toggle("practice", practiceMode);
+		if (practiceMode) {
+			timerBadge.classList.remove("urgent");
+			updatePracticeUI();
+		}
 		showScreen("game");
-		startTimer();
+		if (!practiceMode) startTimer();
 	}
 
 	function startTimer() {
@@ -749,12 +837,18 @@
 		requestFrame(updateTimer);
 	}
 
+	function formatTime(totalSecs) {
+		const mins = Math.floor(totalSecs / 60);
+		const secs = totalSecs % 60;
+		return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+	}
+
 	function updateTimer() {
 		if (!timerRunning) return;
 		const millis = countdownEnd - Date.now();
 		if (millis > 0) {
-			const secs = Math.ceil(millis / 1000);
-			timerValue.textContent = `00:${secs.toString().padStart(2, "0")}`;
+			const totalSecs = Math.ceil(millis / 1000);
+			timerValue.textContent = formatTime(totalSecs);
 			if (millis < 5000) timerBadge.classList.add("urgent");
 			requestFrame(updateTimer);
 		} else {
@@ -765,6 +859,7 @@
 
 	hexInput.addEventListener("input", () => {
 		hexInput.value = hexInput.value.replace(/[^a-fA-F0-9]/g, "").toUpperCase();
+		updatePracticeUI();
 	});
 
 	hexInput.addEventListener("keydown", (e) => {
@@ -772,7 +867,8 @@
 	});
 
 	function submitGuess() {
-		if (!timerRunning) return;
+		if (!roundActive) return;
+		roundActive = false;
 		timerRunning = false;
 		const guessColor = parseHexInput(hexInput.value);
 		showReveal(guessColor);
@@ -830,13 +926,11 @@
 
 	// ---- final screen ----
 	const finalTotal = document.getElementById("finalTotal");
-	const finalAvg = document.getElementById("finalAvg");
 	const tearStrip = document.getElementById("tearStrip");
 	const playAgainBtn = document.getElementById("playAgainBtn");
 
 	function showFinal() {
 		finalTotal.textContent = totalScore;
-		finalAvg.textContent = `avg ${Math.round(totalScore / totalRounds)} pts / round`;
 
 		tearStrip.innerHTML = "";
 		roundResults.forEach((r) => {
