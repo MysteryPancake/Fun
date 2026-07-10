@@ -262,6 +262,7 @@
 	.color-area-half {
 		flex: 1 1 0;
 		order: 2;
+		transition: background-color 0.2s ease;
 	}
 
 	.hud span.value {
@@ -270,6 +271,15 @@
 		text-transform: none;
 		letter-spacing: 0;
 		display: block;
+		transition: color 0.25s ease;
+	}
+
+	.hud span.value.score-up {
+		color: #8fd694;
+	}
+
+	.hud span.value.score-down {
+		color: #ff9a8a;
 	}
 
 	#timerBadge {
@@ -864,12 +874,63 @@
 		swatchBar.appendChild(box);
 	});
 
-	function updatePracticeUI() {
+	let displayedScore = 0;
+	let scoreAnimId = null;
+	let scoreFlashTimeoutId = null;
+	const cancelFrame = window.cancelAnimationFrame || window.clearTimeout;
+
+	function setScoreDisplay(target, animate) {
+		if (scoreAnimId !== null) {
+			cancelFrame(scoreAnimId);
+			scoreAnimId = null;
+		}
+		if (scoreFlashTimeoutId !== null) {
+			clearTimeout(scoreFlashTimeoutId);
+			scoreFlashTimeoutId = null;
+		}
+		if (!animate) {
+			displayedScore = target;
+			timerValue.textContent = `${target} points`;
+			timerValue.classList.remove("score-up", "score-down");
+			return;
+		}
+		const start = displayedScore;
+		const startTime = performance.now();
+		const duration = 250;
+
+		if (target > start) {
+			timerValue.classList.remove("score-down");
+			timerValue.classList.add("score-up");
+		} else if (target < start) {
+			timerValue.classList.remove("score-up");
+			timerValue.classList.add("score-down");
+		}
+
+		function tick(now) {
+			const t = Math.min(1, (now - startTime) / duration);
+			const eased = 1 - Math.pow(1 - t, 3);
+			const value = Math.round(start + (target - start) * eased);
+			timerValue.textContent = `${value} points`;
+			displayedScore = value;
+			if (t < 1) {
+				scoreAnimId = requestFrame(tick);
+			} else {
+				scoreAnimId = null;
+				scoreFlashTimeoutId = setTimeout(() => {
+					timerValue.classList.remove("score-up", "score-down");
+					scoreFlashTimeoutId = null;
+				}, 150);
+			}
+		}
+		scoreAnimId = requestFrame(tick);
+	}
+
+	function updatePracticeUI(animate = true) {
 		if (!practiceMode) return;
 		const guessColor = parseHexInput(hexInput.value);
 		colorTop.style.background = rgbString(guessColor);
 		const dist = colorDistance(guessColor, chosenColor);
-		timerValue.textContent = `${scoreFromDistance(dist)} points`;
+		setScoreDisplay(scoreFromDistance(dist), animate);
 	}
 
 	function nextRound() {
@@ -885,7 +946,7 @@
 		screens.game.classList.toggle("practice", practiceMode);
 		if (practiceMode) {
 			timerBadge.classList.remove("urgent");
-			updatePracticeUI();
+			updatePracticeUI(false);
 		}
 		showScreen("game");
 		if (!practiceMode) startTimer();
