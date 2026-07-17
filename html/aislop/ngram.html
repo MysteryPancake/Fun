@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>N·GRAM — a machine that finishes your sentences</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #17140f;
+    --surface: #221d16;
+    --surface-2: #2c2519;
+    --line: #3c3324;
+    --ink: #ece3d1;
+    --ink-dim: #a99d85;
+    --accent: #56b39a;
+    --accent-dim: #3c8571;
+    --accent-2: #d4a24c;
+    --danger: #b0503a;
+    --radius: 3px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { color-scheme: dark; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(236,227,209,0.035) 1px, transparent 0);
+    background-size: 22px 22px;
+    color: var(--ink);
+    font-family: 'Lora', serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px 80px;
+  }
+
+  main {
+    width: 100%;
+    max-width: 1080px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) 1fr;
+    align-items: start;
+    gap: 20px;
+  }
+
+  @media (max-width: 780px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: 0.08em;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  h1 span { color: var(--accent); }
+
+  .tagline {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    color: var(--ink-dim);
+    font-size: 14.5px;
+    margin: 0;
+  }
+
+  .status-led {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    white-space: nowrap;
+  }
+
+  .status-led::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--danger);
+    box-shadow: 0 0 6px var(--danger);
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+
+  .status-led.ready::before {
+    background: var(--accent);
+    box-shadow: 0 0 7px var(--accent);
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 20px;
+  }
+
+  .upload-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .file-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+
+  .file-btn:hover { border-color: var(--accent-dim); }
+
+  #fileInput { display: none; }
+
+  .file-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--ink-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .controls-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .field {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .field-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    flex: 0 0 130px;
+  }
+
+  .field-label .val { color: var(--accent-2); }
+
+  .field input {
+    flex: 1;
+  }
+
+  input[type="number"] {
+    font-family: 'Inter', sans-serif;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    width: 100%;
+    font-size: 13.5px;
+  }
+
+  input[type="number"]:focus,
+  input[type="range"]:focus-visible,
+  .file-btn:focus-visible,
+  .generate-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 3px;
+    background: var(--line);
+    border-radius: 2px;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 2px solid var(--bg);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 2px solid var(--bg);
+  }
+
+  .generate-row {
+    margin-top: 22px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .generate-btn {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: #12251f;
+    border: none;
+    padding: 12px 22px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  .generate-btn:hover:not(:disabled) { background: #6ac4ab; }
+  .generate-btn:active:not(:disabled) { transform: translateY(1px); }
+
+  .generate-btn:disabled {
+    background: var(--surface-2);
+    color: var(--ink-dim);
+    cursor: not-allowed;
+  }
+
+  .stats-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 24px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .stat-label {
+    color: var(--ink-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 10px;
+  }
+
+  .stat-value {
+    font-family: 'Inter', sans-serif;
+    color: var(--accent-2);
+    font-size: 16px;
+  }
+
+  .printout {
+    position: relative;
+    background: #eee6d3;
+    color: #241f16;
+    border-radius: 2px;
+    padding: 6px 0;
+  }
+
+  .perf {
+    height: 12px;
+    background:
+      radial-gradient(circle at 10px 6px, var(--bg) 3.5px, transparent 3.6px) repeat-x;
+    background-size: 20px 12px;
+  }
+
+  .printout-inner {
+    padding: 26px 30px 32px;
+    min-height: 480px;
+  }
+
+  #output {
+    margin: 0;
+    font-family: 'Lora', serif;
+    font-size: 16px;
+    line-height: 1.75;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  #output:empty::before {
+    content: "The printout is empty. Load a text and press Generate.";
+    color: #8a7f68;
+    font-style: italic;
+  }
+
+  #output.typing::after {
+    content: "▌";
+    animation: blink 1s step-end infinite;
+    color: var(--accent-dim);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #output.typing::after { animation: none; }
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  .hint {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: var(--ink-dim);
+    margin-top: 10px;
+  }
+
+  .hint.error { color: var(--danger); }
+</style>
+</head>
+<body>
+<main>
+
+  <header>
+    <div>
+      <h1>N<span>·</span>GRAM</h1>
+      <p class="tagline">a machine that finishes your sentences</p>
+    </div>
+    <span class="status-led" id="statusLed">no text loaded</span>
+  </header>
+
+  <div class="layout">
+    <div class="left-col">
+      <section class="panel">
+        <div class="upload-row">
+          <button class="file-btn" id="fileBtn" type="button">Load text file</button>
+          <input type="file" id="fileInput" accept="*/*">
+          <span class="file-label" id="fileLabel">no file selected</span>
+        </div>
+
+        <div class="controls-grid">
+          <div class="field">
+            <label class="field-label" for="order">Context</label>
+            <input id="order" type="number" value="5" min="1" max="12">
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="numWords">Words to generate</label>
+            <input id="numWords" type="number" value="200" min="1" max="2000">
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="temperature">Temperature <span class="val" id="temperatureValue">1.0</span></label>
+            <input id="temperature" type="range" value="1" min="0.1" max="3" step="0.1">
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="smoothing">Smoothing <span class="val" id="smoothingValue">0.0</span></label>
+            <input id="smoothing" type="range" value="0" min="0" max="10" step="0.1">
+          </div>
+        </div>
+
+        <div class="generate-row">
+          <button class="generate-btn" id="generateBtn" disabled>Generate ▸</button>
+        </div>
+        <p class="hint" id="hint"></p>
+      </section>
+
+      <section class="panel">
+        <div class="stats-bar">
+          <div class="stat">
+            <span class="stat-label">Words read</span>
+            <span class="stat-value" id="statWords">—</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Vocabulary</span>
+            <span class="stat-value" id="statVocab">—</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Contexts learned</span>
+            <span class="stat-value" id="statContexts">—</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Sentence starts</span>
+            <span class="stat-value" id="statStarts">—</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="right-col">
+      <div class="printout">
+        <div class="perf"></div>
+        <div class="printout-inner">
+          <pre id="output"></pre>
+        </div>
+        <div class="perf"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const fileInput = document.getElementById("fileInput");
+const fileBtn = document.getElementById("fileBtn");
+const fileLabel = document.getElementById("fileLabel");
+const generateBtn = document.getElementById("generateBtn");
+const orderInput = document.getElementById("order");
+const temperatureInput = document.getElementById("temperature");
+const smoothingInput = document.getElementById("smoothing");
+const temperatureValue = document.getElementById("temperatureValue");
+const smoothingValue = document.getElementById("smoothingValue");
+const numWordsInput = document.getElementById("numWords");
+const output = document.getElementById("output");
+const statusLed = document.getElementById("statusLed");
+const hint = document.getElementById("hint");
+const statWords = document.getElementById("statWords");
+const statVocab = document.getElementById("statVocab");
+const statContexts = document.getElementById("statContexts");
+const statStarts = document.getElementById("statStarts");
+
+let models = new Map();
+let globalCounts = new Map();
+let startStates = [];
+let loadedWords = null; // tokenized words from the last loaded file, kept so we can retrain if "order" changes
+
+fileBtn.addEventListener("click", () => fileInput.click());
+
+temperatureInput.addEventListener("input", () => {
+    temperatureValue.textContent = Number(temperatureInput.value).toFixed(1);
+});
+
+smoothingInput.addEventListener("input", () => {
+    smoothingValue.textContent = Number(smoothingInput.value).toFixed(1);
+});
+
+// Retrain automatically if the order changes after a file is already loaded,
+// otherwise the model built at the old order silently mismatches the new one.
+orderInput.addEventListener("change", () => {
+    if (loadedWords) buildModel(loadedWords);
+});
+
+
+// Convert text into words with sentence markers
+function tokenize(text) {
+    const sentences = text
+        .replace(/\s+/g, " ")
+        .split(/[.!?]+/)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+    const words = [];
+
+    for (const sentence of sentences) {
+        words.push("<START>");
+
+        words.push(
+            ...sentence
+                .toLowerCase()
+                .split(/[^a-z0-9']+/)
+                .filter(Boolean)
+        );
+
+        words.push("<END>");
+    }
+
+    return words;
+}
+
+
+// Build the n-gram model (and all backoff sub-models) from a token stream
+function buildModel(words) {
+    models = new Map();
+    globalCounts = new Map();
+
+    const strictStarts = [];
+    const looseStarts = [];
+
+    for (const word of words) {
+        globalCounts.set(word, (globalCounts.get(word) || 0) + 1);
+    }
+
+    const order = Math.max(1, Math.floor(Number(orderInput.value)) || 1);
+
+    for (let i = 0; i + order < words.length; i++) {
+        const history = words.slice(i, i + order);
+        const next = words[i + order];
+
+        // A "true" sentence-start context is a window that begins with <START>.
+        // Any window that merely contains <START> somewhere in the middle spans
+        // a sentence boundary and isn't a clean place to begin generation, but we
+        // keep it as a fallback in case the chosen order is too long for any
+        // sentence in the source text to produce a strict match.
+        if (history[0] === "<START>") {
+            strictStarts.push(history);
+        } else if (history.includes("<START>")) {
+            looseStarts.push(history);
+        }
+
+        for (let n = 1; n <= order; n++) {
+            const key = history.slice(order - n).join(" ");
+
+            if (!models.has(n)) models.set(n, new Map());
+            const model = models.get(n);
+
+            if (!model.has(key)) model.set(key, new Map());
+            const counts = model.get(key);
+
+            counts.set(next, (counts.get(next) || 0) + 1);
+        }
+    }
+
+    startStates = strictStarts.length > 0 ? strictStarts : looseStarts;
+
+    const totalWords = words.filter(w => w !== "<START>" && w !== "<END>").length;
+    let contextCount = 0;
+    for (const m of models.values()) contextCount += m.size;
+
+    statWords.textContent = totalWords.toLocaleString();
+    statVocab.textContent = globalCounts.size.toLocaleString();
+    statContexts.textContent = contextCount.toLocaleString();
+    statStarts.textContent = startStates.length.toLocaleString();
+
+    const ready = startStates.length > 0;
+    generateBtn.disabled = !ready;
+    statusLed.classList.toggle("ready", ready);
+    statusLed.textContent = ready ? "model ready" : "no usable sentences found";
+
+    if (!ready) {
+        hint.textContent = "Couldn't find any complete sentences to learn from — try a longer text or a smaller context value.";
+        hint.classList.add("error");
+    } else {
+        hint.textContent = "";
+        hint.classList.remove("error");
+    }
+}
+
+
+// Load model
+fileInput.addEventListener("change", async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    fileLabel.textContent = file.name;
+    statusLed.textContent = "reading file…";
+
+    let text;
+    try {
+        text = await file.text();
+    } catch (err) {
+        hint.textContent = "Couldn't read that file as text. Please choose a different file.";
+        hint.classList.add("error");
+        statusLed.textContent = "no text loaded";
+        return;
+    }
+
+    loadedWords = tokenize(text);
+    buildModel(loadedWords);
+});
+
+
+// Weighted random sampling
+function sample(counts) {
+    const temperature = Number(temperatureInput.value);
+    const smoothing = Number(smoothingInput.value);
+
+    const entries = [];
+    let total = 0;
+
+    for (const [word, count] of counts) {
+        let weight = count + smoothing;
+        weight = Math.pow(weight, 1 / temperature);
+        total += weight;
+        entries.push([word, weight]);
+    }
+
+    let r = Math.random() * total;
+
+    for (const [word, weight] of entries) {
+        r -= weight;
+        if (r <= 0) return word;
+    }
+
+    return entries[entries.length - 1][0];
+}
+
+
+// Predict with backoff
+function predict(history) {
+    const maxOrder = Number(orderInput.value);
+
+    for (let n = Math.min(maxOrder, history.length); n >= 1; n--) {
+        const key = history.slice(history.length - n).join(" ");
+        const model = models.get(n);
+
+        if (model && model.has(key)) return sample(model.get(key));
+    }
+
+    return sample(globalCounts);
+}
+
+
+// Format output
+function formatText(words) {
+    let text = "";
+    let sentenceStart = true;
+
+    for (const word of words) {
+        if (word === "<END>") {
+            text += ". ";
+            sentenceStart = true;
+            continue;
+        }
+
+        if (word === "<START>") continue;
+        if (!word) continue;
+
+        if (sentenceStart) {
+            text += word[0].toUpperCase() + word.slice(1);
+            sentenceStart = false;
+        } else {
+            text += " " + word;
+        }
+    }
+
+    return text.trim();
+}
+
+
+// Generate text
+generateBtn.addEventListener("click", () => {
+    if (startStates.length === 0) {
+        hint.textContent = "Load a text file first.";
+        hint.classList.add("error");
+        return;
+    }
+    hint.textContent = "";
+    hint.classList.remove("error");
+
+    const order = Number(orderInput.value);
+    const target = Number(numWordsInput.value);
+
+    // Safety cap: guards against the (extremely unlikely) case of the model
+    // repeatedly predicting <START> and never producing a visible word,
+    // which would otherwise spin the loop forever.
+    const maxSteps = Math.max(1000, target * 50);
+    let steps = 0;
+
+    let history = [...startStates[Math.floor(Math.random() * startStates.length)]];
+    const result = [];
+
+    output.classList.add("typing");
+
+    while (result.length < target && steps < maxSteps) {
+        steps++;
+        const next = predict(history);
+
+        if (next !== "<START>") result.push(next);
+
+        history.push(next);
+        if (history.length > order) history.shift();
+
+        if (next === "<END>") {
+            history = [...startStates[Math.floor(Math.random() * startStates.length)]];
+        }
+    }
+
+    output.classList.remove("typing");
+    output.textContent = formatText(result);
+});
+</script>
+
+</body>
+</html>
