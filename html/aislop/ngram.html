@@ -9,15 +9,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #17140f;
-    --surface: #221d16;
-    --surface-2: #2c2519;
-    --line: #3c3324;
-    --ink: #ece3d1;
-    --ink-dim: #a99d85;
-    --accent: #56b39a;
-    --accent-dim: #3c8571;
-    --accent-2: #d4a24c;
+    --bg: #16171a;
+    --surface: #202226;
+    --surface-2: #2a2c30;
+    --line: #3a3c41;
+    --ink: #e8e9eb;
+    --ink-dim: #9c9ea3;
+    --accent: #4f8fdb;
+    --accent-dim: #396aa3;
+    --accent-2: #7fb8ec;
     --danger: #b0503a;
     --radius: 3px;
   }
@@ -29,9 +29,6 @@
   body {
     margin: 0;
     background: var(--bg);
-    background-image:
-      radial-gradient(circle at 1px 1px, rgba(236,227,209,0.035) 1px, transparent 0);
-    background-size: 22px 22px;
     color: var(--ink);
     font-family: 'Lora', serif;
     min-height: 100vh;
@@ -48,7 +45,7 @@
   .layout {
     display: grid;
     grid-template-columns: minmax(280px, 360px) 1fr;
-    align-items: start;
+    align-items: stretch;
     gap: 20px;
   }
 
@@ -61,7 +58,6 @@
     align-items: baseline;
     justify-content: space-between;
     gap: 16px;
-    border-bottom: 1px solid var(--line);
     padding-bottom: 18px;
     margin-bottom: 28px;
     flex-wrap: wrap;
@@ -248,7 +244,7 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
     background: var(--accent);
-    color: #12251f;
+    color: #0d1f33;
     border: none;
     padding: 12px 22px;
     border-radius: var(--radius);
@@ -256,7 +252,7 @@
     transition: background 0.15s, transform 0.1s;
   }
 
-  .generate-btn:hover:not(:disabled) { background: #6ac4ab; }
+  .generate-btn:hover:not(:disabled) { background: #74aeea; }
   .generate-btn:active:not(:disabled) { transform: translateY(1px); }
 
   .generate-btn:disabled {
@@ -292,24 +288,28 @@
     font-size: 16px;
   }
 
-  .printout {
-    position: relative;
-    background: #eee6d3;
-    color: #241f16;
-    border-radius: 2px;
-    padding: 6px 0;
+  .right-col {
+    display: flex;
+    height: 100%;
   }
 
-  .perf {
-    height: 12px;
-    background:
-      radial-gradient(circle at 10px 6px, var(--bg) 3.5px, transparent 3.6px) repeat-x;
-    background-size: 20px 12px;
+  .printout {
+    position: relative;
+    background: #f2ead9;
+    color: #2b2721;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 6px 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
   }
 
   .printout-inner {
     padding: 26px 30px 32px;
     min-height: 480px;
+    flex: 1;
+    display: flex;
   }
 
   #output {
@@ -319,11 +319,18 @@
     line-height: 1.75;
     white-space: pre-wrap;
     word-wrap: break-word;
+    outline: none;
+    cursor: text;
+    flex: 1;
+  }
+
+  #output:focus {
+    outline: none;
   }
 
   #output:empty::before {
-    content: "The printout is empty. Load a text and press Generate.";
-    color: #8a7f68;
+    content: "The printout is empty. Load a text, then press Generate — or type your own text here and press Generate to continue it.";
+    color: #8a8477;
     font-style: italic;
   }
 
@@ -379,7 +386,7 @@
 
           <div class="field">
             <label class="field-label" for="numWords">Words to generate</label>
-            <input id="numWords" type="number" value="200" min="1" max="2000">
+            <input id="numWords" type="number" value="50" min="1" max="2000">
           </div>
 
           <div class="field">
@@ -423,11 +430,9 @@
 
     <div class="right-col">
       <div class="printout">
-        <div class="perf"></div>
         <div class="printout-inner">
-          <pre id="output"></pre>
+          <div id="output" contenteditable="true" spellcheck="false" role="textbox" aria-multiline="true" aria-label="Generated text (editable)"></div>
         </div>
-        <div class="perf"></div>
       </div>
     </div>
   </div>
@@ -635,9 +640,10 @@ function predict(history) {
 
 
 // Format output
-function formatText(words) {
+// sentenceStart controls whether the first word gets capitalized — pass false
+// when the generated words are continuing a sentence the user already started.
+function formatText(words, sentenceStart = true) {
     let text = "";
-    let sentenceStart = true;
 
     for (const word of words) {
         if (word === "<END>") {
@@ -661,6 +667,46 @@ function formatText(words) {
 }
 
 
+// Figure out where generation should pick up from, based on whatever is
+// currently sitting in the (editable) output box:
+//   - empty box, or box ending in . ! ? -> start a brand new sentence,
+//     just like the very first generation, using a real learned start state.
+//   - box ending mid-sentence -> use the last `order` words the user can
+//     see as the n-gram history, so the model continues *their* sentence
+//     rather than the model's own internal (and possibly stale) state.
+function getContinuationState(order) {
+    const randomStart = () => [...startStates[Math.floor(Math.random() * startStates.length)]];
+    const raw = (output.textContent || "").trim();
+
+    if (!raw || /[.!?]\s*$/.test(raw)) {
+        return { history: randomStart(), sentenceStart: true };
+    }
+
+    const lastSentence = raw.split(/[.!?]+/).pop().trim();
+    const words = lastSentence
+        .toLowerCase()
+        .split(/[^a-z0-9']+/)
+        .filter(Boolean);
+
+    if (words.length === 0) {
+        return { history: randomStart(), sentenceStart: true };
+    }
+
+    return { history: words.slice(-order), sentenceStart: false };
+}
+
+// Put the cursor at the very end of the output box after we've appended text,
+// so the user can keep typing right where generation left off.
+function placeCursorAtEnd(el) {
+    el.focus();
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+}
+
 // Generate text
 generateBtn.addEventListener("click", () => {
     if (startStates.length === 0) {
@@ -680,7 +726,8 @@ generateBtn.addEventListener("click", () => {
     const maxSteps = Math.max(1000, target * 50);
     let steps = 0;
 
-    let history = [...startStates[Math.floor(Math.random() * startStates.length)]];
+    const { history: initialHistory, sentenceStart } = getContinuationState(order);
+    let history = initialHistory;
     const result = [];
 
     output.classList.add("typing");
@@ -700,7 +747,21 @@ generateBtn.addEventListener("click", () => {
     }
 
     output.classList.remove("typing");
-    output.textContent = formatText(result);
+
+    const addition = formatText(result, sentenceStart);
+    const existing = output.textContent || "";
+    const separator = existing.length > 0 && !/\s$/.test(existing) ? " " : "";
+
+    output.textContent = existing + separator + addition;
+    placeCursorAtEnd(output);
+});
+
+// Keep pasted content as plain text so formatting/markup from elsewhere
+// can't leak into the printout (and break the word-by-word tokenizer).
+output.addEventListener("paste", e => {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData("text/plain");
+    document.execCommand("insertText", false, text);
 });
 </script>
 
