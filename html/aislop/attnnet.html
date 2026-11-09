@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATTN·NET — a tiny self-attention model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #16171a;
+    --surface: #202226;
+    --surface-2: #2a2c30;
+    --line: #3a3c41;
+    --ink: #e8e9eb;
+    --ink-dim: #9c9ea3;
+    --accent: #4f8fdb;
+    --accent-dim: #396aa3;
+    --accent-2: #7fb8ec;
+    --danger: #b0503a;
+    --radius: 3px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { color-scheme: dark; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Lora', serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px 80px;
+  }
+
+  main {
+    width: 100%;
+    max-width: 1080px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) 1fr;
+    align-items: stretch;
+    gap: 20px;
+  }
+
+  @media (max-width: 780px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 18px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: 0.08em;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  h1 span { color: var(--accent); }
+
+  .tagline {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    color: var(--ink-dim);
+    font-size: 14.5px;
+    margin: 0;
+  }
+
+  .status-led {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    white-space: nowrap;
+  }
+
+  .status-led::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--danger);
+    box-shadow: 0 0 6px var(--danger);
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+
+  .status-led.ready::before {
+    background: var(--accent);
+    box-shadow: 0 0 7px var(--accent);
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 20px;
+  }
+
+  .upload-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .file-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+
+  .file-btn:hover { border-color: var(--accent-dim); }
+
+  #fileInput { display: none; }
+
+  .file-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--ink-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .controls-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .field {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .field-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    flex: 0 0 130px;
+  }
+
+  .field-label .val { color: var(--accent-2); }
+
+  .field input {
+    flex: 1;
+  }
+
+  input[type="number"] {
+    font-family: 'Inter', sans-serif;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    width: 100%;
+    font-size: 13.5px;
+  }
+
+  input[type="number"]:focus,
+  input[type="range"]:focus-visible,
+  .file-btn:focus-visible,
+  .generate-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 3px;
+    background: var(--line);
+    border-radius: 2px;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 2px solid var(--bg);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 2px solid var(--bg);
+  }
+
+  .generate-row {
+    margin-top: 22px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .generate-btn {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: #0d1f33;
+    border: none;
+    padding: 12px 22px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  .generate-btn:hover:not(:disabled) { background: #74aeea; }
+  .generate-btn:active:not(:disabled) { transform: translateY(1px); }
+
+  .generate-btn:disabled {
+    background: var(--surface-2);
+    color: var(--ink-dim);
+    cursor: not-allowed;
+  }
+
+  .stats-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 24px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .stat-label {
+    color: var(--ink-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 10px;
+  }
+
+  .stat-value {
+    font-family: 'Inter', sans-serif;
+    color: var(--accent-2);
+    font-size: 16px;
+  }
+
+  .right-col {
+    display: flex;
+    height: 100%;
+  }
+
+  .printout {
+    position: relative;
+    background: #f2ead9;
+    color: #2b2721;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 6px 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .printout-inner {
+    padding: 26px 30px 32px;
+    min-height: 480px;
+    flex: 1;
+    display: flex;
+  }
+
+  #output {
+    margin: 0;
+    font-family: 'Lora', serif;
+    font-size: 16px;
+    line-height: 1.75;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    outline: none;
+    cursor: text;
+    flex: 1;
+  }
+
+  #output:focus {
+    outline: none;
+  }
+
+  #output:empty::before {
+    content: "The printout is empty. Load a text, then press Generate — or type your own text here and press Generate to continue it.";
+    color: #8a8477;
+    font-style: italic;
+  }
+
+  #output.typing::after {
+    content: "▌";
+    animation: blink 1s step-end infinite;
+    color: var(--accent-dim);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #output.typing::after { animation: none; }
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  .hint {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: var(--ink-dim);
+    margin-top: 10px;
+  }
+
+  .hint.error { color: var(--danger); }
+
+  .status-led.busy::before {
+    background: #d9a441;
+    box-shadow: 0 0 7px #d9a441;
+  }
+
+  .bar {
+    height: 3px;
+    background: var(--line);
+    border-radius: 2px;
+    margin-top: 14px;
+    overflow: hidden;
+  }
+
+  .bar i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <header>
+    <div>
+      <h1>ATTN<span>·</span>NET</h1>
+      <p class="tagline">a tiny self-attention model that trains on your text</p>
+    </div>
+    <span class="status-led" id="led">no text loaded</span>
+  </header>
+
+  <div class="layout">
+    <div class="left-col">
+      <section class="panel">
+        <div class="upload-row">
+          <button class="file-btn" id="fileBtn" type="button">Load text file</button>
+          <input type="file" id="fileInput" accept="*/*">
+          <span class="file-label" id="fileLabel">no file selected</span>
+        </div>
+
+        <div class="controls-grid">
+          <div class="field">
+            <label class="field-label" for="ctx">Context</label>
+            <input id="ctx" type="number" value="8" min="2" max="24">
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="steps">Training steps</label>
+            <input id="steps" type="number" value="600" min="50" max="5000">
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="num">Words to generate</label>
+            <input id="num" type="number" value="50" min="1" max="1000">
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="temp">Temperature <span class="val" id="tempVal">1.0</span></label>
+            <input id="temp" type="range" value="1" min="0.1" max="3" step="0.1">
+          </div>
+        </div>
+
+        <div class="generate-row">
+          <button class="generate-btn" id="gen" disabled>Generate ▸</button>
+        </div>
+        <div class="bar"><i id="barFill"></i></div>
+        <p class="hint" id="hint"></p>
+      </section>
+
+      <section class="panel">
+        <div class="stats-bar">
+          <div class="stat">
+            <span class="stat-label">Words read</span>
+            <span class="stat-value" id="sWords">—</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Vocabulary</span>
+            <span class="stat-value" id="sVocab">—</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Parameters</span>
+            <span class="stat-value" id="sParams">—</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Training loss</span>
+            <span class="stat-value" id="sLoss">—</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Engine</span>
+            <span class="stat-value" id="sEngine" style="font-size: 13px;">—</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Speed</span>
+            <span class="stat-value" id="sSpeed">—</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="right-col">
+      <div class="printout">
+        <div class="printout-inner">
+          <div id="output" contenteditable="true" spellcheck="false" role="textbox" aria-multiline="true" aria-label="Generated text (editable)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ---- tiny transformer in plain typed-array JS: forward + hand-written backward ----
+const D = 48, H4 = 4 * D;
+function rnd(n, sd) { const a = new Float32Array(n); for (let i = 0; i < n; i++) a[i] = sd * Math.sqrt(-2 * Math.log(Math.random() || 1e-9)) * Math.cos(6.2831853 * Math.random()); return a; }
+// ---- matrix kernels: hand-assembled WebAssembly SIMD, with a plain JS fallback ----
+function makeWasm() {
+  try {
+    const u = n => { const o = []; do { let b = n & 127; n >>>= 7; if (n) b |= 128; o.push(b); } while (n); return o; };
+    const s = n => { const o = []; for (;;) { const b = n & 127; n >>= 7; if ((n === 0 && !(b & 64)) || (n === -1 && (b & 64))) { o.push(b); return o; } o.push(b | 128); } };
+    const str = t => [t.length, ...[...t].map(c => c.charCodeAt(0))];
+    const vec = a => [...u(a.length), ...a.flat()];
+    const sec = (id, b) => [id, ...u(b.length), ...b];
+    const LG = i => [0x20, ...u(i)], LS = i => [0x21, ...u(i)], I = n => [0x41, ...s(n)];
+    const ADD = [0x6a], MUL = [0x6c], SHL2 = [...I(2), 0x74], LT = [0x49];
+    const V = (op, ...x) => [0xfd, ...op, ...x], vload = [...V([0x00], 0, 0)], vstore = [...V([0x0b], 0, 0)];
+    const vadd = V([0xe4, 1]), vmul = V([0xe6, 1]), splat = V([0x13]), lane = n => V([0x1f], n);
+    const f32load = [0x2a, 0, 0], f32store = [0x38, 0, 0];
+    const loop = b => [0x03, 0x40, ...b.flat(), 0x0b];
+    // axpy(pa,n,k,pb,m,pc,t): t=0: C[i,:]+=A[i,p]*B[p,:]   t=1: C[p,:]+=A[i,p]*B[i,:]
+    const f0 = [[...LG(4), ...SHL2, ...LS(12)], [...I(0), ...LS(7)],
+      loop([[...I(0), ...LS(8)], loop([
+        [...LG(0), ...LG(7), ...LG(2), ...MUL, ...LG(8), ...ADD, ...SHL2, ...ADD, ...f32load, ...splat, ...LS(13)],
+        [...LG(3), ...LG(7), ...LG(8), ...LG(6), 0x1b, ...LG(12), ...MUL, ...ADD, ...LS(10)],
+        [...LG(5), ...LG(8), ...LG(7), ...LG(6), 0x1b, ...LG(12), ...MUL, ...ADD, ...LS(11)],
+        [...I(0), ...LS(9)],
+        loop([[...LG(11), ...LG(9), ...ADD, ...LG(11), ...LG(9), ...ADD, ...vload, ...LG(13), ...LG(10), ...LG(9), ...ADD, ...vload, ...vmul, ...vadd, ...vstore],
+          [...LG(9), ...I(16), ...ADD, ...LS(9)], [...LG(9), ...LG(12), ...LT, 0x0d, 0]]),
+        [...LG(8), ...I(1), ...ADD, ...LS(8)], [...LG(8), ...LG(2), ...LT, 0x0d, 0]]),
+        [...LG(7), ...I(1), ...ADD, ...LS(7)], [...LG(7), ...LG(1), ...LT, 0x0d, 0]])].flat();
+    // dot(pa,n,k,pb,m,pc,acc): C[i,j] (+)= A[i,:].B[j,:]
+    const f1 = [[...I(0), ...LS(7)],
+      loop([[...I(0), ...LS(8)], loop([
+        [0x43, 0, 0, 0, 0, ...splat, ...LS(13)],
+        [...LG(0), ...LG(7), ...LG(2), ...MUL, ...SHL2, ...ADD, ...LS(9)],
+        [...LG(3), ...LG(8), ...LG(2), ...MUL, ...SHL2, ...ADD, ...LS(10)],
+        [...LG(9), ...LG(2), ...SHL2, ...ADD, ...LS(11)],
+        loop([[...LG(13), ...LG(9), ...vload, ...LG(10), ...vload, ...vmul, ...vadd, ...LS(13)],
+          [...LG(9), ...I(16), ...ADD, ...LS(9)], [...LG(10), ...I(16), ...ADD, ...LS(10)], [...LG(9), ...LG(11), ...LT, 0x0d, 0]]),
+        [...LG(5), ...LG(7), ...LG(4), ...MUL, ...LG(8), ...ADD, ...SHL2, ...ADD, ...LS(12)],
+        [...LG(13), ...lane(0), ...LG(13), ...lane(1), 0x92, ...LG(13), ...lane(2), ...LG(13), ...lane(3), 0x92, 0x92,
+          ...LG(12), ...f32load, 0x43, 0, 0, 0, 0, ...LG(6), 0x1b, 0x92, ...LS(14)],
+        [...LG(12), ...LG(14), ...f32store],
+        [...LG(8), ...I(1), ...ADD, ...LS(8)], [...LG(8), ...LG(4), ...LT, 0x0d, 0]]),
+        [...LG(7), ...I(1), ...ADD, ...LS(7)], [...LG(7), ...LG(1), ...LT, 0x0d, 0]])].flat();
+    // NB: f1's final f32 temp (local 14) is a float: fix up below by declaring it f32
+    const body = (code, locs) => { const b = [...vec(locs), ...code, 0x0b]; return [...u(b.length), ...b]; };
+    const i32 = (n) => [n, 0x7f], v128 = [1, 0x7b], f32 = [1, 0x7d];
+    const bytes = new Uint8Array([0, 0x61, 0x73, 0x6d, 1, 0, 0, 0,
+      ...sec(1, vec([[0x60, ...vec(Array(7).fill([0x7f])), 0]])),
+      ...sec(2, vec([[...str("e"), ...str("m"), 2, 0, 1]])),
+      ...sec(3, vec([[0], [0]])),
+      ...sec(7, vec([[...str("a"), 0, 0], [...str("d"), 0, 1]])),
+      ...sec(10, vec([body(f0, [i32(6), v128]), body(f1, [i32(6), v128, f32])]))]);
+    return bytes;
+  } catch (e) { return null; }
+}
+let WA = null, WD = null, WMEM = null;
+function initWasm(bytes) {
+  try { if (!bytes || typeof WebAssembly === "undefined") return false;
+    WMEM = new WebAssembly.Memory({ initial: 1 });
+    const inst = new WebAssembly.Instance(new WebAssembly.Module(bytes), { e: { m: WMEM } });
+    WA = inst.exports.a; WD = inst.exports.d; return true;
+  } catch (e) { WA = WD = WMEM = null; return false; }
+}
+let USE_WASM = false;
+function mm(A, n, k, B, m, C) {            // C[n,m] = A[n,k] . B[k,m]
+  C.fill(0, 0, n * m);
+  if (USE_WASM) return WA(A.byteOffset, n, k, B.byteOffset, m, C.byteOffset, 0);
+  for (let i = 0; i < n; i++) for (let p = 0; p < k; p++) { const a = A[i * k + p], bo = p * m, co = i * m; for (let j = 0; j < m; j++) C[co + j] += a * B[bo + j]; }
+}
+function mmTB(A, n, k, B, m, C, acc) {     // C[n,m] (+)= A[n,k] . B[m,k]^T
+  if (USE_WASM) return WD(A.byteOffset, n, k, B.byteOffset, m, C.byteOffset, acc ? 1 : 0);
+  for (let i = 0; i < n; i++) { const ao = i * k; for (let j = 0; j < m; j++) { const bo = j * k; let s = 0; for (let p = 0; p < k; p++) s += A[ao + p] * B[bo + p]; C[i * m + j] = acc ? C[i * m + j] + s : s; } }
+}
+function mmAT(A, n, k, B, m, C) {          // C[k,m] += A[n,k]^T . B[n,m]
+  if (USE_WASM) return WA(A.byteOffset, n, k, B.byteOffset, m, C.byteOffset, 1);
+  for (let i = 0; i < n; i++) for (let p = 0; p < k; p++) { const a = A[i * k + p], co = p * m, bo = i * m; for (let j = 0; j < m; j++) C[co + j] += a * B[bo + j]; }
+}
+class Net {
+  constructor(V, T, B) {
+    this.V = V; this.T = T; this.B = B || 16; this.step = 0; this.cache = {};
+    const R = this.B * T, floats = 4 * V * D + 4e5 + R * V + R * (4 * H4 + 16 * D + T) + 2 * V + 2 * T * D;
+    const bytes = floats * 4 + 4e5;
+    if (USE_WASM) { WMEM.grow(Math.max(0, Math.ceil(bytes / 65536) + 1 - WMEM.buffer.byteLength / 65536)); this.buf = WMEM.buffer; } else this.buf = new ArrayBuffer(bytes);
+    this.off = 0;
+    this.p = { E: this.mk(V * D, .1), P: this.mk(T * D, .1), Wq: this.mk(D * D, .15), Wk: this.mk(D * D, .15), Wv: this.mk(D * D, .15), Wo: this.mk(D * D, .1),
+      W1: this.mk(D * H4, .15), b1: this.mk(H4, 0), W2: this.mk(H4 * D, .1), b2: this.mk(D, 0) };
+    this.g = {}; this.m = {}; this.s = {};
+    for (const k in this.p) { const n = this.p[k].length; this.g[k] = this.mk(n, 0); this.m[k] = this.mk(n, 0); this.s[k] = this.mk(n, 0); }
+  }
+  mk(n, sd) {                                // one array carved out of the shared memory
+    const a = new Float32Array(this.buf, this.off, n); this.off += ((n + 3) & ~3) * 4;
+    a.fill(0); if (sd) for (let i = 0; i < n; i++) a[i] = sd * Math.sqrt(-2 * Math.log(Math.random() || 1e-9)) * Math.cos(6.2831853 * Math.random());
+    return a;
+  }
+  count() { return Object.values(this.p).reduce((a, w) => a + w.length, 0); }
+  alloc(B, t, full) {
+    const R = B * t, f = n => this.mk(n, 0), V = this.V;
+    return { B, t, full, R, X: f(R * D), Q: f(R * D), K: f(R * D), Vv: f(R * D), A: f(R * t), C: f(R * D), H1: f(R * D), F1: f(R * H4), Fa: f(R * H4), H2: f(R * D),
+      L: f(full ? R * V : V), dH2: f(R * D), dFa: f(R * H4), dH1: f(R * D), dC: f(R * D), dX: f(R * D), dQ: f(R * D), dK: f(R * D), dV: f(R * D), dA: f(t) };
+  }
+  // forward pass. tok: Int32Array [B*t]. full=true -> logits for every row, else only the last row.
+  fwd(tok, B, t, full) {
+    const { V, p } = this, R = B * t, sc = 1 / Math.sqrt(D);
+    const key = B + "|" + full; let c = this.cache[key]; if (!c) c = this.cache[key] = this.alloc(B, this.T, full);
+    const { X, Q, K, Vv, A, C, H1, F1, Fa, H2 } = c;
+    for (let r = 0; r < R; r++) { const e = tok[r] * D, o = (r % t) * D; for (let d = 0; d < D; d++) X[r * D + d] = p.E[e + d] + p.P[o + d]; }
+    mm(X, R, D, p.Wq, D, Q); mm(X, R, D, p.Wk, D, K); mm(X, R, D, p.Wv, D, Vv);
+    for (let b = 0; b < B; b++) for (let i = 0; i < t; i++) {          // causal self-attention
+      const r = b * t + i, ab = r * t, qo = r * D; let mx = -1e30;
+      for (let j = 0; j <= i; j++) { const ko = (b * t + j) * D; let s = 0; for (let d = 0; d < D; d++) s += Q[qo + d] * K[ko + d]; s *= sc; A[ab + j] = s; if (s > mx) mx = s; }
+      let z = 0; for (let j = 0; j <= i; j++) { const e = Math.exp(A[ab + j] - mx); A[ab + j] = e; z += e; }
+      for (let j = 0; j <= i; j++) A[ab + j] /= z;
+      for (let j = i + 1; j < t; j++) A[ab + j] = 0;
+      for (let d = 0; d < D; d++) C[qo + d] = 0;
+      for (let j = 0; j <= i; j++) { const a = A[ab + j], vo = (b * t + j) * D; for (let d = 0; d < D; d++) C[qo + d] += a * Vv[vo + d]; }
+    }
+    mm(C, R, D, p.Wo, D, H1); for (let i = 0; i < R * D; i++) H1[i] += X[i];
+    mm(H1, R, D, p.W1, H4, F1);
+    for (let i = 0; i < R * H4; i++) { const v = F1[i] + p.b1[i % H4]; F1[i] = v; Fa[i] = v > 0 ? v : 0; }
+    mm(Fa, R, H4, p.W2, D, H2); for (let i = 0; i < R * D; i++) H2[i] += H1[i] + p.b2[i % D];
+    if (full) mmTB(H2, R, D, p.E, V, c.L, false);
+    else { const o = (R - 1) * D; for (let j = 0; j < V; j++) { let s = 0; for (let d = 0; d < D; d++) s += H2[o + d] * p.E[j * D + d]; c.L[j] = s; } }
+    return c;
+  }
+  // forward + backward. fills this.g, returns mean cross-entropy loss
+  lossGrad(tok, tgt, B, t) {
+    const c = this.fwd(tok, B, t, true), { V, p, g } = this, R = B * t, sc = 1 / Math.sqrt(D);
+    if (t !== this.T) throw new Error("training needs t === T");
+    const { X, Q, K, Vv, A, C, H1, F1, Fa, H2, L, dH2, dFa, dH1, dC, dX, dQ, dK, dV, dA } = c;
+    for (const k in g) g[k].fill(0);
+    let loss = 0;
+    for (let r = 0; r < R; r++) {
+      const o = r * V; let mx = -1e30, z = 0;
+      for (let j = 0; j < V; j++) if (L[o + j] > mx) mx = L[o + j];
+      for (let j = 0; j < V; j++) { const e = Math.exp(L[o + j] - mx); L[o + j] = e; z += e; }
+      loss -= Math.log(L[o + tgt[r]] / z + 1e-12);
+      for (let j = 0; j < V; j++) L[o + j] /= z * R;
+      L[o + tgt[r]] -= 1 / R;
+    }
+    mm(L, R, V, p.E, D, dH2); mmAT(L, R, V, H2, D, g.E);                 // output layer (tied embeddings)
+    mmTB(dH2, R, D, p.W2, H4, dFa, false); mmAT(Fa, R, H4, dH2, D, g.W2);
+    for (let i = 0; i < R * D; i++) g.b2[i % D] += dH2[i];
+    for (let i = 0; i < R * H4; i++) { if (F1[i] <= 0 && Fa[i] === 0) dFa[i] = 0; g.b1[i % H4] += dFa[i]; }
+    mmAT(H1, R, D, dFa, H4, g.W1);
+    mmTB(dFa, R, H4, p.W1, D, dH1, false); for (let i = 0; i < R * D; i++) dH1[i] += dH2[i];
+    mmTB(dH1, R, D, p.Wo, D, dC, false); mmAT(C, R, D, dH1, D, g.Wo);
+    dX.set(dH1); dQ.fill(0); dK.fill(0); dV.fill(0);
+    for (let b = 0; b < B; b++) for (let i = 0; i < t; i++) {            // attention backward
+      const r = b * t + i, ab = r * t, co = r * D; let sum = 0;
+      for (let j = 0; j <= i; j++) { const vo = (b * t + j) * D; let s = 0; for (let d = 0; d < D; d++) s += dC[co + d] * Vv[vo + d]; dA[j] = s; sum += A[ab + j] * s; }
+      for (let j = 0; j <= i; j++) {
+        const a = A[ab + j], ds = a * (dA[j] - sum) * sc, o = (b * t + j) * D;
+        for (let d = 0; d < D; d++) { dQ[co + d] += ds * K[o + d]; dK[o + d] += ds * Q[co + d]; dV[o + d] += a * dC[co + d]; }
+      }
+    }
+    mmTB(dQ, R, D, p.Wq, D, dX, true); mmTB(dK, R, D, p.Wk, D, dX, true); mmTB(dV, R, D, p.Wv, D, dX, true);
+    mmAT(X, R, D, dQ, D, g.Wq); mmAT(X, R, D, dK, D, g.Wk); mmAT(X, R, D, dV, D, g.Wv);
+    for (let r = 0; r < R; r++) { const e = tok[r] * D, o = (r % t) * D; for (let d = 0; d < D; d++) { g.E[e + d] += dX[r * D + d]; g.P[o + d] += dX[r * D + d]; } }
+    return loss / R;
+  }
+  adam(lr) {
+    let n2 = 0; for (const k in this.g) for (const x of this.g[k]) n2 += x * x;
+    const clip = Math.min(1, 1 / (Math.sqrt(n2) + 1e-9)), st = ++this.step;
+    const c1 = 1 - Math.pow(.9, st), c2 = 1 - Math.pow(.999, st);
+    for (const k in this.p) { const w = this.p[k], g = this.g[k], m = this.m[k], s = this.s[k];
+      for (let i = 0; i < w.length; i++) { const x = g[i] * clip; m[i] = .9 * m[i] + .1 * x; s[i] = .999 * s[i] + .001 * x * x; w[i] -= lr * (m[i] / c1) / (Math.sqrt(s[i] / c2) + 1e-8); } }
+  }
+  // probabilities-ready logits for the next word after the given token history
+  nextLogits(hist) { return this.fwd(Int32Array.from(hist), 1, hist.length, false).L; }
+}
+function useEngine(wasm) { USE_WASM = !!wasm && initWasm(makeWasm()); return USE_WASM ? "WebAssembly SIMD" : "JavaScript"; }
+
+
+// ---- page logic ----
+const $ = id => document.getElementById(id);
+const BATCH = 16, MAXV = 1500;
+let net = null, vocab = new Map(), rev = [], ids = null, V = 0, T = 8, runId = 0, engine = "";
+
+$("fileBtn").onclick = () => $("fileInput").click();
+$("temp").oninput = () => $("tempVal").textContent = Number($("temp").value).toFixed(1);
+const say = (msg, err) => { $("hint").textContent = msg; $("hint").classList.toggle("error", !!err); };
+const led = (txt, cls) => { $("led").textContent = txt; $("led").className = "status-led " + (cls || ""); };
+const pause = () => new Promise(r => setTimeout(r, 0));
+
+// Same tokenizer as the n-gram page: sentences become <START> w w w <END>
+function tokenize(text) {
+  const out = [];
+  for (const s of text.replace(/\s+/g, " ").split(/[.!?]+/).map(x => x.trim()).filter(Boolean)) {
+    out.push("<START>", ...s.toLowerCase().split(/[^a-z0-9']+/).filter(Boolean), "<END>");
+  }
+  return out;
+}
+
+async function train() {
+  const me = ++runId, total = Math.max(50, Number($("steps").value) || 600);
+  $("gen").disabled = true; led("training…", "busy");
+  T = Math.max(2, Math.min(24, Math.floor(Number($("ctx").value)) || 8));
+  net = new Net(V, T, BATCH);
+  $("sParams").textContent = net.count().toLocaleString(); $("sEngine").textContent = engine;
+  const tok = new Int32Array(BATCH * T), tgt = new Int32Array(BATCH * T), t0 = performance.now();
+  let step = 0, loss = 0;
+  while (step < total) {
+    const slice = performance.now();
+    while (step < total && performance.now() - slice < 40) {          // ~40 ms of training, then let the page breathe
+      for (let b = 0; b < BATCH; b++) {
+        const i = Math.floor(Math.random() * (ids.length - T - 1));
+        for (let j = 0; j < T; j++) { tok[b * T + j] = ids[i + j]; tgt[b * T + j] = ids[i + j + 1]; }
+      }
+      loss = net.lossGrad(tok, tgt, BATCH, T);
+      net.adam(0.005 * Math.min(1, 0.05 + step / 20)); step++;
+    }
+    $("sLoss").textContent = loss.toFixed(3);
+    $("sSpeed").textContent = (step / ((performance.now() - t0) / 1000)).toFixed(0) + " steps/s";
+    $("barFill").style.width = (100 * step / total) + "%";
+    say(`Training… step ${step} of ${total}`);
+    await pause();
+    if (me !== runId) return;                // a newer file or setting replaced this run
+  }
+  led("model ready", "ready"); say("Trained. Press Generate."); $("gen").disabled = false;
+}
+
+$("fileInput").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  $("fileLabel").textContent = f.name; led("reading file…", "busy");
+  let text; try { text = await f.text(); } catch { say("Couldn’t read that file as text.", true); return; }
+  const words = tokenize(text), counts = new Map();
+  words.forEach(w => counts.set(w, (counts.get(w) || 0) + 1));
+  const top = [...counts].filter(([w]) => w[0] !== "<").sort((a, b) => b[1] - a[1]).slice(0, MAXV - 3).map(a => a[0]);
+  vocab = new Map([["<unk>", 0], ["<START>", 1], ["<END>", 2]]); top.forEach(w => vocab.set(w, vocab.size));
+  V = vocab.size; rev = [...vocab.keys()];
+  ids = Int32Array.from(words, w => vocab.get(w) ?? 0);
+  $("sWords").textContent = words.filter(w => w[0] !== "<").length.toLocaleString(); $("sVocab").textContent = V.toLocaleString();
+  if (ids.length < 40) { say("That text is too short — try a longer one with several sentences.", true); led("no usable sentences found"); return; }
+  await train();
+});
+$("ctx").onchange = $("steps").onchange = () => { if (ids) train(); };
+
+// ---- generation: one forward pass per word, then sample from the softmax ----
+function nextToken(hist) {
+  const temp = Number($("temp").value), logits = net.nextLogits(hist);
+  logits[0] = logits[1] = -Infinity;          // never emit <unk> or <START>
+  let mx = -Infinity; for (const x of logits) if (x > mx) mx = x;
+  const p = Array.from(logits, x => Math.exp((x - mx) / temp));
+  let r = Math.random() * p.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < p.length; i++) { r -= p[i]; if (r <= 0) return i; }
+  return p.length - 1;
+}
+
+function formatText(ws, start) {
+  let t = "";
+  for (const w of ws) {
+    if (w === "<END>") { t += ". "; start = true; continue; }
+    if (start) { t += w[0].toUpperCase() + w.slice(1); start = false; } else t += " " + w;
+  }
+  return t.trim();
+}
+
+function continuation() {
+  const raw = ($("output").textContent || "").trim();
+  if (!raw || /[.!?]\s*$/.test(raw)) return { hist: [1], start: true };
+  const ws = raw.split(/[.!?]+/).pop().toLowerCase().split(/[^a-z0-9']+/).filter(Boolean);
+  return ws.length ? { hist: [1, ...ws.map(w => vocab.get(w) ?? 0)], start: false } : { hist: [1], start: true };
+}
+
+$("gen").onclick = async () => {
+  const out = $("output"), target = Number($("num").value) || 50;
+  let { hist, start } = continuation(); hist = hist.slice(-T);
+  const result = []; $("gen").disabled = true; out.classList.add("typing");
+  for (let s = 0; result.length < target && s < target * 20; s++) {
+    const nx = nextToken(hist);
+    result.push(nx === 2 ? "<END>" : rev[nx]);
+    hist = nx === 2 ? [1] : [...hist, nx].slice(-T);
+    if (s % 10 === 0) await pause();
+  }
+  out.classList.remove("typing");
+  const existing = out.textContent || "";
+  out.textContent = existing + (existing && !/\s$/.test(existing) ? " " : "") + formatText(result, start);
+  $("gen").disabled = false;
+  out.focus(); const rg = document.createRange(); rg.selectNodeContents(out); rg.collapse(false);
+  const sel = getSelection(); sel.removeAllRanges(); sel.addRange(rg);
+};
+
+$("output").addEventListener("paste", e => {
+  e.preventDefault(); document.execCommand("insertText", false, e.clipboardData.getData("text/plain"));
+});
+engine = useEngine(true); $("sEngine").textContent = engine;
+
+</script>
+
+</body>
+</html>
